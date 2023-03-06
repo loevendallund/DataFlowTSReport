@@ -1,0 +1,114 @@
+@online{rescript_doc,
+  author = {ReScript Association},
+  title = {ReScript documentation},
+  year = 2022,
+  url = {https://rescript-lang.org/docs/manual/latest/introduction},
+  urldate = {14-09-2022}
+}
+
+@online{rescript_assoc,
+  author = {ReScript Association},
+  title = {ReScript Association about},
+  year = 2022,
+  url = {https://rescript-association.org/about},
+  urldate = {14-09-2022}
+}
+
+@online{rescript_rebrand,
+  author = {ReScript Association},
+  title = {BuckleScript and Reason Rebranding},
+  year = 2020,
+  url = {https://rescript-lang.org/blog/bucklescript-is-rebranding},
+  urldate = {14-09-2022}
+}
+
+@online{reanalyze,
+  author = {ReScript Association},
+  title = {reanalyze},
+  year = 2020,
+  url = {https://github.com/rescript-association/reanalyze},
+  urldate = {15-01-2023}
+}
+
+@inproceedings{DamianiFerruccio2006Dard,
+	abstract = {In this paper we extend, by allowing the use of rank 2 intersection, the non-standard type assignment system for the detection and elimination of dead-code in typed functional programs presented by Coppo et al in the Static Analysis Symposium '96. The main application of this method is the optimization of programs extracted from proofs in logical frameworks, but it could be used as well in the elimination of dead-code determined by program specialization. The use of nonstandard types (also called annotated types) allows to exploit the type structure of the language for investigating program properties. Dead-code is detected via annotated type inference, which can be performed in a complete way, by reducing it to the solution of a system of inequalities between annotation variables. Even though the language considered in the paper is the simply typed λ-calculus with cartesian product, if-then-else, fixpoint, and arithmetic constants we can generalize our approach to polymorphic languages like Miranda, Haskell, and CAML.},
+	author = {Damiani, Ferruccio and Prost, Frédéric},
+	address = {Berlin, Heidelberg},
+	booktitle = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
+	copyright = {Springer-Verlag Berlin Heidelberg 1998},
+	isbn = {9783540651376},
+	issn = {0302-9743},
+	keywords = {Applied sciences ; Computer science; control theory; systems ; Exact sciences and technology ; Free Variable ; Inclusion Relation ; Inference Algorithm ; Lambda Calculus ; Language theory and syntactical analysis ; Software ; Software engineering ; Theoretical computing ; Type Inference},
+	language = {eng},
+	pages = {66-87},
+	publisher = {Springer Berlin Heidelberg},
+	series = {Lecture Notes in Computer Science},
+	title = {Detecting and removing dead-code using rank 2 intersection},
+	volume = {1512},
+	year = {2006},
+}
+
+@article{LiuYanhongA.2003Edco,
+	abstract = {This paper describes a powerful method for dead-code analysis and elimination in the presence of recursive data constructions. We describe partially dead recursive data using liveness patterns based on general regular tree grammars extended with the notion of live and dead, and we formulate the analysis as computing liveness patterns at all program points based on constraints constructed from the program and programming language semantics. The analysis yields the most precise program-based grammars that satisfy the constraints. The analysis algorithm takes cubic time in terms of the size of the program in the worst case but is very efficient in practice, as shown by our prototype implementation. The analysis results are used to identify and eliminate dead code. The framework for representing and analyzing properties of recursive data structures using general regular tree grammars applies to other analyses as well.},
+	author = {Liu, Yanhong A. and Stoller, Scott D.},
+	address = {AMSTERDAM},
+	copyright = {2003 Elsevier Science B.V.},
+	issn = {0167-6423},
+	journal = {Science of computer programming},
+	keywords = {Computer Science ; Computer Science, Software Engineering ; Constraints ; Dead-code elimination ; Program analysis ; Recursive data structures ; Regular-tree grammars ; Science & Technology ; Slicing ; Technology},
+	language = {eng},
+	number = {2},
+	pages = {221-242},
+	publisher = {Elsevier B.V},
+	title = {Eliminating dead code on recursive data},
+	volume = {47},
+	year = {2003},
+}
+
+@inproceedings{XiHongwei1999Dcet,
+	abstract = {Pattern matching is an important feature in various functional programming languages such as SML, Caml, Haskell, etc. In these languages, unreachable or redundant matching clauses, which can be regarded as a special form of dead code, are a rich source for program errors. Therefore, eliminating unreachable matching clauses at compile-time can significantly enhance program error detection. Furthermore, this can also lead to significantly more efficient code at run-time.
+				 We present a novel approach to eliminating unreachable matching clauses through the use of the dependent type system of DML, a functional programming language that enriches ML with a restricted form of dependent types. We then prove the correctness of the approach, which consists of the major technical contribution of the paper. In addition, we demonstrate the applicability of our approach to dead code elimination through some realistic examples. This constitutes a practical application of dependent types to functional programming, and in return it provides us with further support for the methodology adopted in our research on dependent types in practical programming.},
+	author = {Xi, Hongwei},
+	address = {BERLIN},
+	booktitle = {Lecture Notes in Computer Science (including subseries Lecture Notes in Artificial Intelligence and Lecture Notes in Bioinformatics)},
+	copyright = {Copyright 2012 Elsevier B.V., All rights reserved.},
+	isbn = {3540655271},
+	issn = {0302-9743},
+	keywords = {Applied sciences ; Computer Science ; Computer Science, Theory & Methods ; Computer science; control theory; systems ; Exact sciences and technology ; Science & Technology ; Software ; Software engineering ; Technology},
+	language = {eng},
+	pages = {228-242},
+	publisher = {Springer Nature},
+	series = {Lecture Notes in Computer Science},
+	title = {Dead code elimination through dependent types},
+	volume = {1551},
+	year = {1999},
+}
+
+@inproceedings{KnoopJens1994Pdce,
+	abstract = {A new aggressive algorithm for the elimination of partially dead code is presented, i.e., of code which is only dead on some program paths. Besides being more powerful than the usual approaches to dead code elimination, this algorithm is optimal in the following sense: partially dead code remaining in the resulting program cannot be eliminated without changing the branching structure or the semantics of the program, or without impairing some program executions.
+	Our approach is based on techniques for partial redundancy elimination. Besides some new technical problems there is a significant difference here: partial dead code elimination introduces second order effects, which we overcome by means of exhaustive motion and elimination steps. The optimality and the uniqueness of the program obtained is proved by means of a new technique which is universally applicable and particularly useful in the case of mutually interdependent program optimizations.},
+	author = {Knoop, Jens and Rüthing, Oliver and Steffen, Bernhard},
+	booktitle = {Conference on Programming Language Design and Implementation: Proceedings of the ACM SIGPLAN 1994 conference on Programming language design and implementation; 20-24 June 1994},
+	copyright = {Copyright 2020 Elsevier B.V., All rights reserved.},
+	isbn = {9780897916622},
+	keywords = {assignment motion ; bit-vector data flow analyses ; code motion ; data flow analysis ; dead code elimination ; partial redundancy elimination ; program optimization},
+	language = {eng},
+	pages = {147-158},
+	publisher = {ACM},
+	series = {PLDI '94},
+	title = {Partial dead code elimination},
+	year = {1994},
+}
+
+@book{NielsonFlemming1999IWoP,
+	abstract = {In this book we shall introduce four of the main approaches to program analysis: Data Flow Analysis, Control Flow Analysis, Abstract Interpretation, and Type and Effect Systems. Each of Chapters 2 to 5 deals with one of these approaches to some length and generally treats the more advanced material in later sections. Throughout the book we aim at stressing the many similarities between what may at a first glance appear to be very unrelated approaches. To help getting this idea across, and to serve as a gentle introduction, this chapter treats all of-the approaches at the level of examples. The technical details are worked-out but it may be difficult to apply the techniques to related examples until some of the material of later chapters have been studied.
+	Text in English.},
+	author = {Nielson, Flemming and Nielson, Hanne R and Hankin, Chris},
+	copyright = {APPROVED FOR PUBLIC RELEASE},
+	keywords = {ABSTRACT INTERPRETATION ; Computer Programming and Software ; CONTROL FLOW ANALYSIS ; DATA FLOW ANALYSIS ; DATA PROCESSING ; DENMARK ; FOREIGN REPORTS ; PROGRAM ANALYSIS ; SOFTWARE ENGINEERING ; TYPE AND EFFECT SYSTEMS ; WORKSHOPS},
+	language = {eng},
+	organization = {AARHUS UNIV (DENMARK) DEPT OF COMPUTERSCIENCE},
+	title = {International Workshop on Principles of Program Analysis},
+	year = {1999},
+}
+

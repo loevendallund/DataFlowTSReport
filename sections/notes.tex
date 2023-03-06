@@ -1,0 +1,23 @@
+\documentclass[../../master.tex]{subfiles}
+\begin{document}
+\section{Notes}
+\iffalse
+\subsection{Tracking of writes in let bindings}
+An idea to tracking write operations inside a let-binding, is to extend the type in the type system to include abstract locations that has been written to.
+The extended set would be $\tau$, as follows:
+$$\Gamma,\Upsilon,\Pi\vdash e^p:(\delta,\kappa,\tau)$$
+
+In let bindings, the variable will be added to the dependencies of the written variable, as follows:
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\InfName{Let}\\[0.2cm]
+			\inference[]
+				{\Gamma;\Upsilon;\Pi\vdash e_1^{p}:(\delta,\kappa,\tau) &\\
+				\Gamma,x^{p}:\delta;\Upsilon;\Pi\vdash e_2^{p'}:(\delta',\kappa',\tau')}
+				{\Gamma';\Upsilon;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:(\delta',\kappa')}\\[1cm]
+		Where $\Gamma'=\Gamma,x^{p_3}:\Gamma(x)\cup\{p\}$, for all $,x^{p_3}\in\tau$
+	\end{tabular}
+\end{figure}
+\fi
+\end{document}

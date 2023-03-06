@@ -1,0 +1,21 @@
+\documentclass[acmsmall,nonacm]{acmart}
+\input{setup/preamble.tex}
+\input{setup/macros.tex}
+
+\input{frontmatter/acm.tex}
+
+\begin{document}
+   \input{frontmatter/titlepage.tex}
+	
+	\subfile{sections/proof.tex}
+	\subfile{sections/notes.tex}
+
+	\balance
+	%\bibliographystyle{ACM-Reference-Format}
+	%\bibliography{bib.bib}
+	\appendix
+
+	\subfile{sections/appendix/collection.tex}
+	\subfile{sections/appendix/typesystem.tex}
+
+\end{document}
