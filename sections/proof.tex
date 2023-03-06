@@ -115,38 +115,31 @@ This agreement is good, since the program point order derived from the dependenc
 %This agreement is good, the dependency function describes dependencies and program point order, for a given evaluation, and the order
 \bigskip
 
-With the agreement between the three basis' and the collection semantic, we can now define the agreement for the liveness type $(\delta,\kappa)$.
-In the agreement for the liveness type, we use two notations for restricting on the dependency pair, to retrive one component, defined as follows:
+The last agreement can now be defined, for the liveness type.
+This agreement uses a notation to retrive one component from a occurrence pair, defined as follows:
+
+%With the agreement between the three basis' and the collection semantic, we can now define the agreement for the liveness type $(\delta,\kappa)$.
+%In the agreement for the liveness type, we use two notations for restricting on the dependency pair, to retrive one component, defined as follows:
 \begin{itemize}
 	\item $(L,V)|_L \overset{def}{=} L$
 	\item $(L,V)|_V \overset{def}{=} V$
 \end{itemize}
 
-\iffalse
-\begin{definition}{[Dependency collection $w*$]}
-	Let $u\in\Loc^p\cup\Var^p$ be a location or variable occurrence, then the dependency collection function $w^{*}$ is defined as follows:
-	$$w^{*}(u^p)=(L^{*},V^{*})$$
-	where
-	\begin{itemize}
-		\item $L^{*}=\bigcup_{u^{p}\in L\cup V}w^{*}(u^p)|_L$
-		\item $V^{*}=\bigcup_{u^{p}\in L\cup V}w^{*}(u^p)|_V$
-	\end{itemize}
-	and $w(u^p)=(L,V)$
-\end{definition}
-\fi
-
+\todo[inline]{Something is clearly wrong with this definition, since $w$ only describes the dependencies from a specific branch, and $\delta$ is an overapproximation (i.e. $\delta$ can include variable occurrences from other branches)}
 \begin{definition}{[Agreement of liveness type and the dependency function]}
 	Let $w$ be the dependency function, $env$ be the environment, $\delta$ be a set of possible live variables, $\kappa$ be the abstract locations.
-	Then
+	We say that:
 	$$(w,env)\models(\delta,\kappa)$$
 	Iff
-	\begin{itemize}
+	\begin{enumerate}
 		\item $dom(w)\supseteq\delta$
 		\item $dom(w)\supseteq\kappa$
-		\item $\forall x^p\in dom(w)\cap\delta. w^{*}(x^p)|_V\supseteq\delta$
+		\item $\forall x^p\in dom(w)\cap\delta. w(x^p)|_V\supseteq\delta$, and
 		\item $\forall \loc^p.\exists x\in\kappa. env(x)=\loc \Rightarrow w(\loc^p)|_L\supseteq\kappa$
-	\end{itemize}
+	\end{enumerate}
 \end{definition}
+
+The agreement between the liveness type and the dependency function.
 
 \begin{theorem}{[Soundness of type system]}
 	If $(w,env)\models(\delta,\kappa)$ and $(w,env)\models(\Gamma,\Upsilon)$ holds in
