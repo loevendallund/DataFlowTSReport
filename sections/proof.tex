@@ -45,11 +45,26 @@ Sets a defined as upper case letters.
 When labelling a set with a program point, it indicates that the set contains occurrences, e.g. $V^p=\{x_1^{p_1},\cdots,x_n^{p_n}\}$ where $n$ is the number of elements in the set.
 
 \section{Soundness}
+In this section we present the soundness of the liveness system with respect to the collectin semantics, shown in \cref{App:ColSem}.
+The liveness system is sound, if the liveness type contains at least all live occurrences at a given program point.
+
+The liveness system depends on three global bases, one for variable occurrences, for abstract locations, and for an approximation of program points.
+To show that these bases are good, we need to define when they agree with the semantic, i.e., to show that the bases overapproximate the dependency function, and that the approximated order of program points is a good approximation.
+
+
+\iffalse
+%version 2
+The soundness is shown for the liveness type,
+In this section we will present the soundness of the liveness system, i.e., the liveness type must contain at least all live variable occurrences.
+The soundness is presented in respect to the collection semantic, can be found in \cref{App:ColSem}.
+
+%version 1
 In this section we will present the soundness of the liveness system, in respect to the collection semantics.
 The soundness follows that if a variable is used in the evaluation of a program, then this variable needs to be deemed live in the liveness system.
 
 To show the soundness of the liveness system, we need to define the agreement between the collection semantic and the liveness system.
 This follows that we show how the basis', in the liveness system, agrees with the collection semantics, for a given term, and how the liveness type is a safe approximation of the used variable occurrences.
+\fi
 
 We introduced the dependency function $w$ as a function that maps variable and location occurrences to a set of variable and location occurrences.
 In the liveness system, we defined the dependency of occurrences through the global $\Gamma$ basis.
@@ -140,6 +155,17 @@ This agreement uses a notation to retrive one component from a occurrence pair, 
 \end{definition}
 
 The agreement between the liveness type and the dependency function.
+\bigskip
+With the agreements defined, we can move on to the soundness for the livenss system.
+The liveness system is sound in respect to the collection semantic, that is, the liveness type is an overapproximation of the occurrences in the collection semantic.
+
+For the liveness system to be sound, it is important to make sure that the three basis agrees with the collection system.
+This agreement is done in the following maner, given the a sound agreement before an evaluation, we can show that the agreement is still sound after an evaluation.
+Other than the agreement for the three basis, the soundness type must also agree with the semantic, this is done in a similar way.
+
+Other than having the agreement, we must also show that the liveness type is a good approximation, i.e., that the liveness type contains at least all used variables.
+To show this, we compare the liveness type to the set of variable occurrences.
+
 
 \begin{theorem}{[Soundness of type system]}
 	If $(w,env)\models(\delta,\kappa)$ and $(w,env)\models(\Gamma,\Upsilon)$ holds in
@@ -147,7 +173,7 @@ The agreement between the liveness type and the dependency function.
 		\item $\Gamma,\Upsilon,\Pi\vdash e^p : (\delta,\kappa)$, and 
 		\item $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w',sto',L,V,p''\right\rangle$.
 	\end{itemize}
-	Then $(w',env)\models(\Gamma,\Upsilon)$, $(w',env)\models(\delta,\kappa)$, and $\forall y^p\in V.w(y^p)=(L,V)\wedge V\subseteq \delta$ also holds.
+	Then $(w',env)\models(\Gamma,\Upsilon)$, $(w',env)\models(\delta,\kappa)$, $L\subseteq\kappa$, and $V\subseteq\delta$ also holds.
 \end{theorem}
 
 \begin{proof}
