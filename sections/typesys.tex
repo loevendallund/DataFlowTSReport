@@ -1,0 +1,44 @@
+\documentclass[../../master.tex]{subfiles}
+\begin{document}
+\section{type system}
+This section will introduce the liveness type system, for the language presented in \cref{sec:lang}, to type which variable occurrences are alive.
+Even though we call it a type system, we does not detect simple types, but instead we use the notion of a type system on the liveness property.
+
+\subsection{Liveness Type System}
+The abstract type in the liveness type system is defined as a pair of sets, $(\delta,\kappa)$, containing variable occurences $\delta$, and a set of asbtract locations $\kappa$.
+\begin{align*}
+	\delta &\in P(\Var\times\Loc)\\
+	\kappa &\in P(\Var)
+\end{align*}
+
+
+\subsection{Examples}
+
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\inference[$FUNC$]
+			{
+				\inference[$VAR-L$]{}{\Gamma,x^{p_1}:\{\alpha\};\Upsilon;\Pi,p_1\sqsubseteq p\vdash x^p:(\delta,\emptyset)}
+			}
+			{\Gamma;\Upsilon;\Pi\vdash [\lambda\; x.x^p]^{p'}:(\{\lambda\;\alpha:\{\alpha\}\})}\\
+			Where $p_1$ is a fresh program point, $\Lambda(x,p)=p_1$, $\delta=\Gamma(x^{p_1})=\{\alpha\}$
+	\end{tabular}
+	\label{fig:Simple}
+\end{figure}
+
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\inference[$FUNC$]
+			{
+				\inference[$VAR-L$]{}{\Gamma,x^{p_1}:\{\alpha\};\Upsilon;\Pi,p_1\sqsubseteq p\vdash x^p:(\delta,\emptyset)}\;\;
+				\inference[$CONST$]{}{\Gamma;\Upsilon;\Pi\vdash 5^p:(\emptyset,\emptyset)}
+			}
+			{\Gamma;\Upsilon;\Pi\vdash [[\lambda\; x.x^p]^{p'} \; [5]^{p''}]^{p_3}:(\emptyset,\emptyset)}\\
+			Where $p_1$ is a fresh program point, $\Lambda(x,p)=p_1$, $\delta=\Gamma(x^{p_1})=\{\alpha\}$, $\lambda\; \alpha.\delta'\in\delta$, and $\delta'[\alpha:\emptyset]$
+	\end{tabular}
+	\label{fig:Simple}
+\end{figure}
+
+\end{document}

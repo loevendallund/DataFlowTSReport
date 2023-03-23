@@ -4,10 +4,15 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\InfName{VAR}\\[0.2cm]
+		\InfName{VAR-r}\\[0.2cm]
 			\inference[]{}
-				{\Gamma;\Upsilon;\Pi \vdash x^p:(\delta \cup \{x^p\},\kappa)}\\[0.3cm]
-				Where $\Gamma(x^p)=\delta$ and $\Upsilon(x)=\kappa$\\[1cm]
+				{\Gamma;\Upsilon;\Pi \vdash x^p:(\delta \cup \{x^p\},\emptyset)}\\[0.3cm]
+				Where $p'=\Lambda(x,p)$, $\Gamma(x^{p'})=\delta$, and $x\not\in dom(\Upsilon)$\\[1cm]
+
+		\InfName{VAR-l}\\[0.2cm]
+			\inference[]{}
+				{\Gamma;\Upsilon;\Pi \vdash x^p:(\{x^p\},\kappa)}\\[0.3cm]
+				Where $x\in dom(\Upsilon)$ and $\Upsilon(x)=\kappa$\\[1cm]
 
 		\InfName{Const}\\[0.2cm]
 			\inference[]{}
@@ -21,13 +26,13 @@
 		\InfName{Let}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Upsilon;\Pi\vdash e_1^{p}:(\delta,\kappa) &\\
-				\Gamma,x:\delta;\Upsilon;\Pi\vdash e_2^{p}:(\delta',\kappa')}
+				\Gamma,x^p:\delta;\Upsilon,\kappa;\Pi\vdash e_2^{p}:(\delta',\kappa')}
 				{\Gamma;\Upsilon;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:(\delta',\kappa')}\\[1cm]
 
 		\InfName{Let\;rec}\\[0.2cm]
 			\inference[]
 				{\Gamma,f:\delta;\Upsilon;\Pi\vdash e_1^{p}:(\delta,\kappa) &\\
-				\Gamma,f:\delta;\Upsilon;\Pi\vdash e_2^{p}:(\delta',\kappa')}
+				\Gamma,f^p:\delta;\Upsilon,\kappa;\Pi\vdash e_2^{p}:(\delta',\kappa')}
 				{\Gamma;\Upsilon;\Pi\vdash [\mbox{let rec}\; f \; e_1^{p} \; e_2^{p'}]^{p''}:(\delta',\kappa')}\\[1cm]
 	\end{tabular}
 	\label{fig:TypeSys1}
@@ -40,8 +45,9 @@
 			\inference[]
 				{\Gamma;\Upsilon;\Pi\vdash e_1^{p}:(\delta,\kappa) &\\
 				\Gamma;\Upsilon;\Pi\vdash e_2^{p'}:(\delta',\kappa')}
-				{\Gamma;\Upsilon;\Pi\vdash [e_1^{p} \; e_2^{p'}]^{p''}:(\delta\cup\delta''[\alpha:\delta'],\kappa\cup\kappa')}\\[0.3cm]
-			Where $\lambda\alpha.\delta''\in\delta$\\[1cm]
+				{\Gamma;\Upsilon;\Pi\vdash [e_1^{p} \; e_2^{p'}]^{p''}:(\delta_3\cup\delta'',\kappa\cup\kappa')}\\[0.3cm]
+				Where $\delta_3\bigcup_{\lambda\;\alpha:\delta_1}(\delta_1[\alpha:\delta'])$ and \\
+				$\delta''=\forall \lambda\;\alpha.\delta_1\in\delta.\delta/\lambda\;\alpha:\delta$\\[1cm]
 
 		\InfName{Case}\\[0.2cm]
 			\inference[]
@@ -54,13 +60,13 @@
 		\InfName{Ref}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Upsilon;\Pi\vdash  e^{p}:(\delta_1,\kappa_1)}
-				{\Gamma;\Upsilon;\Pi\vdash [\mbox{ref}\;e^{p}]^{p'}:(\delta,\kappa)}\\
-				Where $\delta=\delta_1$, $\kappa=[x]$, and $x$ is fresh\\[1cm]
+				{\Gamma,x^{p'}:\delta;\Upsilon;\Pi\vdash [\mbox{ref}\;e^{p}]^{p'}:(\emptyset,\kappa)}\\
+				Where $\kappa=[x]$, and $x$ is fresh\\[1cm]
 
 		\InfName{Ref-read}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Upsilon;\Pi\vdash  e^{p}:(\delta,\kappa)}
-				{\Gamma;\Upsilon;\Pi\vdash [!e^{p}]^{p'}:(\delta',\kappa)}\\
+{\Gamma;\Upsilon;\Pi\vdash [!e^{p}]^{p'}:(\delta\cup\delta',\emptyset)}\\
 				Where $\delta'=\bigcup_{x\in\kappa}(\Gamma(x^{p''}))$ and $p''=\Lambda(x,p')$\\[1cm]
 
 		\InfName{Ref-write}\\[0.2cm]

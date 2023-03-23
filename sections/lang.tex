@@ -1,0 +1,77 @@
+\documentclass[../../master.tex]{subfiles}
+\begin{document}
+\section{Language}\label{sec:lang}
+\todo[inline]{This section is only notes for now}
+This section introduces the subset of ReScript this paper focuses on.
+The subset is a functional language with bindings, pattern matching, and mutability.
+
+We also introduces the notion of labels, as a mean to analyse and distinguish expressions.
+This notion of labels is also applied to semantical elements, that is, variables and locations, to be able to define where in the program the element occured.
+
+\subsection{Abstract syntax}
+This section will introduce the abstract syntax, based on (Source to previous paper).
+The syntactical categories is defined similarly to the previous paper, and defined as follows:
+Let $\Var$ denote the syntactic category of variables, let $\Con$ be the syntactic category of constants, let $\Val$ as the syntactic category of values, and $\Exp$ as the syntactic category of expressions. 
+Let $e, \; m \in \Exp$, $c \in \Con$, and $x, \; f \in \Var$.
+
+The formation rules is defined as follows, in \cref{fig:coresyntax}:
+
+\begin{figure}[H]
+	\begin{minipage}[t]{0.45\textwidth}
+		\setlength\tabcolsep{4pt}
+		\begin{tabular}{>{$}l<{$}>{$}r<{$}>{$}l<{$}}
+			term \; t &::= &e^p \\\\
+
+			expression \; e &::= &x \mid c \mid t_1\;t_2 \mid \lambda x.t\\
+			&| &\mbox{let} \; x \; t_1 \; t_2 \\
+			&| &\mbox{let rec} \; x \; t_1 \; t_2 \\
+			&| &\mbox{case} \; t_1 \; \{\pi\} \\
+			&| &\mbox{ref} \; t \mid t_1 := t_2 \mid \; !t\\\\
+
+			Record\; r &::= &(l=t) r \\
+			&| &(\mbox{mutable} \; l=t) r \\
+			&| &\varepsilon \\\\
+
+			Field \; l &::= &n \mid x \\\\
+		\end{tabular}
+	\end{minipage}
+	\begin{minipage}[t]{0.45\textwidth}
+		\setlength\tabcolsep{4pt}
+		\begin{tabular}{>{$}l<{$}>{$}r<{$}>{$}l<{$}}
+			Constant\; c &::= &n \mid b\\
+			&| &PLUS \\
+			&| &MINUS \\
+			&| &TIMES\\
+			&| &TIMES \\
+			&| &EQUAL \\
+			&| &LESS\\
+			&| &GREATER\\
+			&| &NOT \\ \\
+
+			R\_Pattern \; q &::= &l, \; q \mid \varepsilon \\
+		\end{tabular}
+	\end{minipage}
+		\setlength\tabcolsep{4pt}
+		\begin{tabular}{>{$}l<{$}>{$}r<{$}>{$}l<{$}}
+			Patterns \; \pi &::= &(s_1\;t_1);\cdots;(s_n\;t_n) \;\;\;\;\; (\mbox{where}\;n\geq 1)\\\\
+			Pattern \; s &::= &n \mid b \mid x \mid \{q\} \mid \_ \mid \bold{F} \\
+\end{tabular}
+	\caption{Abstract syntax}
+	\label{fig:coresyntax}
+\end{figure}
+
+\subsubsection{Pattern matching}
+The pattern matching construct matches a term $t$ with an ordered set of pattern bindings.
+The pattern matching is done by matching on each pattern, until a match is found.
+The matching order is defined by the order in the pattern binding.
+
+A pattern binding $\pi$ is a finite ordered set, with at least one binding of the form $(s\;t)$.
+The order of the pattern binding is defined by the syntex, such that $(s_i\;t_i)$ is before $s_j\;t_j$ if $i\leq j$.
+The size of a pattern binding $\pi$ is written as $|\pi|$, and defined as $|\pi| = n$.
+\todo[inline]{Section not done, as I am still working on redefining pattern matching to better make sense, basing it currently on the theory behind $\lambda$-calculus with constructors and $\rho$-calculus}
+
+\subsection{Semantic}
+
+
+
+\end{document}

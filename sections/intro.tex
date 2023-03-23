@@ -1,4 +1,22 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \section{Introduction}
+
+\section{Notations}
+This section describes some notations used in the following section.
+
+\paragraph{Program point}
+A program point is a labelling of program fragments, allowing to distinguish each expression, and subexpressions, in the program.
+We define labelled program fragments as expressions and terms as unlabelled fragments.
+
+\paragraph{Occurrence}
+An occurrence is either a syntactical or semantical element, labelled with a program point.
+Syntactical occurrences are elements named at some program point, expressed as $e^p$.
+Semantical occurrences are elements applied at some program point, expressed as either $\loc^p$ or $x^p$ for location or variable occurrences, respectively.
+
+\paragraph{Set notation}
+Sets a defined as upper case letters.
+
+\paragraph{Set occurrence}
+When labelling a set with a program point, it indicates that the set contains occurrences, e.g. $V^p=\{x_1^{p_1},\cdots,x_n^{p_n}\}$ where $n$ is the number of elements in the set.
 \end{document}

@@ -28,26 +28,8 @@
 \end{itemize}
 \fi
 
-\section{Notations}
-This section describes some notations used in the following section.
-
-\paragraph{Program point}
-A program point is a labelling of program fragments, allowing to distinguish each expression, and subexpressions, in the program.
-We define labelled program fragments as expressions and terms as unlabelled fragments.
-
-\paragraph{Occurrence}
-An occurrence is either a syntactical or semantical element, labelled with a program point.
-Syntactical occurrences are elements named at some program point, expressed as $e^p$.
-Semantical occurrences are elements applied at some program point, expressed as either $\loc^p$ or $x^p$ for location or variable occurrences, respectively.
-
-\paragraph{Set notation}
-Sets a defined as upper case letters.
-
-\paragraph{Set occurrence}
-When labelling a set with a program point, it indicates that the set contains occurrences, e.g. $V^p=\{x_1^{p_1},\cdots,x_n^{p_n}\}$ where $n$ is the number of elements in the set.
-
 \section{Soundness}
-In this section we present the soundness of the liveness system with respect to the collectin semantics, shown in \cref{App:ColSem}.
+In this section we present the soundness of the liveness system with respect to the collection semantics, shown in \cref{App:ColSem}.
 The liveness system is sound, if the liveness type contains at least all live occurrences at a given program point.
 
 The liveness system depends on three global bases, one for variable occurrences, for abstract locations, and for an approximation of program points.
@@ -130,6 +112,16 @@ For the liveness type, $(\delta,\kappa)$, and $w$ to be in agreement, it follows
 With the agreements defined, we can move on to the soundness for the livenss system.
 The liveness system is sound in respect to the collection semantic, that is, the liveness type is an overapproximation of the occurrences in the collection semantic.
 
+Before introducing the soundness, we the notion for strenghtening the environment, that shows that a binding in the environment can be rewritten to replace all occurrences of a a variable with its value.
+As bindings are immutable, and variables are unique, they cannot be changed in after they are bound.
+
+\begin{lemma}{[Strenghtening of the environment]}
+	\begin{align*}
+		&env[x\mapsto v]\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle \Rightarrow \\ 
+		&env\vdash\left\langle e^{p'}\{v/x\},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle
+	\end{align*}
+\end{lemma}
+
 For the liveness system to be sound, it is important to make sure that the three basis agrees with the collection system.
 This agreement is done in the following maner, given the a sound agreement before an evaluation, we can show that the agreement is still sound after an evaluation.
 Other than the agreement for the three basis, the soundness type must also agree with the semantic, this is done in a similar way.
@@ -149,30 +141,81 @@ To show this, we compare the liveness type to the set of variable occurrences.
 \end{theorem}
 
 \begin{proof}
-	The proof proceeds by induction on the height of the derivation tree for the transition of the form $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$.
-	In the base case, where $n=0$, we only have the rules $[Const]$ and $[Var]$.
+	The proof proceeds by induction on the height of the derivation tree for $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$.
+	First, we consider the base case, where the hight $n=0$.
+	Here, there are 3 rules $[Const]$, $[Var-r]$, and $[Var-l]$:
 	\begin{description}
-		\item[$\lbrack Const \rbrack$] Assume that:
+		%Const rule
+		\item[$\lbrack Const \rbrack$] By the induction hypothesis, we know that:
 			\begin{itemize}
 				\item $\Gamma,\Upsilon,\Pi\vdash c^p :(\emptyset,\emptyset)$,
 				\item $env\vdash\left\langle c^p,w,sto,p'\right\rangle\rightarrow\left\langle c,w,sto,\emptyset,\emptyset,p\right\rangle$
 			\end{itemize}
-			Where we know that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$ are in agreement.
-			Since $env\vdash\left\langle c^p,w,sto,p'\right\rangle\rightarrow\left\langle c,w,sto,\emptyset,\emptyset,p\right\rangle$ does not update $w$, we know that $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$, where $w'=w$, are still in agreement.
-			Since both $V$ and $L$ are empty, it is immediate that $V\subseteq\delta$ and $L\subseteq\kappa$.
-		\item[$\lbrack Var \rbrack$] Assume that
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$ are in agreement.
+
+			Sice $env\vdash\left\langle c^p,w,sto,p'\right\rangle\rightarrow\left\langle c,w,sto,\emptyset,\emptyset,p\right\rangle$ and $\Gamma,\Upsilon,\Pi\vdash c^p:(\emptyset,\emptyset)$, does not update the dependency function, and we know that the liveness pair is empty it is therefore immediate to see that the induction hypothesis holds.
+
+		%Var-r rule
+		\item[$\lbrack Var-r \rbrack$] By the induction hypothesis, we know that:
 			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash x^p :(\delta\cup\{x^p\},\kappa)$, where $\Gamma(x^p)=\delta$ and $\Upsilon(x)=\kappa$,
-				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$, where $env(x)=v$ and $w(x^p)=(L,V)$,
+				\item $\Gamma,\Upsilon,\Pi\vdash x^p :(\delta,\emptyset)$, where $x\not\in dom(\Upsilon)$, $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=\delta'$, and $\delta=\delta'\cup\{x^p\}$,
+				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
 			\end{itemize}
-			Where we knoe that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$ are in agreement.
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$ are in agreement.
+
+			We know that no update is done to the dependency function, so we know that $(w,env)\models(\Gamma,\Upsilon)$, and $(w,env)\models(\delta,\kappa)$ still holds after an evaluation.
+			Thus, it is immediate to see that the theorem hypothesis holds.
+
+		%Var-l rule
+		\item[$\lbrack Var-l \rbrack$] Assume that
+			\begin{itemize}
+				\item $\Gamma,\Upsilon,\Pi\vdash x^p :(\delta\cup\{x^p\},\kappa)$, where $x\not\in dom(\Upsilon)$, $\Lambda(x,p)=p'$, and $\Gamma(x^{p'})=\delta$,
+				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$, where $env(x)=v$, $v=\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
+			\end{itemize}
+			Where we know that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$ are in agreement.
 			Since $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$ does not update $w$, we know that $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$, where $w'=w$, are still in agreement.
 			It is immediate to see that $V\subseteq\delta$ and $L\subseteq\kappa$ because $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$.
 	\end{description}
 
 	In the induction step, assume that $i\leq n$, show for $n+1$:
 	\begin{description}
-		\item[$\lbrack Let \rbrack$] ss
+		\item[$\lbrack Let \rbrack$] By the induction hypothesis we know that:
+			\begin{itemize}
+				\item $\Gamma,\Upsilon,\Pi\vdash [\mbox{let}\;x\;e_1^{p'}\;e_2^{p''}]^{p_3} :(\delta',\kappa')$,
+				\item $env\vdash\left\langle [\mbox{let}\;x\;e_1^{p'}\;e_2^{p''}]^{p_3},w,sto,p\right\rangle\rightarrow\left\langle v,w',sto',(L,V),p_3\right\rangle$,
+			\end{itemize}
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$ are in agreement.
+
+			To conclude the $[let]$ rule, we need to analyse the premises in the collection semantic and type system.
+			In the collection semantic, we have the following:
+
+			\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\inference[]
+				{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p' \right\rangle &\\
+				env[x\mapsto v]\vdash \left\langle e_2^{p''},sto'',w_3,p' \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p'' \right\rangle}
+				{env\vdash \left\langle [\mbox{let}\;x\;e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}\\
+				Where $w_3=w''[x^{p'}\mapsto(L,V)]$\\[1cm]
+			\end{tabular}
+			\end{figure}
+			And in the type system, we have the following:
+			\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\inference[]
+				{\Gamma;\Upsilon;\Pi\vdash e_1^{p}:(\delta',\kappa') &\\
+				\Gamma,x^p:\delta';\Upsilon,\kappa';\Pi\vdash e_2^{p}:(\delta',\kappa')}
+				{\Gamma;\Upsilon;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:(\delta,\kappa)}\\[1cm]
+			\end{tabular}
+			\end{figure}
+
+			For the first premise, if we know that $(w,env)\models(\delta',\kappa')$, then from the induction hypothesis, we can immediately get that $(w'',env)\models(\delta',\kappa')$, $(w,env)\models(\Gamma,\Upsilon)$, $L\subseteq\kappa'$, and $V\subseteq\delta'$.
+			For $(w,env)\models(\delta',\kappa')$ to hold, we know that if the variable $x$ occures in $e_2^{p''}$, then $\delta'\subseteq\delta$, however, we can't make say the same about $\kappa'$, as if were using the dereferencing for the abstract locations in $\kappa'$, then those will probably not appear in $\kappa$.
+
+			For the second premise, we already know that $(w'',env)\models(\delta,\kappa)$, but for the second premise, we need to show for $env[x\mapsto v]$.
+			If we know that $(w'',env[x\mapsto v])\models(\delta,\kappa)$, then by our induction hypothesis we can immediately get $(w',env[x\mapsto v])\models(\delta,\kappa)$, $(w,env[x\mapsto v])\models(\Gamma,x:\delta',\Upsilon,\kappa)$, $L\subseteq\kappa$, and $V\subseteq\delta$.
+			
 		\item[$\lbrack Let \; rec \rbrack$] ss
 		\item[$\lbrack Abstraction \rbrack$] ss
 		\item[$\lbrack App \rbrack$] ss
