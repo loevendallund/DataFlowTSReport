@@ -112,14 +112,11 @@ For the liveness type, $(\delta,\kappa)$, and $w$ to be in agreement, it follows
 With the agreements defined, we can move on to the soundness for the livenss system.
 The liveness system is sound in respect to the collection semantic, that is, the liveness type is an overapproximation of the occurrences in the collection semantic.
 
-Before introducing the soundness, we the notion for strenghtening the environment, that shows that a binding in the environment can be rewritten to replace all occurrences of a a variable with its value.
-As bindings are immutable, and variables are unique, they cannot be changed in after they are bound.
-
-\begin{lemma}{[Strenghtening of the environment]}
-	\begin{align*}
-		&env[x\mapsto v]\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle \Rightarrow \\ 
-		&env\vdash\left\langle e^{p'}\{v/x\},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle
-	\end{align*}
+\begin{lemma}{[Extensions of the dependency function]}
+	Let $w$ and $w'$ be two dependency functions.
+	We say that $w'$ is an extension of $w$, if for some program point $p$ restricted on $w'$ we get $w$, written as:
+	$$w=w'\mid_p$$
+	where $p$ is occurrences that $\sqsubseteq p$
 \end{lemma}
 
 For the liveness system to be sound, it is important to make sure that the three basis agrees with the collection system.
@@ -131,64 +128,72 @@ To show this, we compare the liveness type to the set of variable occurrences.
 
 
 \begin{theorem}{[Soundness of type system]}
-	Suppose $e^p$ is an occurrence and that
+	Suppose $e^p$ is an occurrence where
 	\begin{itemize}
-		\item $\Gamma,\Upsilon,\Pi\vdash e^p : (\delta,\kappa)$, and 
+		\item $\Gamma,\Upsilon,\Pi\vdash e^p : T$, and 
 		\item $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w',sto',L,V,p''\right\rangle$
 	\end{itemize}
-	where $(w,env)\models(\delta,\kappa)$ and $(w,env)\models(\Gamma,\Upsilon)$ are in agreement.
-	Then also $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$ are in agreement, and $L\subseteq\kappa$ and $V\subseteq\delta$ holds.
+	and that $(w,env)\models T$ and $(w,env)\models(\Gamma,\Upsilon)$.
+	Then we have that:
+	\begin{itemize}
+		\item $\Gamma,\Upsilon,\Pi\vdash v : T$
+		\item $(w',env)\models T$
+		\item $(w',env)\models(\Gamma,\Upsilon)$
+		\item $(L,V)\models T$
+	\end{itemize}
 \end{theorem}
 
 \begin{proof}
-	The proof proceeds by induction on the height of the derivation tree for $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$.
+	The proof proceeds by induction on the height for the derivation tree for $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$ and $\Gamma,\Upsilon,\Pi\vdash e^p:T$
+	Note that the proof follows the rules from the type system.
 	First, we consider the base case, where the hight $n=0$.
-	Here, there are 3 rules $[Const]$, $[Var-r]$, and $[Var-l]$:
+	Here, there are two rules $[Const]$, $[Var]$:
 	\begin{description}
 		%Const rule
-		\item[$\lbrack Const \rbrack$] By the induction hypothesis, we know that:
+		\item[$\lbrack Const \rbrack$] By the induction hypothesis for $[Const]$, we know that:
 			\begin{itemize}
 				\item $\Gamma,\Upsilon,\Pi\vdash c^p :(\emptyset,\emptyset)$,
-				\item $env\vdash\left\langle c^p,w,sto,p'\right\rangle\rightarrow\left\langle c,w,sto,\emptyset,\emptyset,p\right\rangle$
+				\item $env\vdash\left\langle c^p,w,sto,p'\right\rangle\rightarrow\left\langle c,w,sto,(\emptyset,\emptyset),p\right\rangle$
 			\end{itemize}
-			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$ are in agreement.
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$.
 
-			Sice $env\vdash\left\langle c^p,w,sto,p'\right\rangle\rightarrow\left\langle c,w,sto,\emptyset,\emptyset,p\right\rangle$ and $\Gamma,\Upsilon,\Pi\vdash c^p:(\emptyset,\emptyset)$, does not update the dependency function, and we know that the liveness pair is empty it is therefore immediate to see that the induction hypothesis holds.
+			By the induction hypothesis we can immediately conclude that $\Gamma,\Upsilon,\Pi\vdash c:(\emptyset,\emptyset)$ $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$, where $w'=w$, and $(\emptyset,\emptyset)\models(\emptyset,\emptyset)$
 
 		%Var-r rule
-		\item[$\lbrack Var-r \rbrack$] By the induction hypothesis, we know that:
+		\item[$\lbrack Var \rbrack$] By the induction hypothesis for $[Var]$, we know that:
 			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash x^p :(\delta,\emptyset)$, where $x\not\in dom(\Upsilon)$, $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=\delta'$, and $\delta=\delta'\cup\{x^p\}$,
-				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
+				\item $\Gamma,\Upsilon,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\cup(\{x^p\},\emptyset)$,
+				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
 			\end{itemize}
-			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$ are in agreement.
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T$.
 
-			We know that no update is done to the dependency function, so we know that $(w,env)\models(\Gamma,\Upsilon)$, and $(w,env)\models(\delta,\kappa)$ still holds after an evaluation.
-			Thus, it is immediate to see that the theorem hypothesis holds.
+			By the induction hypothesis we can immediately conclude that $\Gamma,\Upsilon,\Pi\vdash v:T$ $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models T$, where $w'=w$, and $(L,V\cup\{x^p\})\models T$
 
+\iffalse
 		%Var-l rule
-		\item[$\lbrack Var-l \rbrack$] Assume that
+		\item[$\lbrack Var-l \rbrack$] By the induction hypothesis for $[Var-l]$, we know that:
 			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash x^p :(\delta\cup\{x^p\},\kappa)$, where $x\not\in dom(\Upsilon)$, $\Lambda(x,p)=p'$, and $\Gamma(x^{p'})=\delta$,
-				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$, where $env(x)=v$, $v=\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
+				\item $\Gamma,\Upsilon,\Pi\vdash x^p :(\{x^p\},\kappa)$, where $x\in dom(\Upsilon)$ and $\Upsilon(x)=\kappa$,
+				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
 			\end{itemize}
 			Where we know that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$ are in agreement.
-			Since $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$ does not update $w$, we know that $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$, where $w'=w$, are still in agreement.
-			It is immediate to see that $V\subseteq\delta$ and $L\subseteq\kappa$ because $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$.
+
+			We know that no update is done to the dependency function, so we know that $(w,env)\models(\Gamma,\Upsilon)$, and $(w,env)\models(\delta,\kappa)$ still holds after an evaluation.
+			Thus, it is immediate to see that the induction hypothesis holds.
+\fi
 	\end{description}
 
 	In the induction step, assume that $i\leq n$, show for $n+1$:
 	\begin{description}
-		\item[$\lbrack Let \rbrack$] By the induction hypothesis we know that:
+		\item[$\lbrack Let \rbrack$] By the induction hypothesis for $[Let]$, we know that:
 			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash [\mbox{let}\;x\;e_1^{p'}\;e_2^{p''}]^{p_3} :(\delta',\kappa')$,
+				\item $\Gamma,\Upsilon,\Pi\vdash [\mbox{let}\;x\;e_1^{p'}\;e_2^{p''}]^{p_3}:T$,
 				\item $env\vdash\left\langle [\mbox{let}\;x\;e_1^{p'}\;e_2^{p''}]^{p_3},w,sto,p\right\rangle\rightarrow\left\langle v,w',sto',(L,V),p_3\right\rangle$,
 			\end{itemize}
-			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$ are in agreement.
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$.
 
 			To conclude the $[let]$ rule, we need to analyse the premises in the collection semantic and type system.
 			In the collection semantic, we have the following:
-
 			\begin{figure}[H]
 			\setlength\tabcolsep{8pt}
 			\begin{tabular}{l}
@@ -204,26 +209,73 @@ To show this, we compare the liveness type to the set of variable occurrences.
 			\setlength\tabcolsep{8pt}
 			\begin{tabular}{l}
 				\inference[]
-				{\Gamma;\Upsilon;\Pi\vdash e_1^{p}:(\delta',\kappa') &\\
-				\Gamma,x^p:\delta';\Upsilon,\kappa';\Pi\vdash e_2^{p}:(\delta',\kappa')}
-				{\Gamma;\Upsilon;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:(\delta,\kappa)}\\[1cm]
+				{\Gamma;\Upsilon;\Pi\vdash e_1^{p'}:T_1 &\\
+				\Gamma,x^{p'}:T_1;\Upsilon,\kappa';\Pi\vdash e_2^{p''}:T}
+				{\Gamma;\Upsilon;\Pi\vdash [\mbox{let}\; x \; e_1^{p'} \; e_2^{p''}]^{p_3}:T}\\[1cm]
 			\end{tabular}
 			\end{figure}
 
-			For the first premise, if we know that $(w,env)\models(\delta',\kappa')$, then from the induction hypothesis, we can immediately get that $(w'',env)\models(\delta',\kappa')$, $(w,env)\models(\Gamma,\Upsilon)$, $L\subseteq\kappa'$, and $V\subseteq\delta'$.
-			For $(w,env)\models(\delta',\kappa')$ to hold, we know that if the variable $x$ occures in $e_2^{p''}$, then $\delta'\subseteq\delta$, however, we can't make say the same about $\kappa'$, as if were using the dereferencing for the abstract locations in $\kappa'$, then those will probably not appear in $\kappa$.
+			In the first premise, if we know that $(w,env)\models T_1$, then from the induction hypothesis, we can immediately get that $\Gamma;\Upsilon;\Pi\vdash v':T_1$, $(w'',env)\models T_1$, $(w',env)\models(\Gamma,\Upsilon)$, and $(L',V')\models T_1$.
+			We only need to know that $(w,env)\models T_1$, where we know by the substitution of the value $v'$ in $e_2^{p''}$, where $v'$ has type $T_1$, we also know that $(w,env)\models T_1$ holds if $x$ is used in $e_2^{p''}$.
 
-			For the second premise, we already know that $(w'',env)\models(\delta,\kappa)$, but for the second premise, we need to show for $env[x\mapsto v]$.
-			If we know that $(w'',env[x\mapsto v])\models(\delta,\kappa)$, then by our induction hypothesis we can immediately get $(w',env[x\mapsto v])\models(\delta,\kappa)$, $(w,env[x\mapsto v])\models(\Gamma,x:\delta',\Upsilon,\kappa)$, $L\subseteq\kappa$, and $V\subseteq\delta$.
+			%For $(w,env)\models(\delta',\kappa')$ to hold, we know that if the variable $x$ occures in $e_2^{p''}$, then $\delta'\subseteq\delta$, however, we can't make say the same about $\kappa'$, as if were using the dereferencing for the abstract locations in $\kappa'$, then those will probably not appear in $\kappa$.
+
+			In the second premise, we already know that $(w'',env)\models(\delta,\kappa)$ since we know that $w=w''\mid_p$.
+			For the second premise to hold, we also need to show for $env[x\mapsto v]$.
+			If we know that $(w'',env[x\mapsto v])\models T$, then by our induction hypothesis we can immediately get $\Gamma,x^{p'}:T_1;\Upsilon,\kappa';\Pi\vdash v:T$, $(w',env[x\mapsto v])\models(\Gamma,x^{p'}:T_1,\Upsilon,\kappa')$, $(w',env[x\mapsto v])\models T$, and $(L,V)\models T$.
+			Since $env[x\mapsto v]$ is a local extension, and we know the type and dependencies of $v$, we also know that $(w'',env[x\mapsto v])\models T$.
+			From this, the conclusion is immediate.
 			
 		\item[$\lbrack Let \; rec \rbrack$] ss
-		\item[$\lbrack Abstraction \rbrack$] ss
-		\item[$\lbrack App \rbrack$] ss
+		\item[$\lbrack Abs \rbrack$] By the induction hypothesis for $[Abs]$, we know that:
+			\begin{itemize}
+				\item $\Gamma,\Upsilon,\Pi\vdash [\lambda x.e^{p'}]^{p''}:T_1\rightarrow T_2$.
+				\item $env\vdash\left\langle [\lambda x.e^{p'}]^{p''},w,sto,p\right\rangle\rightarrow\left\langle v,w,sto,(\emptyset,\emptyset),p''\right\rangle$, where $v=\left\langle x, e^{p'}, env \right\rangle$
+			\end{itemize}
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T_1\rightarrow T_2$.
+
+			From the induction hypothesis we immediately get that $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models T_1\rightarrow T_2$, where $w'=w$, and that $(\emptyset,\emptyset)\models T_1\rightarrow T_2$.
+			We need to show that $\Gamma;\Upsilon;\Pi\vdash \left\langle x, e^{p'}, env \right\rangle:T_1\rightarrow T_2$.
+			We know from the premise of the $[Abs]$ type rule that $\Gamma,x^{p''}:T_1;\Upsilon;\Pi\vdash e^{p'}:T_2$, where $p''\sqsubseteq p'\in\Pi$.
+			To show that $\left\langle x, e^{p'}, env \right\rangle$ has type $T_1\rightarrow T_2$, we need to show that for any $v_1^{p_1}:T_1$ we have that $\Gamma,\Upsilon,\Pi\vdash e\{x/v_1\} : T_2\{x/T_1\}$.
+
+			By lemma (insert ref to substitution lemma), we know that if $v_1$ has type $T_1$, the the substition holds.
+
+
+		\item[$\lbrack App \rbrack$] By the induction hypothesis for $[Var]$, we know that:
+			\begin{itemize}
+				\item $\Gamma,\Upsilon,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\cup(\{x^p\},\emptyset)$,
+				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
+			\end{itemize}
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T$.
+
+
 		\item[$\lbrack App \; const \rbrack$] ss
 		\item[$\lbrack App \; rec \rbrack$] ss
-		\item[$\lbrack Loc \; new \rbrack$] ss
-		\item[$\lbrack Loc \; read \rbrack$] ss
-		\item[$\lbrack Loc \; write \rbrack$] ss
+		\item[$\lbrack Loc \; new \rbrack$] By the induction hypothesis for $[Var]$, we know that:
+			\begin{itemize}
+				\item $\Gamma,\Upsilon,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\cup(\{x^p\},\emptyset)$,
+				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
+			\end{itemize}
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T$.
+
+
+		\item[$\lbrack Loc \; read \rbrack$] By the induction hypothesis for $[Var]$, we know that:
+			\begin{itemize}
+				\item $\Gamma,\Upsilon,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\cup(\{x^p\},\emptyset)$,
+				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
+			\end{itemize}
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T$.
+
+
+		\item[$\lbrack Loc \; write \rbrack$] By the induction hypothesis for $[Var]$, we know that:
+			\begin{itemize}
+				\item $\Gamma,\Upsilon,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\cup(\{x^p\},\emptyset)$,
+				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
+			\end{itemize}
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T$.
+
+
 		\item[$\lbrack Case \; match \rbrack$] ss
 		\item[$\lbrack Case \; fail \rbrack$] ss
 		\item[$\lbrack Case \; \epsilon \rbrack$] ss
