@@ -89,7 +89,7 @@ The last agreement can now be defined, that is, for the liveness type.
 \begin{definition}{[Agreement of liveness type and the dependency function]}
 	Let $w$ be the dependency function, $env$ be the environment, $\delta$ be a set of possible live variables, $\kappa$ be the abstract locations.
 	We say that:
-	$$(w,env)\models(\delta,\kappa)$$
+	$$(w,env)\models T$$
 	Iff
 	\begin{enumerate}
 		%\item $dom(w)\supseteq\delta$,
@@ -112,16 +112,26 @@ For the liveness type, $(\delta,\kappa)$, and $w$ to be in agreement, it follows
 With the agreements defined, we can move on to the soundness for the livenss system.
 The liveness system is sound in respect to the collection semantic, that is, the liveness type is an overapproximation of the occurrences in the collection semantic.
 
-\begin{lemma}{[Extensions of the dependency function]}
+\begin{definition}{[Extensions of the dependency function]}
 	Let $w$ and $w'$ be two dependency functions.
 	We say that $w'$ is an extension of $w$, if for some program point $p$ restricted on $w'$ we get $w$, written as:
 	$$w=w'\mid_p$$
 	where $p$ is occurrences that $\sqsubseteq p$
-\end{lemma}
+\end{definition}
 
 For the liveness system to be sound, it is important to make sure that the three basis agrees with the collection system.
 This agreement is done in the following maner, given the a sound agreement before an evaluation, we can show that the agreement is still sound after an evaluation.
 Other than the agreement for the three basis, the soundness type must also agree with the semantic, this is done in a similar way.
+
+\begin{lemma}{[Substitution]}
+	Suppose that $e^p$ is an occurrence, that 
+	$\Gamma,x^{p'}:T_1;\Upsilon;\Pi\vdash e^p:T$ 
+	and 
+	$\Gamma;\Upsilon;\Pi\vdash v:T_1$.
+	Then we have that
+	$\Gamma;\Upsilon;\Pi\vdash e^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
+	where $x^{p'}\not\in dom(\Gamma)$.
+\end{lemma}
 
 Other than having the agreement, we must also show that the liveness type is a good approximation, i.e., that the liveness type contains at least all used variables.
 To show this, we compare the liveness type to the set of variable occurrences.
@@ -157,7 +167,7 @@ To show this, we compare the liveness type to the set of variable occurrences.
 			\end{itemize}
 			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$.
 
-			By the induction hypothesis we can immediately conclude that $\Gamma,\Upsilon,\Pi\vdash c:(\emptyset,\emptyset)$ $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$, where $w'=w$, and $(\emptyset,\emptyset)\models(\emptyset,\emptyset)$
+			By the induction hypothesis we can immediately conclude that $\Gamma,\Upsilon,\Pi\vdash c:(\emptyset,\emptyset)$, $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$, where $w'=w$, and $(\emptyset,\emptyset)\models(\emptyset,\emptyset)$
 
 		%Var-r rule
 		\item[$\lbrack Var \rbrack$] By the induction hypothesis for $[Var]$, we know that:
@@ -242,31 +252,115 @@ To show this, we compare the liveness type to the set of variable occurrences.
 			By lemma (insert ref to substitution lemma), we know that if $v_1$ has type $T_1$, the the substition holds.
 
 
-		\item[$\lbrack App \rbrack$] By the induction hypothesis for $[Var]$, we know that:
+		\item[$\lbrack App \rbrack$] By the induction hypothesis for $[App]$, we know that:
 			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\cup(\{x^p\},\emptyset)$,
-				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
+				\item $\Gamma,\Upsilon,\Pi\vdash [e_1^{p'}\;e_2^{p'}]^{p_3}:T$
+				\item $env\vdash\left\langle [e_1^{p'}\;e_2^{p'}]^{p_3},w,sto,p\right\rangle\rightarrow\left\langle v,w',sto',(L,V),p_3\right\rangle$
 			\end{itemize}
 			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T$.
 
+			To conclude the $[App]$ we need to analyse the premises in the collection semantics and type system.
+			In the collection semantics, we have the following:
+			\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\inference[]
+				{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p' \right\rangle &\\
+				env\vdash \left\langle e_2^{p''},sto'',w'',p' \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L,V),p'' \right\rangle &\\
+				env'[x\mapsto v'']\vdash \left\langle e_2^{p''},sto_3,w_3,p' \right\rangle \rightarrow \left\langle v',sto',w',(L,V),p_1 \right\rangle}
+				{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}\\
+				Where $v=\left\langle x,e^{p_1},env'\right\rangle$\\[1cm]
+			\end{tabular}
+			\end{figure}
+
+			And in the type system we have the following
+			\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\inference[]
+				{\Gamma;\Upsilon;\Pi\vdash e_1^{p'}:T_1\rightarrow T &\\
+				\Gamma;\Upsilon;\Pi\vdash e_2^{p''}:T_1}
+				{\Gamma;\Upsilon;\Pi\vdash [e_1^{p'} \; e_2^{p''}]^{p_3}:T}\\[1cm]
+			\end{tabular}
+			\end{figure}
+
+			Then, in the first premise we have the type $T_1\rightarrow T$, and in the semantics we know that the value it evaluates to is $\left\langle x,e^{p_1},env' \right\rangle$, thus we know that $\Gamma;\Upsilon;\Pi\vdash v_1:T_1\rightarrow T$ where $v_1=[\lambda x.e^{p_1}]$.
+			Furthermore, from the second premise we know that the type must be $T_1$, thuse $\Gamma;\Upsilon;\Pi\vdash v_2:T_1$.
+			From lemma (insert here), we then know that we can conclude the type by substition, and get $\Gamma;\Upsilon;\Pi\vdash e^{p_1}\begin{Bmatrix} ^{v_2}/_x \end{Bmatrix}$
 
 		\item[$\lbrack App \; const \rbrack$] ss
 		\item[$\lbrack App \; rec \rbrack$] ss
-		\item[$\lbrack Loc \; new \rbrack$] By the induction hypothesis for $[Var]$, we know that:
+		\item[$\lbrack Loc \; new \rbrack$] By the induction hypothesis for $[Loc\;new]$, we know that:
 			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\cup(\{x^p\},\emptyset)$,
-				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
+				\item $\Gamma,\nu x:T;\Upsilon,\kappa;\Pi\vdash [\mbox{ref}\;e^{p'}]^{p''}:(\emptyset,\{\kappa\})$, 
+				\item $env\vdash\left\langle [\mbox{ref}\;e^{p'}]^{p''},w,sto,p\right\rangle\rightarrow\left\langle \loc,w',sto',(\{\loc^{p''}\},\emptyset),p''\right\rangle$
+			\end{itemize}
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models (\emptyset,\kappa)$.
+
+			To conclude, we need to first analyse the premises, where in the collection semantics we have:
+			\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\inference[]
+				{env\vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L,V),p' \right\rangle}
+				{env\vdash \left\langle [\mbox{ref}\;e^{p'}]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(\{\loc^{p''}\},\emptyset),p_3 \right\rangle}\\[0.5cm]
+				Where $v=\loc$, $sto'=sto''[next\mapsto \loc]$ and $w'=w''[\loc^{p''}\mapsto(L,V)]$\\
+			\end{tabular}
+			\end{figure}
+
+			And in the type system we have the following
+			\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\inference[]
+				{\Gamma;\Upsilon;\Pi\vdash e^{p'}:(\delta',\kappa')}
+				{\Gamma,\nu x^{p'}:T;\Upsilon,\kappa;\Pi\vdash [\mbox{ref}\;e^{p'}]^{p''}:(\emptyset,\{\kappa\})}\\[0.5cm]
+				Where $\kappa=\{\nu x\}$
+			\end{tabular}
+			\end{figure}
+
+			\todo[inline]{Figure out how to conclude the premise}
+			Then, from the first premise, if we know that $(w,env)\models(\delta',\kappa')$, then we immediately get $\Gamma;\Upsilon;\Pi\vdash v':(\delta',\kappa')$, $(w',env)\models(\delta',\kappa')$, $(w',env)\models(\Gamma,\Upsilon)$, and $(L,V)\models(\delta',\kappa')$.
+
+			From the induction hypothesis we know that the type of $v$ must be $\Gamma;\Upsilon;\Pi\vdash v:(\emptyset,\kappa)$.
+			We can immediately conclude that $(w'',env)\models(\emptyset,\{\kappa\}$, $(w'',env)\models(\Gamma,\nu x:(\delta',\kappa'))$.
+			Lastly, we can conclude $(L,\emptyset)\models(\emptyset,\kappa)$, since $\nu x$ is an internal variable that represents a location.
+
+
+
+		\item[$\lbrack Loc \; read \rbrack$] By the induction hypothesis for $[Loc\;read]$, we know that:
+			\begin{itemize}
+				\item $\Gamma,\Upsilon,\Pi\vdash [!e^{p'}]^{p''}:T$
+				\item $env\vdash\left\langle [!e^{p'}]^{p''},w,sto,p\right\rangle\rightarrow\left\langle v,w,sto,(L,V),p''\right\rangle$
 			\end{itemize}
 			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T$.
 
+			To conclude, we need to first analyse the premises, where in the collection semantics we have:
+			\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\inference[]
+				{env\vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v',sto',w',(L,V),p' \right\rangle}
+				{env\vdash \left\langle [!e^{p'}]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L\cup L'\cup\{\loc^{p''}\},V\cup V'),p'' \right\rangle}\\[0.5cm]
+				Where $v'=\loc$ $sto'(\loc)=v$, $p_3=inf_p{\loc,w}$, and $w(\loc^{p_3})=(L',V')$
+			\end{tabular}
+			\end{figure}
 
-		\item[$\lbrack Loc \; read \rbrack$] By the induction hypothesis for $[Var]$, we know that:
-			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\cup(\{x^p\},\emptyset)$,
-				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
-			\end{itemize}
-			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T$.
+			And in the type system we have the following
+			\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\inference[]
+				{\Gamma;\Upsilon;\Pi\vdash e^{p'}:(\delta',\kappa')}
+				{\Gamma;\Upsilon;\Pi\vdash [\mbox{ref}\;e^{p'}]^{p''}:T}\\[0.5cm]
+				Where $T=T'\cup(\delta',\kappa')$, \\$T'=\bigcup_{[\tilde{x}]\in\kappa}(\Gamma(\nu x^{p_3})\cup\{\nu x^{p''}\})$, \\$\nu x\in[\tilde{x}]$, and $p_3=\Lambda(x,p')$.
+			\end{tabular}
+			\end{figure}
 
+			From the premise, if we know that $(w,env)\models(\delta',\kappa')$ we can immediately get that $\Gamma;\Upsilon;\Pi\vdash v':(\delta',\kappa')$, $(w',env)\models(\delta',\kappa')$, $(w',env)\models(\Gamma,\Upsilon)$, and $(L,V)\models(\delta',\kappa')$.
+			We already know that $(\delta',\kappa')$ is a part of $T$ from the side condition, thus we already know that $(w,env)\models(\delta',\kappa')$.
+
+			From this, the conclusion follows immediately, since we also get that $\Gamma;\Upsilon;\Pi\vdash v:T$, $(w',env)\models T$, $(w',env)\models(\Gamma,\Upsilon)$, and $(L,V)\models T$.
 
 		\item[$\lbrack Loc \; write \rbrack$] By the induction hypothesis for $[Var]$, we know that:
 			\begin{itemize}
