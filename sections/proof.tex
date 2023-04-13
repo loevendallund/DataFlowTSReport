@@ -87,10 +87,13 @@ For $w$ and $\Pi$ to agree, it is important that all dependencies for an occurre
 The last agreement can now be defined, that is, for the liveness type.
 
 \begin{definition}{[Agreement of liveness type and the dependency function]}
-	Let $w$ be the dependency function, $env$ be the environment, $\delta$ be a set of possible live variables, $\kappa$ be the abstract locations.
+	Let $w$ be the dependency function, $env$ be the environment, and $T$ be the liveness type.
+	%$\delta$ be a set of possible live variables, $\kappa$ be the abstract locations.
 	We say that:
 	$$(w,env)\models T$$
-	Iff
+	if $T=T_1\rightarrow T_2$ then $(w,env)\models T_1 \Rightarrow (w,env)\models T_2$.
+
+	If $T=(\delta,\kappa)$ then:
 	\begin{enumerate}
 		%\item $dom(w)\supseteq\delta$,
 		%\item $dom(w)\supseteq\kappa$,
@@ -352,7 +355,7 @@ To show this, we compare the liveness type to the set of variable occurrences.
 			\begin{tabular}{l}
 				\inference[]
 				{\Gamma;\Upsilon;\Pi\vdash e^{p'}:(\delta',\kappa')}
-				{\Gamma;\Upsilon;\Pi\vdash [\mbox{ref}\;e^{p'}]^{p''}:T}\\[0.5cm]
+				{\Gamma;\Upsilon;\Pi\vdash [!\;e^{p'}]^{p''}:T}\\[0.5cm]
 				Where $T=T'\cup(\delta',\kappa')$, \\$T'=\bigcup_{[\tilde{x}]\in\kappa}(\Gamma(\nu x^{p_3})\cup\{\nu x^{p''}\})$, \\$\nu x\in[\tilde{x}]$, and $p_3=\Lambda(x,p')$.
 			\end{tabular}
 			\end{figure}
@@ -362,13 +365,47 @@ To show this, we compare the liveness type to the set of variable occurrences.
 
 			From this, the conclusion follows immediately, since we also get that $\Gamma;\Upsilon;\Pi\vdash v:T$, $(w',env)\models T$, $(w',env)\models(\Gamma,\Upsilon)$, and $(L,V)\models T$.
 
-		\item[$\lbrack Loc \; write \rbrack$] By the induction hypothesis for $[Var]$, we know that:
+		\item[$\lbrack Loc \; write \rbrack$] By the induction hypothesis for $[Loc\;write]$, we know that:
 			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\cup(\{x^p\},\emptyset)$,
-				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
+				\item $\Gamma,\Upsilon,\Pi\vdash [e_1^{p'} := e_2^{p''}]^{p_3}:(\delta,\kappa)$,
+				\item $env\vdash\left\langle [e_1^{p'} := e_2^{p''}]^{p_3},w,sto,p\right\rangle\rightarrow\left\langle v,w',sto',(L,V),p_3\right\rangle$.
 			\end{itemize}
-			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T$.
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models (\delta,\kappa)$.
 
+			To conclude, we need to first analyse the premises, where in the collection semantics we have:
+			\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\inference[]
+				{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L,V),p' \right\rangle \\&
+				env\vdash \left\langle e_2^{p''},sto'',w'',p \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L',V'),p' \right\rangle}
+				{env\vdash \left\langle [e_1^{p'} := e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L\cup L'\cup\{\loc^{p''}\},V\cup V'),p_3 \right\rangle}\\[0.5cm]
+				Where $v=()$, $v'=\loc$, $sto'=sto_3[\loc\mapsto v'']$, and $w'=w_3[\loc^{p_3}\mapsto(L',V')]$.
+			\end{tabular}
+			\end{figure}
+
+			And in the type system we have the following
+			\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\inference[]
+				{\Gamma;\Upsilon;\Pi\vdash e_1^{p'}:(\delta,\kappa)\\&
+				\Gamma;\Upsilon;\Pi\vdash e_2^{p''}:(\delta',\kappa')}
+				{\Gamma';\Upsilon;\Pi\vdash [e_1^{p'} := e_2^{p''}]^{p_3}:(\delta,\kappa)}\\[0.5cm]
+				Where $\Gamma'=\forall[\tilde{x}]\in\kappa\wedge \nu x\in[\tilde{x}].\Gamma,\nu x^{p_3}:((\delta',\kappa')\cup\Gamma(\nu x^{p_1}))$ \\and $p_1=\Lambda(\nu x, p_3)$.
+			\end{tabular}
+			\end{figure}
+
+			The first premise is immediate, so we get $\Gamma;\Upsilon;\Pi\vdash v':(\delta,\kappa)$, $(w'',env)\models(\delta,\kappa)$, $(w'',env)\models(\Gamma,\Upsilon)$, and $(L,V)\models(\delta,\kappa)$.
+
+			\tode[inline]{Need to find out how we get that $(w'',env)\models(\delta',\kappa')$}
+			In the second premise, if we know that $(w'',env)\models(\delta',\kappa')$, then we immediately get that $\Gamma;\Upsilon;\Pi\vdash v'':(\delta',\kappa')$, $(w_3,env)\models(\delta',\kappa')$, $(w_3,env)\models(\Gamma,\Upsilon)$, and $(L',V')\models(\delta',\kappa')$.
+
+			Based on the premises, we get the following immediately: $\Gamma;\Upsilon;\Pi\vdash v:(\delta,\kappa)$, $(w',env)\models(\delta,\kappa)$, and $(L,V)\models(\delta,\kappa)$.
+			Since we does not know which branch we are evaluating, if there are multiple branches an imperative variable's location can be bound to, we need to update for all possible internal variables $\nu x$ we get from $e_1$.
+			This also implies that we need to keep the liveness information from the previous write to the internal variables.
+
+			With this, we can conclude that $(w',env)\models(\Gamma',\Upsilon)$, since we know that $\Gamma;\Upsilon;\Pi\vdash v'':(\delta',\kappa')$, we also know that all possible internal variables $\nu x$ should atleast contain $(\delta',\kappa')$.
 
 		\item[$\lbrack Case \; match \rbrack$] ss
 		\item[$\lbrack Case \; fail \rbrack$] ss
