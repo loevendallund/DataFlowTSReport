@@ -60,6 +60,11 @@
 				{\Gamma;\Upsilon;\Pi\vdash [\mbox{case}\;e^{p} \vec{\pi}]^{p'}:T\cup(\delta,\kappa)}\\[0.3cm]
 			Where $T=\bigcup_{i}T_i$\\[1cm]
 
+		\InfName{Pattern}\\[0.2cm]
+			\inference[]
+				{\Gamma;\Upsilon;\Pi\vdash e^{p}:T}
+				{\Gamma;\Upsilon;\Pi\vdash (s \; e^{p}):T}\\[1cm]
+
 		\InfName{Ref}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Upsilon;\Pi\vdash  e^{p}:(\delta',\kappa')}

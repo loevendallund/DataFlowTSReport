@@ -79,32 +79,8 @@ In the $VAR$ rule we make use of the union between a type and a base type, which
 	\end{equation*}
 \end{definition}
 
-
-\iffalse
-\subsection{Examples}
-
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
-		\inference[$ABS$]
-		{
-				\inference[$APP$]
-				{
-					\inference[$VAR$]{}{\Gamma';\Upsilon;\Pi\vdash x^{p}:\alpha:T'\rightarrow T''}
-					\;\;\;
-					\inference[$VAR$]{}{\Gamma';\Upsilon;\Pi\vdash z^{p'}:(\{z^{p'}\},\emptyset)}
-				}
-				{\Gamma,x:T_1;\Upsilon;\Pi\vdash [x^{p}\;z^{p'}]^{p''}:T''\{\alpha / (\{z^{p'}\},\emptyset)\}}
-		}
-		{\Gamma;\Upsilon;\Pi\vdash [\lambda\; x.([x^{p}\;z^{p'}]^{p''})]^{p_3}:x:T_1\rightarrow T''\{\alpha / (\{z^{p'}\},\emptyset)\}}\\
-		Where $T_1=\alpha:T'\rightarrow T''$
-	\end{tabular}
-	\label{fig:Simple}
-\end{figure}
-\fi
-
 \begin{landscape}
-\subsection{Example}
+\subsection{Example Abs}
 Given the following program
 $$(\lambda x.(x\;z))(\lambda y.y)$$
 Where $z$ is bound to a constant integer and its type is thus $(\emptyset,\emptyset)$.
@@ -113,31 +89,8 @@ To type this program, we first construct the tree according to the rules:
 
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
-		\inference[$APP$]
-		{
-			\inference[$ABS$]
-			{
-				\inference[$APP$]
-				{
-					\inference[$VAR$]{}{\Gamma';\Upsilon;\Pi\vdash x^{p}:\alpha:T'\rightarrow T''}
-					\;\;\;
-					\inference[$VAR$]{}{\Gamma';\Upsilon;\Pi\vdash z^{p'}:(\{z^{p'}\},\emptyset)}
-				}
-				{\Gamma,x:T_1;\Upsilon;\Pi\vdash [x^{p}\;z^{p'}]^{p''}:T''\{\alpha / (\{z^{p'}\},\emptyset)\}}
-			}
-			{\Gamma;\Upsilon;\Pi\vdash [\lambda\; x.([x^{p}\;z^{p'}]^{p''})]^{p_3}:x:T_1\rightarrow T''\{\alpha / (\{z^{p'}\},\emptyset)\}}
-			\;\;
-			\inference[$ABS$]
-			{
-					\inference[$VAR$]{}{\Gamma,y:T;\Upsilon;\Pi\vdash y^{p_3}:T}
-			}
-			{\Gamma';\Upsilon;\Pi\vdash \lambda y.[y^{p_3}]^{p_4})]^{p_5}:y:T\rightarrow T}
-		}
-		{\Gamma;\Upsilon;\Pi\vdash [[\lambda x.[x^{p}\;z^{p'}]^{p''}]^{p_3}\;[\lambda y.y^{p_4}]^{p_5}]^{p_6}:T''\{\alpha / (\{z^{p'}\},\emptyset)\}\{x / T\rightarrow T\}}\\
-		Where $T_1=\alpha:T'\rightarrow T''$
-	\end{tabular}
-	\label{fig:Simple}
+	\input{examples/AbsEx.tex}
+	\label{fig:AbsExample}
 \end{figure}
 
 After that, we can solve the intermediate types, since we now know the righthand type of the outermost application, and we will get the following:
@@ -199,22 +152,34 @@ Lastly, we can solve the last part, to get the prober type:
 	\end{tabular}
 	\label{fig:Simple}
 \end{figure}
-\end{landscape}
-
-\iffalse
+\subsection{Example case}
+In the following example, the initial $\Gamma$ and $\Upsilon$ is given by:
+\begin{align*}
+	\Gamma &= [\nu x\mapsto(\emptyset,\emptyset),x\mapsto(\emptyset,\{\{\nu x\}\}),\nu y\mapsto(\emptyset,\emptyset),y\mapsto(\emptyset,\{\{\nu y\}\})]\\
+	\Upsilon &=\{\{\nu x, x\},\{\nu y, y\}\}
+\end{align*}
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
-		\inference[$FUNC$]
-			{
-				\inference[$VAR-L$]{}{\Gamma,x^{p_1}:\{\alpha\};\Upsilon;\Pi,p_1\sqsubseteq p\vdash x^p:(\delta,\emptyset)}\;\;
-				\inference[$CONST$]{}{\Gamma;\Upsilon;\Pi\vdash 5^p:(\emptyset,\emptyset)}
-			}
-			{\Gamma;\Upsilon;\Pi\vdash [[\lambda\; x.x^p]^{p'} \; [5]^{p''}]^{p_3}:(\emptyset,\emptyset)}\\
-			Where $p_1$ is a fresh program point, $\Lambda(x,p)=p_1$, $\delta=\Gamma(x^{p_1})=\{\alpha\}$, $\lambda\; \alpha.\delta'\in\delta$, and $\delta'[\alpha:\emptyset]$
-	\end{tabular}
-	\label{fig:Simple}
+	\input{examples/case.tex}
+	\label{fig:SimpleCase}
 \end{figure}
-\fi
+This example will be used in the two following, and is refered as $caseEx$ with the type:
+$$T=(\{x,y\},\{\{\nu x\}, \{\nu y\}, \{\nu z\}\})$$
+\newpage
+
+\subsection{Example let-case 1}
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\input{examples/letcase1.tex}
+	\label{fig:LetCase1}
+\end{figure}
+
+\subsection{Example let-case 2}
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\input{examples/letcase2.tex}
+	\label{fig:LetCase1}
+\end{figure}
+\end{landscape}
 
 \end{document}

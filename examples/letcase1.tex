@@ -1,0 +1,15 @@
+\begin{tabular}{l}
+	\inference[$let$]
+	{
+		\inference[$Case$]{}
+		{\Gamma;\Upsilon;\Pi\vdash [caseEx]:T}
+		\;\;
+		\inference[$Ref\;read$]
+		{
+			\inference[$Var$]{}{\Gamma;\Upsilon;\Pi\vdash z:T\cup(\{z\},\emptyset)}
+		}
+		{\Gamma,z:T;\Upsilon;\Pi\vdash [!z]:T'}
+	}
+{\Gamma;\Upsilon;\Pi\vdash [\mbox{let}\;z\;(caseEx)\;(!z)]:T'}\\
+Where $T'=(\{x,y,z,\nu x,\nu y,\nu z\},\emptyset)$
+\end{tabular}

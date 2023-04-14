@@ -1,0 +1,15 @@
+\begin{tabular}{l}
+	\inference[$let$]
+	{
+		\inference[$Case$]{}
+		{\Gamma;\Upsilon;\Pi\vdash [caseEx]:T}
+		\;\;
+		\inference[$Ref\;read$]
+		{
+			\inference[$Var$]{}{\Gamma;\Upsilon;\Pi\vdash x:(\{x\},\{\nu x, x\})}
+		}
+		{\Gamma,z:T;\Upsilon;\Pi\vdash [!x]:(\{x,\nu x\},\emptyset)}
+	}
+{\Gamma;\Upsilon;\Pi\vdash [\mbox{let}\;z\;(caseEx)\;(!x)]:(\{x,\nu x\},\emptyset)}\\
+Where $T=(\{x,y\},\{\{\nu x, x\}, \{\nu y, y\}, \{\nu z\}\})$
+\end{tabular}

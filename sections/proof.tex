@@ -322,7 +322,7 @@ To show this, we compare the liveness type to the set of variable occurrences.
 			\end{tabular}
 			\end{figure}
 
-			\todo[inline]{Figure out how to conclude the premise}
+			%\todo[inline]{Figure out how to conclude the premise}
 			Then, from the first premise, if we know that $(w,env)\models(\delta',\kappa')$, then we immediately get $\Gamma;\Upsilon;\Pi\vdash v':(\delta',\kappa')$, $(w',env)\models(\delta',\kappa')$, $(w',env)\models(\Gamma,\Upsilon)$, and $(L,V)\models(\delta',\kappa')$.
 
 			From the induction hypothesis we know that the type of $v$ must be $\Gamma;\Upsilon;\Pi\vdash v:(\emptyset,\kappa)$.
@@ -398,7 +398,7 @@ To show this, we compare the liveness type to the set of variable occurrences.
 
 			The first premise is immediate, so we get $\Gamma;\Upsilon;\Pi\vdash v':(\delta,\kappa)$, $(w'',env)\models(\delta,\kappa)$, $(w'',env)\models(\Gamma,\Upsilon)$, and $(L,V)\models(\delta,\kappa)$.
 
-			\tode[inline]{Need to find out how we get that $(w'',env)\models(\delta',\kappa')$}
+			%\todo[inline]{Need to find out how we get that $(w'',env)\models(\delta',\kappa')$}
 			In the second premise, if we know that $(w'',env)\models(\delta',\kappa')$, then we immediately get that $\Gamma;\Upsilon;\Pi\vdash v'':(\delta',\kappa')$, $(w_3,env)\models(\delta',\kappa')$, $(w_3,env)\models(\Gamma,\Upsilon)$, and $(L',V')\models(\delta',\kappa')$.
 
 			Based on the premises, we get the following immediately: $\Gamma;\Upsilon;\Pi\vdash v:(\delta,\kappa)$, $(w',env)\models(\delta,\kappa)$, and $(L,V)\models(\delta,\kappa)$.
@@ -412,35 +412,4 @@ To show this, we compare the liveness type to the set of variable occurrences.
 		\item[$\lbrack Case \; \epsilon \rbrack$] ss
 	\end{description}
 \end{proof}
-
-\iffalse
-\begin{theorem}{[Test 1]}
-	If $(w,env)\models(\delta,\kappa)$ and $(w,env)\models(\Gamma,\Upsilon)$ holds in
-	\begin{itemize}
-		\item $\Gamma,\Upsilon,\Pi\vdash e^p : (\delta,\kappa)$, and 
-		\item $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w',sto',L,V,p''\right\rangle$.
-	\end{itemize}
-	Then $(w',env)\models(\Gamma,\Upsilon)$, $(w',env)\models(\delta,\kappa)$, $L\subseteq\kappa$, and $V\subseteq\delta$ also holds.
-\end{theorem}
-
-\begin{theorem}{[Test 2]}
-	Suppose $(w,env)\models(\delta,\kappa)$ and $(w,env)\models(\Gamma,\Upsilon)$ agrees in
-	\begin{itemize}
-		\item $\Gamma,\Upsilon,\Pi\vdash e^p : (\delta,\kappa)$, and 
-		\item $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w',sto',L,V,p''\right\rangle$.
-	\end{itemize}
-	for some occurrence $e^p$.
-	Then $(w',env)\models(\Gamma,\Upsilon)$, $(w',env)\models(\delta,\kappa)$, $L\subseteq\kappa$, and $V\subseteq\delta$ still holds after the evaluation of $e^p$.
-\end{theorem}
-
-\begin{theorem}{[Test 3]}
-	Suppose $e^p$ is an occurrence and that
-	\begin{itemize}
-		\item $\Gamma,\Upsilon,\Pi\vdash e^p : (\delta,\kappa)$, and 
-		\item $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w',sto',L,V,p''\right\rangle$
-	\end{itemize}
-	where $(w,env)\models(\delta,\kappa)$ and $(w,env)\models(\Gamma,\Upsilon)$ are in agreement.
-	Then also $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$ are in agreement, and $L\subseteq\kappa$ and $V\subseteq\delta$ holds.
-\end{theorem}
-\fi
 \end{document}

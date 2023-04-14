@@ -1,7 +1,6 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \section{Language}\label{sec:lang}
-\todo[inline]{This section is only notes for now}
 This section introduces the subset of ReScript this paper focuses on.
 The subset is a functional language with bindings, pattern matching, and mutability.
 
@@ -53,7 +52,7 @@ The formation rules is defined as follows, in \cref{fig:coresyntax}:
 	\end{minipage}
 		\setlength\tabcolsep{4pt}
 		\begin{tabular}{>{$}l<{$}>{$}r<{$}>{$}l<{$}}
-			Patterns \; \pi &::= &(s_1\;t_1);\cdots;(s_n\;t_n) \;\;\;\;\; (\mbox{where}\;n\geq 1)\\\\
+			Patterns \; \pi &::= &(s\;t)\mid(s\;t)\pi\\\\
 			Pattern \; s &::= &n \mid b \mid x \mid \{q\} \mid \_ \mid \bold{F} \\
 \end{tabular}
 	\caption{Abstract syntax}
@@ -68,7 +67,6 @@ The matching order is defined by the order in the pattern binding.
 A pattern binding $\pi$ is a finite ordered set, with at least one binding of the form $(s\;t)$.
 The order of the pattern binding is defined by the syntex, such that $(s_i\;t_i)$ is before $s_j\;t_j$ if $i\leq j$.
 The size of a pattern binding $\pi$ is written as $|\pi|$, and defined as $|\pi| = n$.
-\todo[inline]{Section not done, as I am still working on redefining pattern matching to better make sense, basing it currently on the theory behind $\lambda$-calculus with constructors and $\rho$-calculus}
 
 \subsection{Semantic}
 

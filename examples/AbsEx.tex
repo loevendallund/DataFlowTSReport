@@ -1,0 +1,24 @@
+	\begin{tabular}{l}
+		\inference[$APP$]
+		{
+			\inference[$ABS$]
+			{
+				\inference[$APP$]
+				{
+					\inference[$VAR$]{}{\Gamma';\Upsilon;\Pi\vdash x^{p}:\alpha:T'\rightarrow T''}
+					\;\;\;
+					\inference[$VAR$]{}{\Gamma';\Upsilon;\Pi\vdash z^{p'}:(\{z^{p'}\},\emptyset)}
+				}
+				{\Gamma,x:T_1;\Upsilon;\Pi\vdash [x^{p}\;z^{p'}]^{p''}:T''\{\alpha / (\{z^{p'}\},\emptyset)\}}
+			}
+			{\Gamma;\Upsilon;\Pi\vdash [\lambda\; x.([x^{p}\;z^{p'}]^{p''})]^{p_3}:x:T_1\rightarrow T''\{\alpha / (\{z^{p'}\},\emptyset)\}}
+			\;\;
+			\inference[$ABS$]
+			{
+					\inference[$VAR$]{}{\Gamma,y:T;\Upsilon;\Pi\vdash y^{p_3}:T}
+			}
+			{\Gamma';\Upsilon;\Pi\vdash \lambda y.[y^{p_3}]^{p_4})]^{p_5}:y:T\rightarrow T}
+		}
+		{\Gamma;\Upsilon;\Pi\vdash [[\lambda x.[x^{p}\;z^{p'}]^{p''}]^{p_3}\;[\lambda y.y^{p_4}]^{p_5}]^{p_6}:T''\{\alpha / (\{z^{p'}\},\emptyset)\}\{x / T\rightarrow T\}}\\
+		Where $T_1=\alpha:T'\rightarrow T''$
+	\end{tabular}

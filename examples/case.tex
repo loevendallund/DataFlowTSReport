@@ -1,0 +1,29 @@
+\begin{tabular}{l}
+	\inference[$CASE$]
+	{
+		\inference[$Cons$]{}{\Gamma;\Upsilon;\Pi\vdash 1:(\emptyset,\emptyset) }
+		\;\;
+		\inference[$Pattern$]
+		{
+			\inference[$Var$]{} {\Gamma;\Upsilon;\Pi\vdash x:(\{x\},\{\{\nu x\}\})}
+		}
+		{\Gamma;\Upsilon;\Pi\vdash [1\;(x)]:(\{x\},\{\{\nu x\}\}) }
+		&\\
+		\inference[$Pattern$]
+		{
+			\inference[$Var$]{} {\Gamma;\Upsilon;\Pi\vdash y:(\{y\},\{\{\nu y\}\})}
+		}
+		{\Gamma;\Upsilon;\Pi\vdash [2\;(y)]:(\{y\},\{\{\nu y\}\}) }
+		\;\;
+		\inference[$Pattern$]
+		{
+			\inference[$Ref$]
+			{
+				\inference[$Cons$]{}{\Gamma;\Upsilon;\Pi\vdash 10:(\emptyset,\emptyset) }
+			}
+			{\Gamma,\nu z:(\emptyset,\emptyset);\Upsilon,\{\{\nu z\}\};\Pi\vdash [ref\;(10)]:(\emptyset,\{\{\nu z\}\})}
+		}
+		{\Gamma;\Upsilon;\Pi\vdash [3\;(ref(10))]:(\emptyset,\{\{\nu z\}\}) }
+	}
+{\Gamma;\Upsilon;\Pi\vdash [case\;(1)\;\{(1\;(x))\;(2\;(y))\;(3\;(ref\;(1)))\}]:(\{x,y\},\{\{\nu x\}, \{\nu y\}, \{\nu z\}\})}\\
+\end{tabular}

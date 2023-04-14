@@ -86,30 +86,38 @@
 				{env\vdash \left\langle [e_1^{p'}:=e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle (),sto_3,w_3,L,V,p_3 \right\rangle}\\
 			Where $sto_3=sto''[\loc\mapsto v]$ and $w_3=w''[\loc^{p_3}\mapsto(L',V')]$\\[1cm]
 
-		\InfName{Case\;match}\\[0.2cm]
+		\InfName{Case}\\[0.2cm]
 			\inference[]
-				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',L,V,p' \right\rangle &\\
-				env[\sigma] \vdash \left\langle e_1^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v,sto'',w'',L',V',p'' \right\rangle}
-				{env\vdash \left\langle [\mbox{case}\;e^{p'}(s\;e_1^{p''})\;m^{p_3})]^{p_4},sto,w,p \right\rangle \rightarrow \left\langle v,sto'',w'',L\cup L',V\cup V',p_4 \right\rangle}\\
+				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
+				env \vdash \left\langle (v,\pi^{p''}),sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle}
+				{env\vdash \left\langle [\mbox{case}\;e^{p'}\;\pi^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L\cup L',V\cup V'),p_3 \right\rangle}\\
 				Where $match(v)=\sigma$\\[1cm]
 
-		\InfName{Case\;fail}\\[0.2cm]
+		\InfName{match}\\[0.2cm]
 			\inference[]
-				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',L,V,p' \right\rangle &\\
-				env\vdash \left\langle [\mbox{case}\;e^{p'}\;m^{p_3})]^{p_4},sto',w',p' \right\rangle \rightarrow \left\langle v,sto'',w'',L',V',p_3 \right\rangle}
-				{env\vdash \left\langle [\mbox{case}\;e^{p'}(s\;e_1^{p''})\;m^{p_3})]^{p_4},sto,w,p \right\rangle \rightarrow \left\langle v,sto'',w'',L\cup L',V\cup V',p_4 \right\rangle}\\
-			Where $match(v)=F$\\[1cm]
+				{env\sigma \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle}
+				{env\vdash \left\langle [(v,(s\;e^{p'})\pi^{p''})]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}\\
+			Where $match(v,s)=\sigma$\\[1cm]
 
-		\InfName{Case\;\epsilon}\\[0.2cm]
-		\inference[]{}
-			{env\vdash \left\langle [\mbox{case}\;e^{p'}\epsilon]^{p''},sto,w,p \right\rangle \rightarrow \left\langle '(),sto,w,L,V,p'' \right\rangle}\\
+		\InfName{match-\perp}\\[0.2cm]
+			\inference[]
+				{env \vdash \left\langle (v,\pi^{p''}),sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p'' \right\rangle}
+				{env\vdash \left\langle [(v,(s\;e^{p'})\pi^{p''})]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}\\
+			Where $match(v,s)=\perp$\\[1cm]
+
+		\InfName{match-error}\\[0.2cm]
+			\inference[]{}
+				{env\vdash \left\langle [(v,(s\;e^{p'}))]^{p''},sto,w,p \right\rangle \rightarrow \left\langle '(),sto,w,(\emptyset,\emptyset),p'' \right\rangle}\\
+			Where $match(v,s)=\perp$\\
 	\end{tabular}
 	\label{fig:InfDV}
 \end{figure}
 ReScript pattern matching matches the first expression, $e_1$, with each case in the order they are defined in.
-Here, we define the function $match:\Exp \times Pat \rightarrow (\Var \rightharpoonup \Exp)$, where $Pat$ is the set of patterns.
+Here, we define the function $match:Val \times Pat \rightarrow (\Var \rightharpoonup \Exp)$, where $Pat$ is the set of patterns.
 
-The $match(e,p)=\sigma$ function, where $\sigma:\Var \rightharpoonup \Exp$ is a substition.
+Note that the $match$ rules also holds if $\pi$ is empty, i.e., it does not contain more cases.
+
+The $match(v,s)=\sigma$ function, where $\sigma:\Var \rightharpoonup \Exp$ is a substition.
 We defined the function inductively as follows:
 
 \begin{align*}
