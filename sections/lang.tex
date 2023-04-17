@@ -63,7 +63,7 @@ Note that, for functional constant that take two or more arguments, $apply$ shou
 $$apply(apply(PLUS,2),2)=2+2$$
 
 \paragraph{Abstractions}
-$\lambda$-abstractions denotes functions with a parameter $x$ and body $t$.
+$\lambda$-abstractions denotes functions with a parameter $x$ and body $t$, where $x\in\Var$.
 Here, abstractions use juxtaposition of expressions, where abstractions have exactly one argument.
 
 \paragraph{bindings}
@@ -84,8 +84,37 @@ The pattern matching is done by matching on each pattern, until a match is found
 A pattern binding is of the form $(s\;t)$, with at least one pattern binding.
 We also denote $|\pi|$ as the number of pattern bindings.
 
-\subsection{Semantic}
+\subsection{Semantics}
+We will now introduce the big-step semantics extended with the collection of occurrence dependencies.
+The collection of occurrence dependencies is done through the dependency function $w$, defined as:
+$$w:\Var^P\cup\IVar^P\cup\Loc^P\rightharpoonup\Pow(\Loc^P\times\Var^P\cup\IVar^P)$$
+where a lookup in the function would look like $w(x^p)=(L,V)$, where $L=\{\loc^{p_1},\cdots,\loc^{p_n}\}$ and $V=\{x_1^{p'_1},\cdots,x_y^{p'_y}\}$ is the set of location occurrences and variables occurrences, respectively.
 
+With the dependency function defined, we can now present the transition system, which is similarly defined in (previous paper), and are of the form $env\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle$, where $env\in\Env$ and $sto\in\Sto$.
+This should be read as, given the store $sto$, dependency function $w$, and the previous program point $p$, the syntactical occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, the liveness pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
+
+The environment keeps the bindings currently known, such that:
+$$\Env:\Var\cup\IVar\rightharpoonup\Val$$
+
+The store keeps the location bindings known, and is thus defined as:
+$$\Sto:\Loc\rightharpoonup\Val$$
+
+Where $Val$ is similarly defined, as in (previous paper):
+\begin{itemize}
+	\item All constants are values.
+	\item Locations are values.
+	\item Closures, \InfVal{x,e,env} are values.
+	\item Recursive closures, \InfVal{f,x,e,env}, are values.
+	\item Unit values, $()$, are values.
+\end{itemize}
+In other words, we have
+\begin{align*}
+	&\Val=\Con\cup\Loc\cup(\Var\cup\IVar)\times\Exp\times\Val\cup\\
+	&(\Var\cup\IVar)\times(\Var\cup\IVar)\times\Exp\times\Val\cup()
+\end{align*}
+
+Note that, in the semantics we refer to syntactical occurrences, $e^p$, directly instead of terms.
+This is done, as will be obvious later, to directly refer to program points.
 
 
 \end{document}
