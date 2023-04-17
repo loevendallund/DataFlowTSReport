@@ -1,19 +1,22 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \section{Language}\label{sec:lang}
-This section introduces the subset of ReScript this paper focuses on.
-The subset is a functional language with bindings, pattern matching, and mutability.
+In this section, we will now present a functional subset of ReScript, based on the OCaml family.
+The language introduced, contains the typical lambda expressions, bindings, pattern matching, and mutability.
+For the purpose of the type system that will be presented later, we also extends to language with program points, such that each expression has its own unique program point, which we call syntactic occurrences.
 
-We also introduces the notion of labels, as a mean to analyse and distinguish expressions.
-This notion of labels is also applied to semantical elements, that is, variables and locations, to be able to define where in the program the element occured.
+The occurrences is used in the type system to analyse and distinguish between expressions, where there is syntactical occurrences, that is expressions, and semantical occurrences, those are variables and locations.
 
 \subsection{Abstract syntax}
-This section will introduce the abstract syntax, based on (Source to previous paper).
-The syntactical categories is defined similarly to the previous paper, and defined as follows:
-Let $\Var$ denote the syntactic category of variables, let $\Con$ be the syntactic category of constants, let $\Val$ as the syntactic category of values, and $\Exp$ as the syntactic category of expressions. 
-Let $e, \; m \in \Exp$, $c \in \Con$, and $x, \; f \in \Var$.
+In this section we will introduce the abstract syntax, based on (previous paper), with some notable changes.
+We reintroduce the syntactical categories as the previous paper, that is, $\Con$ denotes the category of constants, $\Val$ denotes the category of values, and $\Exp$ denotes the category of expressions.
+Where $e, \; m \in \Exp$ and $c \in \Con$.
 
-The formation rules is defined as follows, in \cref{fig:coresyntax}:
+The syntactic categories for variables is changed, where we now have $\Var$ denotes the category for placeholder variables, that is variables from $\lambda$-abstractions, and $\IVar$ denotes the category for imperative variables, variables from binding expressions.
+The syntactic category $\Loc$ denotes the category for locations, and $\Point$ that denotes the category for program point labels.
+We then have $x,\;f\in(\Var\cup\IVar)$, $\loc\in\Loc$, and $p,\;p',\;p'',p_1,\cdots,p_n\in\Point$.
+
+The formation rules is then defined, in \cref{fig:coresyntax}:
 
 \begin{figure}[H]
 	\begin{minipage}[t]{0.45\textwidth}
@@ -27,11 +30,9 @@ The formation rules is defined as follows, in \cref{fig:coresyntax}:
 			&| &\mbox{case} \; t_1 \; \{\pi\} \\
 			&| &\mbox{ref} \; t \mid t_1 := t_2 \mid \; !t\\\\
 
-			Record\; r &::= &(l=t) r \\
-			&| &(\mbox{mutable} \; l=t) r \\
-			&| &\varepsilon \\\\
+			Patterns \; \pi &::= &(s\;t)\mid(s\;t)\;\pi\\\\
 
-			Field \; l &::= &n \mid x \\\\
+			Pattern \; s &::= &n \mid b \mid x \mid \_ \\
 		\end{tabular}
 	\end{minipage}
 	\begin{minipage}[t]{0.45\textwidth}
@@ -46,27 +47,42 @@ The formation rules is defined as follows, in \cref{fig:coresyntax}:
 			&| &LESS\\
 			&| &GREATER\\
 			&| &NOT \\ \\
-
-			R\_Pattern \; q &::= &l, \; q \mid \varepsilon \\
 		\end{tabular}
 	\end{minipage}
-		\setlength\tabcolsep{4pt}
-		\begin{tabular}{>{$}l<{$}>{$}r<{$}>{$}l<{$}}
-			Patterns \; \pi &::= &(s\;t)\mid(s\;t)\pi\\\\
-			Pattern \; s &::= &n \mid b \mid x \mid \{q\} \mid \_ \mid \bold{F} \\
-\end{tabular}
 	\caption{Abstract syntax}
 	\label{fig:coresyntax}
 \end{figure}
 
-\subsubsection{Pattern matching}
-The pattern matching construct matches a term $t$ with an ordered set of pattern bindings.
-The pattern matching is done by matching on each pattern, until a match is found.
-The matching order is defined by the order in the pattern binding.
+Most of these formation rules are similar to (previous paper) there are, however, some changes made in regards to how pattern matching is presented.
+Some of the notable constructs is further explained below.
 
-A pattern binding $\pi$ is a finite ordered set, with at least one binding of the form $(s\;t)$.
-The order of the pattern binding is defined by the syntex, such that $(s_i\;t_i)$ is before $s_j\;t_j$ if $i\leq j$.
-The size of a pattern binding $\pi$ is written as $|\pi|$, and defined as $|\pi| = n$.
+\paragraph{Constants}
+The constants is either natural numbers $n$, boolean values $b$, or functional constants.
+For each functional constant we introduce a function $apply$, that for each constant returns the result of applying a constant to its arguments.
+Note that, for functional constant that take two or more arguments, $apply$ should be used twice, such that, as an example for $PLUS$ we have:
+$$apply(apply(PLUS,2),2)=2+2$$
+
+\paragraph{Abstractions}
+$\lambda$-abstractions denotes functions with a parameter $x$ and body $t$.
+Here, abstractions use juxtaposition of expressions, where abstractions have exactly one argument.
+
+\paragraph{bindings}
+Bindings are immutable and is done through local declaration, which can be recursive or non-recursive by the use of the $rec$ keyword.
+A binding is done on placeholder variables, such that $x,\;f\in\IVar$.
+Here, if $\mbox{let}\;x\;t_1\;t_2$ has an occurrence of $x$ in $t_1$ it is not treated as a recursive call to $x$ and $x$ should thus be specified elsewhere.
+If we add the $rec$ keyword, then if $x$ appears in $t_1$, it should thus be treated as a recursive call to $x$.
+
+\paragraph{Mutability}
+The mutability is handled as references, that is, for the constructs $\mbox{ref}\;t$, $t_1\;:=\;t_2$, and $!t$, for declaring a new location, writing to a location, or reading from a location, respectively.
+These constructs wraps the mutability to a semantical construct for locations, which are handled on runtime.
+Note that, even though bindings are immutable, a variable can still be bound to a location.
+This does not make the variable mutable, as it will then be bound to this location, and cannot be bound to another value or location.
+
+\paragraph{Pattern matching}
+The pattern matching construct matches a term $t$ with the pattern bindings in $\pi$.
+The pattern matching is done by matching on each pattern, until a match is found, in the order given by the syntax.
+A pattern binding is of the form $(s\;t)$, with at least one pattern binding.
+We also denote $|\pi|$ as the number of pattern bindings.
 
 \subsection{Semantic}
 
