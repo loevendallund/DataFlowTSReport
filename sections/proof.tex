@@ -33,11 +33,11 @@ In this section we present the soundness of the liveness system with respect to 
 The liveness system is sound, if the liveness type contains at least all live occurrences at a given program point.
 
 The liveness system depends on three global bases, one for variable occurrences, for abstract locations, and for an approximation of program points.
-To show that these bases are good, we need to define when they agree with the semantic, i.e., to show that the bases overapproximate the dependency function, and that the approximated order of program points is a good approximation.
+To show that these bases are good, we need to define when they agree with the semantics, i.e., to show that the bases overapproximate the dependency function, and that the approximated order of program points is a good approximation.
 \bigskip
 
-The tracking of dependencies is handled differently between the liveness system and the semantic.
-In the collection semantic, the dependencies of variable and location occurrences are tracked using the $w$ function.
+The tracking of dependencies is handled differently between the liveness system and the semantics.
+In the collection semantics, the dependencies of variable and location occurrences are tracked using the $w$ function.
 The liveness system need to keep track of dependencies differently, as the notion of locations are purely semantical, throught the global basis for variable occurrences.
 To handle locations, the notion of abstract locations is introduced, which is stored in the equivalence basis.
 The agreement for occurrence dependencies between the collection semantic and liveness system are as follows:
@@ -113,7 +113,7 @@ For the liveness type, $(\delta,\kappa)$, and $w$ to be in agreement, it follows
 
 \bigskip
 With the agreements defined, we can move on to the soundness for the livenss system.
-The liveness system is sound in respect to the collection semantic, that is, the liveness type is an overapproximation of the occurrences in the collection semantic.
+The liveness system is sound in respect to the collection semantics, that is, the liveness type is an overapproximation of the occurrences in the collection semantics.
 
 \begin{definition}{[Extensions of the dependency function]}
 	Let $w$ and $w'$ be two dependency functions.
@@ -124,7 +124,7 @@ The liveness system is sound in respect to the collection semantic, that is, the
 
 For the liveness system to be sound, it is important to make sure that the three basis agrees with the collection system.
 This agreement is done in the following maner, given the a sound agreement before an evaluation, we can show that the agreement is still sound after an evaluation.
-Other than the agreement for the three basis, the soundness type must also agree with the semantic, this is done in a similar way.
+Other than the agreement for the three basis, the soundness type must also agree with the semantics, this is done in a similar way.
 
 \begin{lemma}{[Substitution]}
 	Suppose that $e^p$ is an occurrence, that 
@@ -205,8 +205,8 @@ To show this, we compare the liveness type to the set of variable occurrences.
 			\end{itemize}
 			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$.
 
-			To conclude the $[let]$ rule, we need to analyse the premises in the collection semantic and type system.
-			In the collection semantic, we have the following:
+			To conclude the $[let]$ rule, we need to analyse the premises in the collection semantics and type system.
+			In the collection semantics, we have the following:
 			\begin{figure}[H]
 			\setlength\tabcolsep{8pt}
 			\begin{tabular}{l}

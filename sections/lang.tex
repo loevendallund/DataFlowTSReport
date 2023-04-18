@@ -94,12 +94,13 @@ With the dependency function defined, we can now present the transition system, 
 This should be read as, given the store $sto$, dependency function $w$, and the previous program point $p$, the syntactical occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, the liveness pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
 
 The environment keeps the bindings currently known, such that:
-$$\Env:\Var\cup\IVar\rightharpoonup\Val$$
+$$\Env=\Var\cup\IVar\rightharpoonup\Val$$
 
-The store keeps the location bindings known, and is thus defined as:
-$$\Sto:\Loc\rightharpoonup\Val$$
+The store keeps the location bindings known and a placeholder $next$ that represent the next free location.
 
-Where $Val$ is similarly defined, as in (previous paper):
+$$\Sto=\Loc\cup\{next\}\rightharpoonup\Val$$
+
+Where $\Val$ is similarly defined, as in (previous paper):
 \begin{itemize}
 	\item All constants are values.
 	\item Locations are values.
@@ -113,8 +114,72 @@ In other words, we have
 	&(\Var\cup\IVar)\times(\Var\cup\IVar)\times\Exp\times\Val\cup()
 \end{align*}
 
+We, similarly to (prev paper), assume the existence of a function $new:\Loc\rightharpoonup\Loc$, which takes a location and finds the next location.
+This function is only used on the $next$ location placeholder to find the next free location, i.e. a location that is not already bound in $sto$.
+
 Note that, in the semantics we refer to syntactical occurrences, $e^p$, directly instead of terms.
 This is done, as will be obvious later, to directly refer to program points.
+\bigskip
+
+Only a couple of interesting transition rules will be shown here, the rest can be found in \cref{App:ColSem}.
+The first transition rule, $\runa{Con}$, is the simplest rule that shows part of the transition system.
+Here, as a constant is directly evaluated there is no side effects, the pair $(L,V)$ is empty, and the program point reached after evaluating $c^p$ is $p$.
+
+\todo[inline]{$\runa{Var}$ description needs a rewrite}
+In the second rule, $\runa{Var}$, the environment and dependency function comes into play, as the value and dependencies of the variable needs to be looked up.
+The value for the variable is easy, as it is directly looked up in the environment.
+To get the dependencies of a variable, the closest occurrence needs to be found first.
+This is done through the $inf_p$ function, which finds the closest occurrence for the same variable in $w$, and returns the program point.
+With the given program point, the dependencies for this variable, at the given program point, can be looked up in $w$.
+Since the variable occurrence, $x^{p'}$, is used, it is added to the set of variable occurrences.
+
+The third rule, $\runa{let}$, is for when a local declaration is reached, here we add the information from the local declaration in both the environment and dependency function.
+The dependency function is updated with the liveness pair from evaluating the local declaration for the variable occurrence $x^{p'}$, where the program point is the point reached after evaluating the local declaration.
+
+The next two rules shown, $\runa{Loc new}$ and $\runa{Loc write}$, are for handling creating a new reference and writing to a reference.
+The $\runa{Loc new}$ rule evaluated the body to a value $v$ and returns a location.
+This location, $\loc$, is retrieved from the placeholder location $next$ in $sto$ and $\loc$ is bound to $v$ in $sto$.
+The dependency function is also updated with the liveness information from evaluating the body, and is bound to the occurrence for $\loc$ at the program point $p''$.
+
+For $\runa{Loc write}$, first the two terms are evaluated, where first term needs to be a location.
+The location $\loc$ is bound to the value from evaluating the second term, in $sto$ and the $w$ is updated with the liveness pair from the second term, to the occurrence for $\loc$ at point $p_3$.
+Since the value of a write expression, in ReScript, does not return a value, the value returned here is the unit value $()$.
 
 
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\InfName{Const}\\[0.2cm]
+			\inference[]{}
+				{env\vdash \left\langle c^{p'},sto,w,p \right\rangle \rightarrow \left\langle c,sto,w,(\emptyset,\emptyset),p' \right\rangle}\\[1cm]
+			
+		\InfName{Var}\\[0.2cm]
+			\inference[]{}
+				{env\vdash \left\langle x^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto,w,(L,V\cup\{x^{p'}\}),p' \right\rangle}\\
+				Where $env(x)=v$, $p''=\inf_{p} (x^{p'},w)$, and $w(x^{p''})=(L,V)$\\[1cm]
+
+		\InfName{Let}\\[0.2cm]
+			\inference[]
+			{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
+			env[x\mapsto v]\vdash \left\langle e_2^{p''},sto',w'',p' \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p'' \right\rangle}
+			{env\vdash \left\langle [\mbox{let}\;x\;e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p_3 \right\rangle}\\
+		Where $w''=w'[x^{p'}\mapsto(L,V)]$\\[1cm]
+
+		\InfName{Loc\;new}\\[0.2cm]
+			\inference[]
+				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle}
+				{env\vdash \left\langle [\mbox{ref}\;e^{p'}]^{p''},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto''[\loc\mapsto v],w'',(L,V),p'' \right\rangle}\\
+			Where $\loc = next$, $sto''=sto'[next\mapsto new\;\loc]$ and $w''=w'[\loc^{p''}\mapsto (L,V)]$\\[1cm]
+
+
+		\InfName{Loc\;write}\\[0.2cm]
+			\inference[]
+				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto',w',(L,V),p' \right\rangle &\\
+				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v,sto'',w'',(L',V'),p'' \right\rangle}
+				{env\vdash \left\langle [e_1^{p'}:=e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle (),sto_3,w_3,(L,V),p_3 \right\rangle}\\
+				Where $sto_3=sto''[\loc\mapsto v]$ and $w_3=w''[\loc^{p_3}\mapsto(L',V')]$\\[1cm]
+	\end{tabular}
+	\caption{Collection semantic}
+	\label{fig:ColSem}
+\end{figure}
 \end{document}
