@@ -1,32 +1,32 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
-\section{type system}
-This section will introduce the liveness type system, for the language presented in \cref{sec:lang}.
-This type system will focus on the liveness property for variable occurrences, to describe which and where variables are used.
+\section{Occurrence dependency system}
+This section will introduce the occurrence dependency system for the language presented in \cref{sec:lang}, to describe what occurrences are used to evaluate a term.
+The system is based on the notion of type systems, and is therefore used to classifying the syntactic occurrences of used.
+For this reason, some notations from the semantics needs to be represented differently, in particular locations as they are purely semantical.
+We therefore introduce a new syntactic category of variables, $\AVar$, which we call internal variables and is ranged over by $\nu x,\;\nu y$.
+We further denote the set of all variables as $Id=\Var\cup\IVar\cup\AVar$.
 
-\subsubsection{Variables}
-The language presented uses variables in different areas, where we have classic placeholder variables from the classical $\lambda$-calculus, in the form of abstractions, and also imperative variables.
-The imperative variables are in the form of bindings, which are immutable by default, but can be bound to a location by referencing.
+\subsection{Types}
+Similar to type systems, we denote the syntactical category for types as \cat{Types} and is ranged over by $T$
+A subset of of \cat{Types} is the set of base types, ranged over by the pair $(\delta,\kappa)$, where $\delta\subseteq Id^P$ is a set of variable occurrences and $\kappa\subseteq\Pow{\Pow{Id}}$.
+Note that $\kappa$ will always contain at least one internal variable.
 
-In the type system we differentiate between these variable types, by letting $\Var$, $\IVar$, and $\AVar$ be the categories for placeholder variables, imperative variables, and internal variables, respectively.
-Note that, since the type system only knows about the syntax, and locations are purely semantical which does not need to be bound to a variable, we introduce the notation of internal variables.
-These variables are denoted as $\nu x\in\AVar$ to differentiate from other variables.
-We further denote $Id=\Var\cup\IVar\cup\AVar$ as the category of identifiers.
+The composite type for abstractions, denoted as $T_1\rightarrow T_2$, represents a function that takes an input type $T_1$ and returns a value of type $T_2$.
+The type of abstractions is denoted as $T_1\rightarrow T_2$, that 
 
-\subsubsection{Types}
-The syntactic category of types $TYPES$ is ranged over by $T$ and is given by the following formation rules:
-
+The formation rules for types is thus given as:
 $$T::=(\delta,\kappa)\mid T_1 \rightarrow T_2$$
 
-As can be seen by the formation rules, there are two ways of describing a type, a base type and a function type.
-The base type is a pair containing the set of variable occurrences $\delta$, and a set of variables $\kappa$.
-Here, $\delta$ is used to describe a set of live variable occurrences and $\kappa$ is a set of abstract locations.
-The second type is the function type $T_1\rightarrow T_2$ that represents a function where the input has the type $T_1$ and returns a value of type $T_2$.
+\subsection{Bases}
+In the semantics, presented in \cref{sec:sem}, we keep track of dependencies through the dependency function $w$, and value bindings through the environment and store.
 
-\subsubsection{Bases}
-As also described earlier, this type system keeps track of the abstract liveness type, that keeps track of live variable occurrences.
-In the type system we uses the base $\Gamma$ to track the type of identifier occurrences, $\Upsilon$ to track variables that share an abstract location, and $\Pi$ as an approximation of program points.
+The occurrence dependency system similarly needs to keep track of dependencies.
+It is also, equally important, that the knowledge of which variables are bound to which internal variables.
+We therefore introduce the notion of a type dependency base $\Gamma$, that keeps track of the type of variables, and an internal variable dependency base $\Upsilon$, that keeps track of which variables are bound to which internal variables. 
+As the language contains the notion of pattern matching, the type can be non-deterministic as there can be multiple branches, therefore variables can be bound to multiple internal variables.
 
+The type dependency base can thus be defined as:
 \begin{definition}{[Type base $\Gamma$]}
 	The type base $\Gamma$ is a partial function $\Gamma:Id^P\rightharpoonup TYPES$
 \end{definition}
@@ -46,6 +46,7 @@ A lookup in the type base $\Gamma$ is of the form $\Gamma(x^p)=T$ for placeholde
 The extension of $\Gamma$ for internal variables can be similarly defined.
 \bigskip
 
+\todo[inline]{Rewrite the rest from this point}
 \begin{definition}{[Abstract location base $\Upsilon$]}
 	The base for abstract locations $\Upsilon$ is a set of sets, $\Upsilon=\Pow((\IVar\cup\AVar))$
 \end{definition}

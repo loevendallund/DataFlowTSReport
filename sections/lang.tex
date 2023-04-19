@@ -84,7 +84,7 @@ The pattern matching is done by matching on each pattern, until a match is found
 A pattern binding is of the form $(s\;t)$, with at least one pattern binding.
 We also denote $|\pi|$ as the number of pattern bindings.
 
-\subsection{Semantics}
+\subsection{Semantics}\label{sec:sem}
 We will now introduce the big-step semantics extended with the collection of occurrence dependencies.
 The collection of occurrence dependencies is done through the dependency function $w$, defined as:
 $$w:\Var^P\cup\IVar^P\cup\Loc^P\rightharpoonup\Pow(\Loc^P\times\Var^P\cup\IVar^P)$$
