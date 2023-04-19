@@ -23,8 +23,8 @@ In the semantics, presented in \cref{sec:sem}, we keep track of dependencies thr
 
 The occurrence dependency system similarly needs to keep track of dependencies.
 It is also, equally important, that the knowledge of which variables are bound to which internal variables.
-We therefore introduce the notion of a type dependency base $\Gamma$, that keeps track of the type of variables, and an internal variable dependency base $\Upsilon$, that keeps track of which variables are bound to which internal variables. 
-As the language contains the notion of pattern matching, the type can be non-deterministic as there can be multiple branches, therefore variables can be bound to multiple internal variables.
+We therefore introduce the notion of a type dependency base $\Gamma$, that keeps track of the type of variables, and a reference family $\Upsilon$ that keeps track of which variables shares internal variables.
+%As the language contains the notion of pattern matching, the type can be non-deterministic as there can be multiple branches, therefore variables can be bound to multiple internal variables.
 
 The type dependency base can thus be defined as:
 \begin{definition}{[Type base $\Gamma$]}
@@ -46,16 +46,20 @@ A lookup in the type base $\Gamma$ is of the form $\Gamma(x^p)=T$ for placeholde
 The extension of $\Gamma$ for internal variables can be similarly defined.
 \bigskip
 
-\todo[inline]{Rewrite the rest from this point}
-\begin{definition}{[Abstract location base $\Upsilon$]}
-	The base for abstract locations $\Upsilon$ is a set of sets, $\Upsilon=\Pow((\IVar\cup\AVar))$
+\begin{definition}{[Reference family $\Upsilon$]}
+	The  $\Upsilon$ is a family of sets, $\Upsilon=\Pow((\IVar\cup\AVar))$, where each partition is disjunct.
 \end{definition}
-We denote $\Upsilon(x)=\kappa$ as a lookup of all sets in $\Upsilon$ containing the variable $x$.
+We denote $\Upsilon(x)=\kappa$ as a partition $B\in\Upsilon$ where $x\in B$.
+%We denote $\Upsilon(x)=\kappa$ as a lookup of all sets in $\Upsilon$ containing the variable $x$.
 
 \begin{definition}{[Extending $\Upsilon$]}
 	We write $\Upsilon,\kappa$ for $\Upsilon'$ defined by:
 	\begin{align*}
-		\Upsilon'(y)=\{[\tilde{x}]\in\Upsilon \mid y\in[\tilde{x}]\} \cup \{[\tilde{z}]\in\kappa \mid y\in[\tilde{z}]\}
+		\Upsilon'(y)=
+		\left\{\begin{matrix}
+ 			\Upsilon(y) & if y\not\in\kappa \\ 
+ 			\kappa & if y\in\kappa 
+		\end{matrix}\right.
 	\end{align*}
 \end{definition}
 \bigskip
@@ -66,16 +70,18 @@ The order of program points is also transitive, i.e., if $p\sqsubseteq p'\in\Pi$
 
 \subsection{Judgement}
 The type judgement is defined as:
-$$\Gamma,\Upsilon,\Pi\vdash t: T$$
+$$\Gamma,\Upsilon,\Pi\vdash e^p: T$$
+And should be read as, the occurrence $e^p$ has type $T$ given the dependency bindings $\Gamma$, the family of variables $\Upsilon$, and the approximated order of program points $\Pi$.
 
 In the $VAR$ rule we make use of the union between a type and a base type, which we define as follows:
 
 \begin{definition}{[Union of types]}
 	Let $T$ be an arbitrary type and $(\delta,\kappa)$ be a base type, then the unification of these two types is as follows:
 	\begin{equation*}
-		T\cup(\delta,\kappa)=\left\{\begin{matrix}
-			\mbox{If } \; T=(\delta',\kappa') & \mbox{then} \; (\delta'\cup\delta,\kappa'\cup\kappa)\\
-			\mbox{else if } \; T=x:T_1\rightarrow T_2 & \mbox{then} \; x:T_1\rightarrow (T_2\cup(\delta,\kappa))
+		T_1\cup T_2=
+		\left\{\begin{matrix}
+			\mbox{If } \; T_1=(\delta,\kappa) \;\mbox{and}\; T_2=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
+			\mbox{else if } \; T_1=T_1'\rightarrow T_1''\;\mbox{and}\;T_2=T_2'\rightarrow T_2'' & \mbox{then} \; T_1'\cup T_2'\rightarrow (T_1''\cup T_2'')
 		\end{matrix}\right.
 	\end{equation*}
 \end{definition}
