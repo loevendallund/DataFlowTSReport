@@ -162,26 +162,9 @@ To show this, we compare the liveness type to the set of variable occurrences.
 	First, we consider the base case, where the hight $n=0$.
 	Here, there are two rules $[Const]$, $[Var]$:
 	\begin{description}
-		%Const rule
-		\item[$\lbrack Const \rbrack$] By the induction hypothesis for $[Const]$, we know that:
-			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash c^p :(\emptyset,\emptyset)$,
-				\item $env\vdash\left\langle c^p,w,sto,p'\right\rangle\rightarrow\left\langle c,w,sto,(\emptyset,\emptyset),p\right\rangle$
-			\end{itemize}
-			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$.
-
-			By the induction hypothesis we can immediately conclude that $\Gamma,\Upsilon,\Pi\vdash c:(\emptyset,\emptyset)$, $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$, where $w'=w$, and $(\emptyset,\emptyset)\models(\emptyset,\emptyset)$
-
+		\input{sections/TProof/cons.tex}
+		\input{sections/TProof/var.tex}
 		%Var-r rule
-		\item[$\lbrack Var \rbrack$] By the induction hypothesis for $[Var]$, we know that:
-			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\cup(\{x^p\},\emptyset)$,
-				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
-			\end{itemize}
-			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T$.
-
-			By the induction hypothesis we can immediately conclude that $\Gamma,\Upsilon,\Pi\vdash v:T$ $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models T$, where $w'=w$, and $(L,V\cup\{x^p\})\models T$
-
 \iffalse
 		%Var-l rule
 		\item[$\lbrack Var-l \rbrack$] By the induction hypothesis for $[Var-l]$, we know that:

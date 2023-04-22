@@ -23,7 +23,7 @@ In the semantics, presented in \cref{sec:sem}, we keep track of dependencies thr
 
 The occurrence dependency system similarly needs to keep track of dependencies.
 It is also, equally important, that the knowledge of which variables are bound to which internal variables.
-We therefore introduce the notion of a type dependency base $\Gamma$, that keeps track of the type of variables, and a reference family $\Upsilon$ that keeps track of which variables shares internal variables.
+We therefore introduce the notion of a type dependency base $\Gamma$, that keeps track of the type of variables.
 %As the language contains the notion of pattern matching, the type can be non-deterministic as there can be multiple branches, therefore variables can be bound to multiple internal variables.
 
 The type dependency base can thus be defined as:
@@ -46,42 +46,49 @@ A lookup in the type base $\Gamma$ is of the form $\Gamma(x^p)=T$ for placeholde
 The extension of $\Gamma$ for internal variables can be similarly defined.
 \bigskip
 
-\begin{definition}{[Reference family $\Upsilon$]}
-	The  $\Upsilon$ is a family of sets, $\Upsilon=\Pow((\IVar\cup\AVar))$, where each partition is disjunct.
-\end{definition}
-We denote $\Upsilon(x)=\kappa$ as a partition $B\in\Upsilon$ where $x\in B$.
-%We denote $\Upsilon(x)=\kappa$ as a lookup of all sets in $\Upsilon$ containing the variable $x$.
-
-\begin{definition}{[Extending $\Upsilon$]}
-	We write $\Upsilon,\kappa$ for $\Upsilon'$ defined by:
-	\begin{align*}
-		\Upsilon'(y)=
-		\left\{\begin{matrix}
- 			\Upsilon(y) & if y\not\in\kappa \\ 
- 			\kappa & if y\in\kappa 
-		\end{matrix}\right.
-	\end{align*}
-\end{definition}
-\bigskip
-
 The last base, $\Pi$, is the approximated order of program points, where we denote $p\sqsubseteq p'\in\Pi$ if the program point $p$ is an earlier or the same program point as $p'$.
 The order of program points is also transitive, i.e., if $p\sqsubseteq p'\in\Pi$ and $p'\sqsubseteq p''\in\Pi$ then $p\sqsubseteq p''\in\Pi$.
 
 
 \subsection{Judgement}
 The type judgement is defined as:
-$$\Gamma,\Upsilon,\Pi\vdash e^p: T$$
-And should be read as, the occurrence $e^p$ has type $T$ given the dependency bindings $\Gamma$, the family of variables $\Upsilon$, and the approximated order of program points $\Pi$.
+$$\Gamma;\Pi\vdash e^p: T$$
+And should be read as, the occurrence $e^p$ has type $T$ given the dependency bindings $\Gamma$ and the approximated order of program points $\Pi$.
 
-In the $VAR$ rule we make use of the union between a type and a base type, which we define as follows:
+In the type system we make use of type unions, either the union of two arbitrary types, or a type with the base type.
+The unification of two arbritary types is used in the \runa{Case} rule, by unifying each branch.
+Note that, the two types must have the same structure, i.e., the same number of abstraction types (if any).
+As an example, if we have:
+$$(\delta_1,\kappa_1)\rightarrow(\delta_2,\kappa_2)\cup(\delta_1',\kappa_1')\rightarrow(\delta_2',\kappa_2')$$
+Then, by unification, we get:
+$$(\delta_1\cup\delta_1',\kappa_1\cup\kappa_1')\rightarrow(\delta_2\cup\delta_2',\kappa_2\cup\kappa_2')$$
 
-\begin{definition}{[Union of types]}
-	Let $T$ be an arbitrary type and $(\delta,\kappa)$ be a base type, then the unification of these two types is as follows:
+\begin{definition}{[Type union]}
+	Let $T_1$ and $T_2$ be two types, we say that an union, $\cup$, of types if:
 	\begin{equation*}
 		T_1\cup T_2=
 		\left\{\begin{matrix}
 			\mbox{If } \; T_1=(\delta,\kappa) \;\mbox{and}\; T_2=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
 			\mbox{else if } \; T_1=T_1'\rightarrow T_1''\;\mbox{and}\;T_2=T_2'\rightarrow T_2'' & \mbox{then} \; T_1'\cup T_2'\rightarrow (T_1''\cup T_2'')
+		\end{matrix}\right.
+	\end{equation*}
+\end{definition}
+
+The unification of a type and a base type is used when in the \runa{Var}, \runa{Case}, and \runa{Ref-read} rules.
+This unification always makes sure to unify the base type to the end of a type, i.e., unifying onto an abstraction type, then the base type is unifyed onto the result of the abstraction.
+As an example, if we have 
+$$(\delta_1,\kappa_1)\rightarrow(\delta_2,\kappa_2)\rightarrow(\delta',\kappa')\sqcup(\delta,\kappa)$$
+this will result in the following type:
+$$(\delta_1,\kappa_1)\rightarrow(\delta_2,\kappa_2)\rightarrow(\delta'\cup\delta,\kappa'\cup\kappa)$$
+The reason here is if, from a lookup in the var rule we get an abstraction type and later reach an application rule, then the variable occurrence must be part of the resulting type.
+
+\begin{definition}{[Base type union]}
+	Let $T$ be an arbitrary type and $(\delta,\kappa)$ be a base type, then the unification of these types is as follows:
+	\begin{equation*}
+		T\sqcup (\delta,\kappa)=
+		\left\{\begin{matrix}
+			\mbox{If } \; T=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
+			\mbox{else if } \; T=T_1\rightarrow T_2 & \mbox{then} \; T_2\sqcup (\delta,\kappa)
 		\end{matrix}\right.
 	\end{equation*}
 \end{definition}

@@ -87,7 +87,7 @@ We also denote $|\pi|$ as the number of pattern bindings.
 \subsection{Semantics}\label{sec:sem}
 We will now introduce the big-step semantics extended with the collection of occurrence dependencies.
 The collection of occurrence dependencies is done through the dependency function $w$, defined as:
-$$w:\Var^P\cup\IVar^P\cup\Loc^P\rightharpoonup\Pow(\Loc^P\times\Var^P\cup\IVar^P)$$
+$$w:\Var^P\cup\IVar^P\cup\Loc^P\rightharpoonup\Pow{\Loc^P\times\Var^P\cup\IVar^P}$$
 where a lookup in the function would look like $w(x^p)=(L,V)$, where $L=\{\loc^{p_1},\cdots,\loc^{p_n}\}$ and $V=\{x_1^{p'_1},\cdots,x_y^{p'_y}\}$ is the set of location occurrences and variables occurrences, respectively.
 
 With the dependency function defined, we can now present the transition system, which is similarly defined in (previous paper), and are of the form $env\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle$, where $env\in\Env$ and $sto\in\Sto$.

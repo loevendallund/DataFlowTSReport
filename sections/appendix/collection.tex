@@ -99,7 +99,7 @@
 				{env\vdash \left\langle [(v,(s\;e^{p'})\pi^{p''})]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}\\
 			Where $match(v,s)=\sigma$\\[1cm]
 
-		\InfName{match-\perp}\\[0.2cm]
+		\InfName{match-}\\[0.2cm]
 			\inference[]
 				{env \vdash \left\langle (v,\pi^{p''}),sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p'' \right\rangle}
 				{env\vdash \left\langle [(v,(s\;e^{p'})\pi^{p''})]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}\\
@@ -144,64 +144,4 @@ $\sigma_i=match(\{l_i=e_i\}^n_{i \in I},\{l_i\}^n_{i \in I})$
 \paragraph{wildcard and fail}
 The last two patterns to match are the wildcard and fail cases.
 The wildcard accepts any input $e$ and gives an emtpy sybstitution, the fail case just return a false boolean value, since it were an unsuccessful match.
-
-%The two first $match$ rules, for numbers and booleans, just matches the values.
-%The third and fourth rules instantias the pattern variables, where either a pattern kappa or variable is bound to the expression's value (e is bound to the variable, and value is bound to the kappa variable).
-%Matching on records, matches each record field and binds the label with expression from the first argument.
-%The wildcard matching returns an empty substition, denoted by $\epsilon$, and $fail$ denotes if a pattern match failed, in the case first argument does not match a given pattern.
-
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
-		\InfName{Record\;new}\\[0.2cm]
-			\inference[]
-				{env\vdash \left\langle r^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',L,V,p'' \right\rangle}
-				{env\vdash \left\langle [\{r^{p'}\}]^{p''},sto,w',p \right\rangle \rightarrow \left\langle v',sto',w',\emptyset,\emptyset,p'' \right\rangle}\\[1cm]
-
-		\InfName{Record\;1}\\[0.2cm]
-			\inference[]
-				{env\vdash \left\langle r^{p''},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',L,V,p'' \right\rangle &\\
-				env\vdash \left\langle (l=e^{p'}),sto',w',p'' \right\rangle \rightarrow \left\langle v',sto'',w'',L',V',p' \right\rangle}
-				{env\vdash \left\langle [(l=e^{p'})\;r^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto'',w'',L\cup L',V\cup V',p_3 \right\rangle}\\
-				Where $v=\left\langle env'\right\rangle$ and $v''=\left\langle env'[l\mapsto v']\right\rangle$\\[1cm]
-
-		\InfName{Record\;2}\\[0.2cm]
-			\inference[]
-				{env\vdash \left\langle r^{p''},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',L,V,p'' \right\rangle &\\
-				env\vdash \left\langle (\mbox{mut}\;l=e^{p'}),sto',w',p'' \right\rangle \rightarrow \left\langle \loc,sto'',w'',L',V',p' \right\rangle}
-				{env\vdash \left\langle [(\mbox{mut}\;l=e^{p'})\;r^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',L\cup L',V\cup V',p_3 \right\rangle}\\
-				Where $v=\left\langle env'\right\rangle$ and $v'=\left\langle env'[l\mapsto \loc]\right\rangle$\\[1cm]
-
-		\InfName{Record\;\epsilon}\\[0.2cm]
-			\inference[]{}
-				{env\vdash \left\langle \epsilon^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto,w,\emptyset,\emptyset,p' \right\rangle}\\
-				Where $v=\left\langle env_\epsilon\right\rangle$\\[1cm]
-	\end{tabular}
-	\label{fig:InfDV}
-\end{figure}
-
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
-		\InfName{Record\;read\;1}\\[0.2cm]
-			\inference[]
-				{env\vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',L,V,p' \right\rangle}
-				{env\vdash \left\langle [e^{p'}.l]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v',sto',w',L,V,p'' \right\rangle}\\
-				Where $v=\left\langle env'\right\rangle$, $env'(l)=v'$, and $v'\neq\loc$\\[1cm]
-
-		\InfName{Record\;read\;2}\\[0.2cm]
-			\inference[]
-				{env\vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',L,V,p' \right\rangle}
-				{env\vdash \left\langle [e^{p'}.l]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v'',sto',w',L,V,p'' \right\rangle}\\
-				Where $v=\left\langle env'\right\rangle$, $env'(l)=v'$, $v'=\loc$, and $sto'(\loc)=v''$\\[1cm]
-
-		\InfName{Record\;write}\\[0.2cm]
-			\inference[]
-				{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',L,V,p' \right\rangle &\\
-				env\vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',L',V',p'' \right\rangle}
-				{env\vdash \left\langle [e_1^{p'}.l:=e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle '(),sto'',w'',L\cup L',V\cup V',p_3 \right\rangle}\\
-				Where $v=\left\langle env'\right\rangle$, $env'(l)=\loc$, and $v''=\left\langle env'[\loc\mapsto v']\right\rangle$\\
-	\end{tabular}
-	\label{fig:InfDV}
-\end{figure}
 \end{document}

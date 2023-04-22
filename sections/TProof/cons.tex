@@ -1,0 +1,8 @@
+\item[\runa{Cons}] By the induction hypothesis for $[Const]$, we know that:
+			\begin{itemize}
+				\item $\Gamma,\Upsilon,\Pi\vdash c^p :(\emptyset,\emptyset)$,
+				\item $env\vdash\left\langle c^p,w,sto,p'\right\rangle\rightarrow\left\langle c,w,sto,(\emptyset,\emptyset),p\right\rangle$
+			\end{itemize}
+			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$.
+
+			By the induction hypothesis we can immediately conclude that $\Gamma,\Upsilon,\Pi\vdash c:(\emptyset,\emptyset)$, $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$, where $w'=w$, and $(\emptyset,\emptyset)\models(\emptyset,\emptyset)$
