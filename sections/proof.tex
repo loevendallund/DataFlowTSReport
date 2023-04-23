@@ -1,36 +1,9 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
-\iffalse
-\begin{itemize}
-	\item Introduction (what and how)
-	\begin{itemize}
-		\item What we will go through
-		\item What do we mean with the system being sound
-		\item How do we compare the system to the semantic (evaluation)
-	\end{itemize}
-	\item What should we know to prove the soundness of the liveness system
-	\item Agreement of the different basis
-	\begin{itemize}
-		\item What does it mean to aggree
-		\item How does $\Gamma$ and $\Upsilon$ aggree with $w$ and $env$?
-		\item How does $\Pi$ aggree with the semantics
-		\item How does the live type aggree with the semantics?
-	\end{itemize}
-	\item Soundness of liveness system (theorem
-	\begin{itemize}
-		\item What and why
-		\item How is it good and what does it say
-	\end{itemize}
-	\item Rewrite the collection semantics
-	\begin{itemize}
-		\item The pair $(L,V)$ should contain all live locations and variables
-	\end{itemize}
-\end{itemize}
-\fi
-
 \section{Soundness}
 In this section we present the soundness of the liveness system with respect to the collection semantics, shown in \cref{App:ColSem}.
 The liveness system is sound, if the liveness type contains at least all live occurrences at a given program point.
+The liveness system is sound in respect to the collection semantics, that is, the liveness type is an overapproximation of the occurrences in the collection semantics.
 
 The liveness system depends on three global bases, one for variable occurrences, for abstract locations, and for an approximation of program points.
 To show that these bases are good, we need to define when they agree with the semantics, i.e., to show that the bases overapproximate the dependency function, and that the approximated order of program points is a good approximation.
@@ -42,31 +15,41 @@ The liveness system need to keep track of dependencies differently, as the notio
 To handle locations, the notion of abstract locations is introduced, which is stored in the equivalence basis.
 The agreement for occurrence dependencies between the collection semantic and liveness system are as follows:
 
+\todo[inline]{I am not sure if $env$ is still needed here, and if the way we compare $\loc$ with the possible $\nu x$'s is enough}
 \begin{definition}{[Agreement of the dependency of occurrences]}
-	Let $w$ be the dependency function, $env$ be the environment, $\Gamma$ be the basis for variable occurrences, and $\Upsilon$ be the basis for abstract locations.
+	Let $w$ be the dependency function, $env$ be the environment, and $\Gamma$ be the basis occurrence dependencies.
 	We say that
-	$$(w,env)\models(\Gamma,\Upsilon)$$
+	$$(w,env)\models\Gamma$$
 	Iff
 	\begin{enumerate}
-		\item $dom(env)\supseteq dom(\Upsilon)$
-		\item $\forall x\in dom(\Upsilon). \exists \loc\in\Loc$ such that $env(x)=\loc$
-		\item $\forall x^p\in dom(w).w(x^p)=(L^p,V^p)\Rightarrow \Gamma(x^p)=\delta\wedge V^p\subseteq\delta\wedge \Upsilon(x)=\kappa\wedge L^p\subseteq\kappa$
+		\item $\forall x^p\in dom(w).w(x^p)=(L^P,V^P)\wedge\Gamma(x^p)=T\Rightarrow(L^P,V^P)\models T$
+		\item $\forall \loc^p\in dom(w).\exists\nu x^p\in dom(\Gamma).w(\loc^p)=(L^P,V^P)\wedge\Gamma(\nu x^p)=T\Rightarrow(L^P,V^P)\models T$
 	\end{enumerate}
 \end{definition}
+The agreement for the occurrence dependencies follows that the dependencies in $w$ should also be defined by $\Gamma$.
+This agreement holds, if there exists a variable occurrence, $x^p$, in the domain of $w$, the dependencies also exists in the basis $\Gamma$, i.e. the liveness pair agrees with the type.
+The same follows for locations, where there need to exists an internal variable in $\Gamma$, for the same program point, such that the liveness pair of a location agrees with the type of the corresponding internal variable.
 
-The agreement for the occurrence dependencies follows that the dependencies in $w$ should also be defined by $(\Gamma, \Upsilon)$.
-The environment, $env$, is introduced here to find which variables are bound to locations.
-Since $\Gamma$ and $\Upsilon$ are global, it is sound to only assume that the dependencies in $w$ should be contained in $\Gamma$ and $\Upsilon$, since there can be occurrences not defined in $w$, either by them exisiting in another evaluation branch, or they are not reached yet.
-For the pairs, $(w,env)$ and $(\Gamma,\Upsilon)$, to agree it follows that:
-\begin{description}
-	\item[(1)] Every variable bound by $\Upsilon$ should also be bound by $env$, since $\Upsilon$ should not define any variables that does not exists in $env$.
-	\item[(2)] Every variable bound by $\Upsilon$ must be bound to a location in $env$.
-	\item[(3)] For all variable occurrence, $x^p$, bound in $w$, the occurrence pair $(L^p,V^p)$ must agree with $\Gamma$ and $\Upsilon$.
-		This means that the dependency from $\Gamma(x^p)=\delta$ must be a superset of $V^p$, and the abstract locations obtained from $\Upsilon(x)=\kappa$ must be a superset of $L^p$.
-\end{description}
+The agreement of type is defined as follows:
 
+\begin{definition}{[Agreement of type]}
+	Let $(L^P,V^P)$ be the liveness pair contain a set of location occurrence and a set of variable occurremces, and $T$ be a type.
+	We say that
+	$$(L^P,V^P)\models T$$
+	Iff
+	\begin{enumerate}
+		\item $T=T_1\rightarrow T_2$ then $(L^P,V^P)\models T_2$
+		\item $T=(\delta,\kappa)$ then $L^P\subseteq\kappa\wedge V^P\subseteq\delta$
+	\end{enumerate}
+\end{definition}
+The agreement of a type and liveness pair follows that the liveness pair of the \runa{Abs} rule $(\emptyset,\emptyset)$, however, from the \runa{Var} rule, the variable occurrence is added to the liveness pair.
+In the type system, we doe something similar, but since there exists an abstraction type, the variable occurrence is added to the $T_2$ part of the type.
+As an example, if a variable, $x$, is bound to $\left\langle x,e^p,env\right\rangle$ in $env$ and has the type $(\delta_1,\kappa_1)\rightarrow(\delta_2,\kappa_2)$, then using the \runa{Var} rule on $x$, at program point $p$, we get the liveness pair $(\{x^p\},\emptyset)$ and the type $(\delta_1,\kappa_1)\rightarrow(\delta_2\cup\{x^p\},\kappa_2)$.
+Here, the agreement of a type would check that $\emptyset\subseteq\kappa\wedge\{x^p\}\subseteq(\delta\cup\{x^p\})$, which clearly holds.
+
+\todo[inline]{I am not sure the agreement of program order still holds, because of abstractions (mostly when using the \runa{App} rule on an abstraction)}
 Next follows the agreement between the approximated order of program points, $\Pi$, and the dependency function, $w$.
-Here, it is assumed that the order between occurrences can be derived from $w$, since occurrences are only bound to occurences at earlier program points.
+Here, it is assumed that the order between occurrences can be derived from $w$, since occurrences are only bound to occurrences at earlier program points.
 
 \begin{definition}{[Agreement of program order]}
 	Let $w$ be the dependency function and $\Pi$ be an approximation of the order of program points, then we say that
@@ -80,51 +63,46 @@ Here, it is assumed that the order between occurrences can be derived from $w$, 
 
 The agreement of program order defines that, for the order of program points that can be derived from $w$, the global basis must also agree on this order.
 Thus, the only program points they agree on are those the dependency function knows about.
-This agreement is good, as the only scenarios that is dependent on the program order, in the liveness system, is when to find the closest program point(s) where a reference is written to.
 For $w$ and $\Pi$ to agree, it is important that all dependencies for an occurrence, in the domain of $w$, is at an earlier program point, and that $\Pi$ agrees with it.
 \bigskip
 
+\todo[inline]{Missing notation for what it means for $(w,env)$ and $\kappa$ to agree, as the definition for $\kappa$ has changed quite a bit}
 The last agreement can now be defined, that is, for the liveness type.
-
 \begin{definition}{[Agreement of liveness type and the dependency function]}
 	Let $w$ be the dependency function, $env$ be the environment, and $T$ be the liveness type.
 	%$\delta$ be a set of possible live variables, $\kappa$ be the abstract locations.
 	We say that:
 	$$(w,env)\models T$$
-	if $T=T_1\rightarrow T_2$ then $(w,env)\models T_1 \Rightarrow (w,env)\models T_2$.
-
-	If $T=(\delta,\kappa)$ then:
-	\begin{enumerate}
-		%\item $dom(w)\supseteq\delta$,
-		%\item $dom(w)\supseteq\kappa$,
-		\item $\forall x^p\in dom(w)\cap\delta. w(x^p)=(L^p,V^p)\wedge V^p\subseteq\delta$, and
-		%\item $\forall \loc^p.\exists x\in\kappa. env(x)=\loc \Rightarrow w(\loc^p)=(L^p,V^p)\wedge L^p\subseteq\kappa$
-		\item $\forall x\in\kappa.\exists \loc^p.env(x)=\loc \Rightarrow  w(\loc^p)=(L^p,V^p)$ and $\forall\loc^q\in L^p.\exists y.env(y)=\loc\wedge y\in\kappa$
-	\end{enumerate}
+	Iff
+	\begin{itemize}
+		\item $T=T_1\rightarrow T_2$ then $(w,env)\models T_1 \Rightarrow (w,env)\models T_2$
+		\item $T=(\delta,\kappa)$ then:
+		\begin{enumerate}
+			\item $\forall x^p\in (dom(w)\cap\delta). w(x^p)=(L^p,V^p)\wedge V^p\subseteq\delta$, and
+			%\item $\forall$
+			%\item $\forall x\in\kappa.\exists \loc^p.env(x)=\loc \Rightarrow  w(\loc^p)=(L^p,V^p)$ and $\forall\loc^q\in L^p.\exists y.env(y)=\loc\wedge y\in\kappa$
+		\end{enumerate}
+	\end{itemize}
 \end{definition}
 
-The agreement between the liveness type and $w$ makes sure that if $w$ has bound an occurrence to a possible live occurence, that the liveness type defines to be live, then the liveness type must also contain this occurence.
+The agreement between the liveness type and $w$ makes sure that if $w$ has bound an occurrence to a possible live occurrence, that the liveness type defines to be live, then the liveness type must also contain this occurrence.
 For the liveness type, $(\delta,\kappa)$, and $w$ to be in agreement, it follows that:
 \begin{description}
-	\item[(1)] For all the variable occurrences that both are in the domain of $w$ and in $\delta$, then this variable occurrence's variable dependency must also be contained in $\delta$.
-	\item[(2)] For all variables, $x$, in $\kappa$, there must exist a location occurrence, $\loc^p$, where $x$ is bound to this location in $env$ where the location occurrence dependencies of $\loc^p$, in $w$, must agree with $\kappa$.
-		For a set of location occurrences to agree with $\kappa$, each location occurrence must be bound to a variable, in accordance to $env$, that exists in $\kappa$.
+	\item[(1)] For all the variable occurrences that both are in the domain of $w$ and in $\delta$, then this variable occurrences variable dependency must also be contained in $\delta$.
+	%\item[(2)] For all variables, $x$, in $\kappa$, there must exist a location occurrence, $\loc^p$, where $x$ is bound to this location in $env$ where the location occurrence dependencies of $\loc^p$, in $w$, must agree with $\kappa$.
+	%For a set of location occurrences to agree with $\kappa$, each location occurrence must be bound to a variable, in accordance to $env$, that exists in $\kappa$.
 \end{description}
 
-\bigskip
-With the agreements defined, we can move on to the soundness for the livenss system.
-The liveness system is sound in respect to the collection semantics, that is, the liveness type is an overapproximation of the occurrences in the collection semantics.
-
-\begin{definition}{[Extensions of the dependency function]}
-	Let $w$ and $w'$ be two dependency functions.
-	We say that $w'$ is an extension of $w$, if for some program point $p$ restricted on $w'$ we get $w$, written as:
+\begin{definition}{[Restriction of dependency function]}
+	Let $w$ and $w'$ be two dependency functions where $dom(w)\subseteq dom(w')$.
+	We write:
 	$$w=w'\mid_p$$
-	where $p$ is occurrences that $\sqsubseteq p$
+	If we get $w$ from restricting $w'$ on $p$, i.e., removing all occurrences, $x^{p'}$ or $\loc^{p'}$, in $dom(w)$ if $p\sqsubseteq p'$.
 \end{definition}
 
-For the liveness system to be sound, it is important to make sure that the three basis agrees with the collection system.
-This agreement is done in the following maner, given the a sound agreement before an evaluation, we can show that the agreement is still sound after an evaluation.
-Other than the agreement for the three basis, the soundness type must also agree with the semantics, this is done in a similar way.
+%For the liveness system to be sound, it is important to make sure that the three basis agrees with the collection system.
+%This agreement is done in the following manner, given a sound agreement before an evaluation, we can show that the agreement is still sound after an evaluation.
+%Other than the agreement for the three basis, the soundness type must also agree with the semantics, this is done in a similar way.
 
 \begin{lemma}{[Substitution]}
 	Suppose that $e^p$ is an occurrence, that 
@@ -136,8 +114,8 @@ Other than the agreement for the three basis, the soundness type must also agree
 	where $x^{p'}\not\in dom(\Gamma)$.
 \end{lemma}
 
-Other than having the agreement, we must also show that the liveness type is a good approximation, i.e., that the liveness type contains at least all used variables.
-To show this, we compare the liveness type to the set of variable occurrences.
+%Other than having the agreement, we must also show that the liveness type is a good approximation, i.e., that the liveness type contains at least all used variables.
+%To show this, we compare the liveness type to the set of variable occurrences.
 
 
 \begin{theorem}{[Soundness of type system]}
@@ -165,18 +143,6 @@ To show this, we compare the liveness type to the set of variable occurrences.
 		\input{sections/TProof/cons.tex}
 		\input{sections/TProof/var.tex}
 		%Var-r rule
-\iffalse
-		%Var-l rule
-		\item[$\lbrack Var-l \rbrack$] By the induction hypothesis for $[Var-l]$, we know that:
-			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash x^p :(\{x^p\},\kappa)$, where $x\in dom(\Upsilon)$ and $\Upsilon(x)=\kappa$,
-				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
-			\end{itemize}
-			Where we know that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$ are in agreement.
-
-			We know that no update is done to the dependency function, so we know that $(w,env)\models(\Gamma,\Upsilon)$, and $(w,env)\models(\delta,\kappa)$ still holds after an evaluation.
-			Thus, it is immediate to see that the induction hypothesis holds.
-\fi
 	\end{description}
 
 	In the induction step, assume that $i\leq n$, show for $n+1$:

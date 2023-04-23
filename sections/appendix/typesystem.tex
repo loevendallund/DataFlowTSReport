@@ -4,7 +4,6 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\todo[inline]{rewrite the war rule}\\
 		\runa{Var}\\[0.2cm]
 			\inference[]{}
 				{\Gamma;\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}\\[0.3cm]
@@ -64,8 +63,8 @@
 		\InfName{Ref-read}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Pi\vdash  e^{p}:(\delta,\kappa)}
-{\Gamma;\Pi\vdash [!e^{p}]^{p'}:T\sqcup(\delta,\emptyset)}\\
-				Where $T=\bigcup_{\nu x\in\kappa}(\Gamma(\nu x^{p''}))$ and $p''=\Lambda(x,p')$\\[1cm]
+{\Gamma;\Pi\vdash [!e^{p}]^{p'}:T\sqcup(\delta\cup\delta',\emptyset)}\\
+			Where $\delta'=\bigcup_{\nu x\in\kappa}\{\nu x^{p'}\}$,\\ $T=\bigcup_{\nu x\in\kappa}(\Gamma(\nu x^{p''}))$ and $p''=\Lambda(x,p')$\\[1cm]
 
 		\InfName{Ref-write}\\[0.2cm]
 			\inference[]
