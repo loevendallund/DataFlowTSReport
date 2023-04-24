@@ -5,11 +5,11 @@ In this section, we will now present a functional subset of ReScript, based on t
 The language introduced, contains the typical lambda expressions, bindings, pattern matching, and mutability.
 For the purpose of the type system that will be presented later, we also extends to language with program points, such that each expression has its own unique program point, which we call syntactic occurrences.
 
-The occurrences is used in the type system to analyse and distinguish between expressions, where there is syntactical occurrences, that is expressions, and semantical occurrences, those are variables and locations.
+The occurrences is used in the type system to analyse and distinguish between expressions, where there is syntactic occurrences, that is expressions, and semantic occurrences, those are variables and locations.
 
 \subsection{Abstract syntax}
 In this section we will introduce the abstract syntax, based on (previous paper), with some notable changes.
-We reintroduce the syntactical categories as the previous paper, that is, $\Con$ denotes the category of constants, $\Val$ denotes the category of values, and $\Exp$ denotes the category of expressions.
+We reintroduce the syntactic categories as the previous paper, that is, $\Con$ denotes the category of constants, $\Val$ denotes the category of values, and $\Exp$ denotes the category of expressions.
 Where $e, \; m \in \Exp$ and $c \in \Con$.
 
 The syntactic categories for variables is changed, where we now have $\Var$ denotes the category for placeholder variables, that is variables from $\lambda$-abstractions, and $\IVar$ denotes the category for imperative variables, variables from binding expressions.
@@ -74,7 +74,7 @@ If we add the $rec$ keyword, then if $x$ appears in $t_1$, it should thus be tre
 
 \paragraph{Mutability}
 The mutability is handled as references, that is, for the constructs $\mbox{ref}\;t$, $t_1\;:=\;t_2$, and $!t$, for declaring a new location, writing to a location, or reading from a location, respectively.
-These constructs wraps the mutability to a semantical construct for locations, which are handled on runtime.
+These constructs wraps the mutability to a semantic construct for locations, which are handled on runtime.
 Note that, even though bindings are immutable, a variable can still be bound to a location.
 This does not make the variable mutable, as it will then be bound to this location, and cannot be bound to another value or location.
 
@@ -91,7 +91,7 @@ $$w:\Var^P\cup\IVar^P\cup\Loc^P\rightharpoonup\Pow{\Loc^P\times\Var^P\cup\IVar^P
 where a lookup in the function would look like $w(x^p)=(L,V)$, where $L=\{\loc^{p_1},\cdots,\loc^{p_n}\}$ and $V=\{x_1^{p'_1},\cdots,x_y^{p'_y}\}$ is the set of location occurrences and variables occurrences, respectively.
 
 With the dependency function defined, we can now present the transition system, which is similarly defined in (previous paper), and are of the form $env\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle$, where $env\in\Env$ and $sto\in\Sto$.
-This should be read as, given the store $sto$, dependency function $w$, and the previous program point $p$, the syntactical occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, the liveness pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
+This should be read as, given the store $sto$, dependency function $w$, and the previous program point $p$, the syntactic occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, the liveness pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
 
 The environment keeps the bindings currently known, such that:
 $$\Env=\Var\cup\IVar\rightharpoonup\Val$$
@@ -117,7 +117,7 @@ In other words, we have
 We, similarly to (prev paper), assume the existence of a function $new:\Loc\rightharpoonup\Loc$, which takes a location and finds the next location.
 This function is only used on the $next$ location placeholder to find the next free location, i.e. a location that is not already bound in $sto$.
 
-Note that, in the semantics we refer to syntactical occurrences, $e^p$, directly instead of terms.
+Note that, in the semantics we refer to syntactic occurrences, $e^p$, directly instead of terms.
 This is done, as will be obvious later, to directly refer to program points.
 \bigskip
 

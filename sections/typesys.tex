@@ -2,15 +2,14 @@
 \begin{document}
 \section{Occurrence dependency system}
 This section will introduce the occurrence dependency system for the language presented in \cref{sec:lang}, to describe what occurrences are used to evaluate a term.
-The system is based on the notion of type systems, and is therefore used to classifying the syntactic occurrences of used.
-For this reason, some notations from the semantics needs to be represented differently, in particular locations as they are purely semantical.
-We therefore introduce a new syntactic category of variables, $\AVar$, which we call internal variables and is ranged over by $\nu x,\;\nu y$.
+The system is based on the notion of type systems, and is therefore used to classifying the syntactic occurrences used.
+For this reason, some notations from the semantics needs to be represented differently, in particular locations as they are purely semantic.
+We therefore introduce a new syntactic category of variables, $\AVar$, which we call internal variables and is ranged over by $\nu x,\;\nu y,\cdots\in\AVar$.
 We further denote the set of all variables as $Id=\Var\cup\IVar\cup\AVar$.
 
 \subsection{Types}
-Similar to type systems, we denote the syntactical category for types as \cat{Types} and is ranged over by $T$
-A subset of of \cat{Types} is the set of base types, ranged over by the pair $(\delta,\kappa)$, where $\delta\subseteq Id^P$ is a set of variable occurrences and $\kappa\subseteq\Pow{\Pow{Id}}$.
-Note that $\kappa$ will always contain at least one internal variable.
+Similar to type systems, we denote the syntactic category for types as \cat{Types} and is ranged over by $T$
+A subset of \cat{Types} is the set of base types, ranged over by the pair $(\delta,\kappa)$, where $\delta\subseteq Id^P$ is a set of variable occurrences and $\kappa\subseteq\AVar$ is a set of internal variables.
 
 The composite type for abstractions, denoted as $T_1\rightarrow T_2$, represents a function that takes an input type $T_1$ and returns a value of type $T_2$.
 The type of abstractions is denoted as $T_1\rightarrow T_2$, that 
@@ -19,21 +18,19 @@ The formation rules for types is thus given as:
 $$T::=(\delta,\kappa)\mid T_1 \rightarrow T_2$$
 
 \subsection{Bases}
-In the semantics, presented in \cref{sec:sem}, we keep track of dependencies through the dependency function $w$, and value bindings through the environment and store.
+In the semantics, presented in \cref{sec:sem}, we keep track of dependencies through the dependency function $w$, value bindings through the environment, and location bindings through the store.
 
 The occurrence dependency system similarly needs to keep track of dependencies.
-It is also, equally important, that the knowledge of which variables are bound to which internal variables.
-We therefore introduce the notion of a type dependency base $\Gamma$, that keeps track of the type of variables.
-%As the language contains the notion of pattern matching, the type can be non-deterministic as there can be multiple branches, therefore variables can be bound to multiple internal variables.
+In the system, we keep track of dependencies through the types instead of the liveness pair used in $w$.
+We introduce the notion of a type dependency base $\Gamma$, that keeps track of the type of variables.
 
-The type dependency base can thus be defined as:
-\begin{definition}{[Type base $\Gamma$]}
+\begin{definition}{[Type base]}
 	The type base $\Gamma$ is a partial function $\Gamma:Id^P\rightharpoonup TYPES$
 \end{definition}
 
-A lookup in the type base $\Gamma$ is of the form $\Gamma(x^p)=T$ for placeholder and imperative variables, and $\Gamma(\nu x^p)=T$ for internal variables.
+A lookup in the type base $\Gamma$ is of the form $\Gamma(x^p)=T$, for placeholder and imperative variables, and $\Gamma(\nu x^p)=T$, for internal variables.
 
-\begin{definition}{[Extending $\Gamma$]}
+\begin{definition}{[Extending the type base]}
 	We write $\Gamma,x^p:T$ for the type base $\Gamma'$ defined by:
 	\begin{align*}
 		\Gamma'(y^{p'})=
@@ -46,25 +43,19 @@ A lookup in the type base $\Gamma$ is of the form $\Gamma(x^p)=T$ for placeholde
 The extension of $\Gamma$ for internal variables can be similarly defined.
 \bigskip
 
-The last base, $\Pi$, is the approximated order of program points, where we denote $p\sqsubseteq p'\in\Pi$ if the program point $p$ is an earlier or the same program point as $p'$.
+The last base, $\Pi$, is the approximated order of program points, where we denote $p\sqsubseteq p'\in\Pi$, if $p$ is an earlier or the same program point as $p'$.
 The order of program points is also transitive, i.e., if $p\sqsubseteq p'\in\Pi$ and $p'\sqsubseteq p''\in\Pi$ then $p\sqsubseteq p''\in\Pi$.
 
 
 \subsection{Judgement}
 The type judgement is defined as:
 $$\Gamma;\Pi\vdash e^p: T$$
-And should be read as, the occurrence $e^p$ has type $T$ given the dependency bindings $\Gamma$ and the approximated order of program points $\Pi$.
+And should be read as, the occurrence $e^p$ has type $T$, given the dependency bindings $\Gamma$ and the approximated order of program points $\Pi$.
 
-In the type system we make use of type unions, either the union of two arbitrary types, or a type with the base type.
-The unification of two arbritary types is used in the \runa{Case} rule, by unifying each branch.
-Note that, the two types must have the same structure, i.e., the same number of abstraction types (if any).
-As an example, if we have:
-$$(\delta_1,\kappa_1)\rightarrow(\delta_2,\kappa_2)\cup(\delta_1',\kappa_1')\rightarrow(\delta_2',\kappa_2')$$
-Then, by unification, we get:
-$$(\delta_1\cup\delta_1',\kappa_1\cup\kappa_1')\rightarrow(\delta_2\cup\delta_2',\kappa_2\cup\kappa_2')$$
-
+In the type system we make use of type unions, either by unifying two types, or unifying a type and base type.
+A type union of two types is defined as follows, and is used when approximating the types from each branch in a \runa{Case} expression.
 \begin{definition}{[Type union]}
-	Let $T_1$ and $T_2$ be two types, we say that an union, $\cup$, of types if:
+	Let $T_1$ and $T_2$ be two types, then the type unification, $\cup$, are as follows:
 	\begin{equation*}
 		T_1\cup T_2=
 		\left\{\begin{matrix}
@@ -74,16 +65,10 @@ $$(\delta_1\cup\delta_1',\kappa_1\cup\kappa_1')\rightarrow(\delta_2\cup\delta_2'
 	\end{equation*}
 \end{definition}
 
-The unification of a type and a base type is used when in the \runa{Var}, \runa{Case}, and \runa{Ref-read} rules.
-This unification always makes sure to unify the base type to the end of a type, i.e., unifying onto an abstraction type, then the base type is unifyed onto the result of the abstraction.
-As an example, if we have 
-$$(\delta_1,\kappa_1)\rightarrow(\delta_2,\kappa_2)\rightarrow(\delta',\kappa')\sqcup(\delta,\kappa)$$
-this will result in the following type:
-$$(\delta_1,\kappa_1)\rightarrow(\delta_2,\kappa_2)\rightarrow(\delta'\cup\delta,\kappa'\cup\kappa)$$
-The reason here is if, from a lookup in the var rule we get an abstraction type and later reach an application rule, then the variable occurrence must be part of the resulting type.
-
+A type union of a type and base type is used in the \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref read} rules.
+This type union is used to add an occurrence to a type, e.g., in the \runa{Var} rule where the variable occurrence needs to be added to the type for that variable.
 \begin{definition}{[Base type union]}
-	Let $T$ be an arbitrary type and $(\delta,\kappa)$ be a base type, then the unification of these types is as follows:
+	Let $T$ be an type and $(\delta,\kappa)$ be a base type, then the unification of these are as follows:
 	\begin{equation*}
 		T\sqcup (\delta,\kappa)=
 		\left\{\begin{matrix}
@@ -170,15 +155,41 @@ Lastly, we can solve the last part, to get the prober type:
 In the following example, the initial $\Gamma$ and $\Upsilon$ is given by:
 \begin{align*}
 	\Gamma &= [\nu x\mapsto(\emptyset,\emptyset),x\mapsto(\emptyset,\{\{\nu x\}\}),\nu y\mapsto(\emptyset,\emptyset),y\mapsto(\emptyset,\{\{\nu y\}\})]\\
-	\Upsilon &=\{\{\nu x, x\},\{\nu y, y\}\}
 \end{align*}
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\input{examples/case.tex}
 	\label{fig:SimpleCase}
 \end{figure}
-This example will be used in the two following, and is refered as $caseEx$ with the type:
-$$T=(\{x,y\},\{\{\nu x\}, \{\nu y\}, \{\nu z\}\})$$
+
+Where $Case_1$:
+\begin{figure}[H]
+\begin{tabular}{l}
+		\inference[$Pattern$]
+		{
+			\inference[$Var$]{} {\Gamma;\Pi\vdash y:(\{y\},\{\nu y\})}
+		}
+		{\Gamma;\Pi\vdash [2\;(y)]:(\{y\},\{\nu y\}) }
+\end{tabular}
+\end{figure}
+And $Case_2$:
+\begin{figure}[H]
+\begin{tabular}{l}
+		\inference[$Pattern$]
+		{
+			\inference[$Ref$]
+			{
+				\inference[$Cons$]{}{\Gamma;\Pi\vdash 10:(\emptyset,\emptyset) }
+			}
+			{\Gamma,\nu z:(\emptyset,\emptyset);\Pi\vdash [ref\;(10)]:(\emptyset,\{\nu z\})}
+		}
+		{\Gamma;\Pi\vdash [3\;(ref\;(1))]:(\emptyset,\{\nu z\})}
+\end{tabular}
+\end{figure}
+
+
+This example will be used in the two following examples, and is refered as $caseEx$ with the type:
+$$T=(\{x,y\},\{\nu x, \nu y, \nu z\})$$
 \newpage
 
 \subsection{Example let-case 1}

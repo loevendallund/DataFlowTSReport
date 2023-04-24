@@ -2,14 +2,14 @@
 	\inference[$let$]
 	{
 		\inference[$Case$]{}
-		{\Gamma;\Upsilon;\Pi\vdash [caseEx]:T}
+		{\Gamma;\Pi\vdash [caseEx]:T}
 		\;\;
 		\inference[$Ref\;read$]
 		{
-			\inference[$Var$]{}{\Gamma;\Upsilon;\Pi\vdash x:(\{x\},\{\nu x, x\})}
+			\inference[$Var$]{}{\Gamma;\Pi\vdash x:(\{x\},\{\nu x\})}
 		}
-		{\Gamma,z:T;\Upsilon;\Pi\vdash [!x]:(\{x,\nu x\},\emptyset)}
+		{\Gamma,z:T;\Pi\vdash [!x]:T'}
 	}
-{\Gamma;\Upsilon;\Pi\vdash [\mbox{let}\;z\;(caseEx)\;(!x)]:T'}\\
+{\Gamma;\Pi\vdash [\mbox{let}\;z\;(caseEx)\;(!x)]:T'}\\
 Where $T'=(\{x,\nu x\},\emptyset)$
 \end{tabular}
