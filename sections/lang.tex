@@ -1,7 +1,7 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \section{Language}\label{sec:lang}
-In this section, we will now present a functional subset of ReScript, based on the OCaml family.
+In this section, we will present a subset of ReScript, which is based on the OCaml family.
 The language introduced, contains the typical lambda expressions, bindings, pattern matching, and mutability.
 For the purpose of the type system that will be presented later, we also extends to language with program points, such that each expression has its own unique program point, which we call syntactic occurrences.
 
@@ -57,17 +57,17 @@ Most of these formation rules are similar to (previous paper) there are, however
 Some of the notable constructs is further explained below.
 
 \paragraph{Constants}
-The constants is either natural numbers $n$, boolean values $b$, or functional constants.
+The constants are either natural numbers $n$, boolean values $b$, or functional constants.
 For each functional constant we introduce a function $apply$, that for each constant returns the result of applying a constant to its arguments.
 Note that, for functional constant that take two or more arguments, $apply$ should be used twice, such that, as an example for $PLUS$ we have:
 $$apply(apply(PLUS,2),2)=2+2$$
 
 \paragraph{Abstractions}
-$\lambda$-abstractions denotes functions with a parameter $x$ and body $t$, where $x\in\Var$.
+denotes functions with a parameter $x$ and body $t$, where $x\in\Var$.
 Here, abstractions use juxtaposition of expressions, where abstractions have exactly one argument.
 
 \paragraph{bindings}
-Bindings are immutable and is done through local declaration, which can be recursive or non-recursive by the use of the $rec$ keyword.
+are immutable and are done through local declaration, which can be recursive or non-recursive by the use of the $rec$ keyword.
 A binding is done on placeholder variables, such that $x,\;f\in\IVar$.
 Here, if $\mbox{let}\;x\;t_1\;t_2$ has an occurrence of $x$ in $t_1$ it is not treated as a recursive call to $x$ and $x$ should thus be specified elsewhere.
 If we add the $rec$ keyword, then if $x$ appears in $t_1$, it should thus be treated as a recursive call to $x$.
@@ -79,10 +79,10 @@ Note that, even though bindings are immutable, a variable can still be bound to 
 This does not make the variable mutable, as it will then be bound to this location, and cannot be bound to another value or location.
 
 \paragraph{Pattern matching}
-The pattern matching construct matches a term $t$ with the pattern bindings in $\pi$.
+The pattern matching construct matches a term $t$ with the pattern in $\pi$.
 The pattern matching is done by matching on each pattern, until a match is found, in the order given by the syntax.
-A pattern binding is of the form $(s\;t)$, with at least one pattern binding.
-We also denote $|\pi|$ as the number of pattern bindings.
+A pattern is of the form $(s\;t)$, with at least one pattern.
+We also denote $|\pi|$ as the number of pattern that occurs in $\pi$.
 
 \subsection{Semantics}\label{sec:sem}
 We will now introduce the big-step semantics extended with the collection of occurrence dependencies.
@@ -90,7 +90,11 @@ The collection of occurrence dependencies is done through the dependency functio
 $$w:\Var^P\cup\IVar^P\cup\Loc^P\rightharpoonup\Pow{\Loc^P\times\Var^P\cup\IVar^P}$$
 where a lookup in the function would look like $w(x^p)=(L,V)$, where $L=\{\loc^{p_1},\cdots,\loc^{p_n}\}$ and $V=\{x_1^{p'_1},\cdots,x_y^{p'_y}\}$ is the set of location occurrences and variables occurrences, respectively.
 
-With the dependency function defined, we can now present the transition system, which is similarly defined in (previous paper), and are of the form $env\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle$, where $env\in\Env$ and $sto\in\Sto$.
+With the dependency function defined, we can now present the transition system, which is similarly defined in (previous paper), and are of the form:
+\begin{align*}
+env\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle
+\end{align*}
+Where $env\in\Env$ and $sto\in\Sto$
 This should be read as, given the store $sto$, dependency function $w$, and the previous program point $p$, the syntactic occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, the liveness pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
 
 The environment keeps the bindings currently known, such that:
@@ -179,7 +183,7 @@ Since the value of a write expression, in ReScript, does not return a value, the
 				{env\vdash \left\langle [e_1^{p'}:=e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle (),sto_3,w_3,(L,V),p_3 \right\rangle}\\
 				Where $sto_3=sto''[\loc\mapsto v]$ and $w_3=w''[\loc^{p_3}\mapsto(L',V')]$\\[1cm]
 	\end{tabular}
-	\caption{Collection semantic}
+	\caption{Collection semantics}
 	\label{fig:ColSem}
 \end{figure}
 \end{document}

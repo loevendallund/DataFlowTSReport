@@ -3,7 +3,7 @@
 \section{Occurrence dependency system}
 This section will introduce the occurrence dependency system for the language presented in \cref{sec:lang}, to describe what occurrences are used to evaluate a term.
 The system is based on the notion of type systems, and is therefore used to classifying the syntactic occurrences used.
-For this reason, some notations from the semantics needs to be represented differently, in particular locations as they are purely semantic.
+For this reason, some notions from the semantics needs to be represented differently, in particular locations as they are purely semantic.
 We therefore introduce a new syntactic category of variables, $\AVar$, which we call internal variables and is ranged over by $\nu x,\;\nu y,\cdots\in\AVar$.
 We further denote the set of all variables as $Id=\Var\cup\IVar\cup\AVar$.
 
@@ -11,11 +11,36 @@ We further denote the set of all variables as $Id=\Var\cup\IVar\cup\AVar$.
 Similar to type systems, we denote the syntactic category for types as \cat{Types} and is ranged over by $T$
 A subset of \cat{Types} is the set of base types, ranged over by the pair $(\delta,\kappa)$, where $\delta\subseteq Id^P$ is a set of variable occurrences and $\kappa\subseteq\AVar$ is a set of internal variables.
 
-The composite type for abstractions, denoted as $T_1\rightarrow T_2$, represents a function that takes an input type $T_1$ and returns a value of type $T_2$.
-The type of abstractions is denoted as $T_1\rightarrow T_2$, that 
+The composite type for abstractions, denoted as $T_1\rightarrow T_2$, represents a function that takes a value of type $T_1$ as input and returns a value of type $T_2$.
 
 The formation rules for types is thus given as:
 $$T::=(\delta,\kappa)\mid T_1 \rightarrow T_2$$
+
+In the occurrence dependency system we make use of type unions, either by unifying two types, or unifying a type and base type.
+A type union of two types is defined as follows, and is used when approximating the types from each branch in a \runa{Case} expression.
+\begin{definition}[Type union]
+	Let $T_1$ and $T_2$ be two types, then the type union, $\cup$, are as follows:
+	\begin{equation*}
+		T_1\cup T_2=
+		\left\{\begin{matrix}
+			\mbox{If } \; T_1=(\delta,\kappa) \;\mbox{and}\; T_2=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
+			\mbox{else if } \; T_1=T_1'\rightarrow T_1''\;\mbox{and}\;T_2=T_2'\rightarrow T_2'' & \mbox{then} \; (T_1'\cup T_2')\rightarrow (T_1''\cup T_2'')
+		\end{matrix}\right.
+	\end{equation*}
+\end{definition}
+
+A type union of a type and base type is used in the \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref read} rules.
+This type union is used to add an occurrence to a type, e.g., in the \runa{Var} rule where the variable occurrence needs to be added to the type for that variable.
+\begin{definition}[Base type union]
+	Let $T$ be an type and $(\delta,\kappa)$ be a base type, then the union of these are as follows:
+	\begin{equation*}
+		T\sqcup (\delta,\kappa)=
+		\left\{\begin{matrix}
+			\mbox{If } \; T=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
+			\mbox{else if } \; T=T_1\rightarrow T_2 & \mbox{then} \; T_1\rightarrow(T_2\sqcup (\delta,\kappa))
+		\end{matrix}\right.
+	\end{equation*}
+\end{definition}
 
 \subsection{Bases}
 In the semantics, presented in \cref{sec:sem}, we keep track of dependencies through the dependency function $w$, value bindings through the environment, and location bindings through the store.
@@ -24,13 +49,13 @@ The occurrence dependency system similarly needs to keep track of dependencies.
 In the system, we keep track of dependencies through the types instead of the liveness pair used in $w$.
 We introduce the notion of a type dependency base $\Gamma$, that keeps track of the type of variables.
 
-\begin{definition}{[Type base]}
+\begin{definition}[Type base]
 	The type base $\Gamma$ is a partial function $\Gamma:Id^P\rightharpoonup TYPES$
 \end{definition}
 
 A lookup in the type base $\Gamma$ is of the form $\Gamma(x^p)=T$, for placeholder and imperative variables, and $\Gamma(\nu x^p)=T$, for internal variables.
 
-\begin{definition}{[Extending the type base]}
+\begin{definition}[Extending the type base]
 	We write $\Gamma,x^p:T$ for the type base $\Gamma'$ defined by:
 	\begin{align*}
 		\Gamma'(y^{p'})=
@@ -51,160 +76,10 @@ The order of program points is also transitive, i.e., if $p\sqsubseteq p'\in\Pi$
 The type judgement is defined as:
 $$\Gamma;\Pi\vdash e^p: T$$
 And should be read as, the occurrence $e^p$ has type $T$, given the dependency bindings $\Gamma$ and the approximated order of program points $\Pi$.
-
-In the type system we make use of type unions, either by unifying two types, or unifying a type and base type.
-A type union of two types is defined as follows, and is used when approximating the types from each branch in a \runa{Case} expression.
-\begin{definition}{[Type union]}
-	Let $T_1$ and $T_2$ be two types, then the type unification, $\cup$, are as follows:
-	\begin{equation*}
-		T_1\cup T_2=
-		\left\{\begin{matrix}
-			\mbox{If } \; T_1=(\delta,\kappa) \;\mbox{and}\; T_2=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
-			\mbox{else if } \; T_1=T_1'\rightarrow T_1''\;\mbox{and}\;T_2=T_2'\rightarrow T_2'' & \mbox{then} \; T_1'\cup T_2'\rightarrow (T_1''\cup T_2'')
-		\end{matrix}\right.
-	\end{equation*}
-\end{definition}
-
-A type union of a type and base type is used in the \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref read} rules.
-This type union is used to add an occurrence to a type, e.g., in the \runa{Var} rule where the variable occurrence needs to be added to the type for that variable.
-\begin{definition}{[Base type union]}
-	Let $T$ be an type and $(\delta,\kappa)$ be a base type, then the unification of these are as follows:
-	\begin{equation*}
-		T\sqcup (\delta,\kappa)=
-		\left\{\begin{matrix}
-			\mbox{If } \; T=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
-			\mbox{else if } \; T=T_1\rightarrow T_2 & \mbox{then} \; T_2\sqcup (\delta,\kappa)
-		\end{matrix}\right.
-	\end{equation*}
-\end{definition}
+\todo[inline]{Pick some examples of type system that would be good to present}
 
 \begin{landscape}
-\subsection{Example Abs}
-Given the following program
-$$(\lambda x.(x\;z))(\lambda y.y)$$
-Where $z$ is bound to a constant integer and its type is thus $(\emptyset,\emptyset)$.
-
-To type this program, we first construct the tree according to the rules:
-
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\input{examples/AbsEx.tex}
-	\label{fig:AbsExample}
-\end{figure}
-
-After that, we can solve the intermediate types, since we now know the righthand type of the outermost application, and we will get the following:
-
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
-		\inference[$APP$]
-		{
-			\inference[$ABS$]
-			{
-				\inference[$APP$]
-				{
-					\inference[$VAR$]{}{\Gamma';\Upsilon;\Pi\vdash x^{p}:\alpha:T\rightarrow T}
-					\;\;\;
-					\inference[$VAR$]{}{\Gamma';\Upsilon;\Pi\vdash z^{p'}:(\{z^{p'}\},\emptyset)}
-				}
-				{\Gamma,x:T\rightarrow T;\Upsilon;\Pi\vdash [x^{p}\;z^{p'}]^{p''}:T\{\alpha / (\{z^{p'}\},\emptyset)\}}
-			}
-			{\Gamma;\Upsilon;\Pi\vdash [\lambda\; x.([x^{p}\;z^{p'}]^{p''})]^{p_3}:x:(T\rightarrow T)\rightarrow T\{\alpha / (\{z^{p'}\},\emptyset)\}}
-			\;\;
-			\inference[$ABS$]
-			{
-					\inference[$VAR$]{}{\Gamma,y:T;\Upsilon;\Pi\vdash y^{p_3}:T}
-			}
-			{\Gamma';\Upsilon;\Pi\vdash \lambda y.[y^{p_3}]^{p_4})]^{p_5}:y:T\rightarrow T}
-		}
-		{\Gamma;\Upsilon;\Pi\vdash [[\lambda x.[x^{p}\;z^{p'}]^{p''}]^{p_3}\;[\lambda y.y^{p_4}]^{p_5}]^{p_6}:T\{\alpha / (\{z^{p'}\},\emptyset)\}\{x / T\rightarrow T\}}\\
-	\end{tabular}
-	\label{fig:Simple}
-\end{figure}
-
-Lastly, we can solve the last part, to get the prober type:
-
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
-		\inference[$APP$]
-		{
-			\inference[$ABS$]
-			{
-				\inference[$APP$]
-				{
-					\inference[$VAR$]{}{\Gamma';\Upsilon;\Pi\vdash x^{p}:\alpha:T\rightarrow T}
-					\;\;\;
-					\inference[$VAR$]{}{\Gamma';\Upsilon;\Pi\vdash z^{p'}:(\{z^{p'}\},\emptyset)}
-				}
-				{\Gamma,x:T\rightarrow T;\Upsilon;\Pi\vdash [x^{p}\;z^{p'}]^{p''}:T\{\alpha / (\{z^{p'}\},\emptyset)\}}
-			}
-			{\Gamma;\Upsilon;\Pi\vdash [\lambda\; x.([x^{p}\;z^{p'}]^{p''})]^{p_3}:x:(T\rightarrow T)\rightarrow T\{\alpha / (\{z^{p'}\},\emptyset)\}}
-			\;\;
-			\inference[$ABS$]
-			{
-					\inference[$VAR$]{}{\Gamma,y:T;\Upsilon;\Pi\vdash y^{p_3}:T}
-			}
-			{\Gamma';\Upsilon;\Pi\vdash \lambda y.[y^{p_3}]^{p_4})]^{p_5}:y:T\rightarrow T}
-		}
-		{\Gamma;\Upsilon;\Pi\vdash [[\lambda x.[x^{p}\;z^{p'}]^{p''}]^{p_3}\;[\lambda y.y^{p_4}]^{p_5}]^{p_6}:(\{z^{p'}\},\emptyset)}\\
-	\end{tabular}
-	\label{fig:Simple}
-\end{figure}
-\subsection{Example case}
-In the following example, the initial $\Gamma$ and $\Upsilon$ is given by:
-\begin{align*}
-	\Gamma &= [\nu x\mapsto(\emptyset,\emptyset),x\mapsto(\emptyset,\{\{\nu x\}\}),\nu y\mapsto(\emptyset,\emptyset),y\mapsto(\emptyset,\{\{\nu y\}\})]\\
-\end{align*}
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\input{examples/case.tex}
-	\label{fig:SimpleCase}
-\end{figure}
-
-Where $Case_1$:
-\begin{figure}[H]
-\begin{tabular}{l}
-		\inference[$Pattern$]
-		{
-			\inference[$Var$]{} {\Gamma;\Pi\vdash y:(\{y\},\{\nu y\})}
-		}
-		{\Gamma;\Pi\vdash [2\;(y)]:(\{y\},\{\nu y\}) }
-\end{tabular}
-\end{figure}
-And $Case_2$:
-\begin{figure}[H]
-\begin{tabular}{l}
-		\inference[$Pattern$]
-		{
-			\inference[$Ref$]
-			{
-				\inference[$Cons$]{}{\Gamma;\Pi\vdash 10:(\emptyset,\emptyset) }
-			}
-			{\Gamma,\nu z:(\emptyset,\emptyset);\Pi\vdash [ref\;(10)]:(\emptyset,\{\nu z\})}
-		}
-		{\Gamma;\Pi\vdash [3\;(ref\;(1))]:(\emptyset,\{\nu z\})}
-\end{tabular}
-\end{figure}
-
-
-This example will be used in the two following examples, and is refered as $caseEx$ with the type:
-$$T=(\{x,y\},\{\nu x, \nu y, \nu z\})$$
-\newpage
-
-\subsection{Example let-case 1}
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\input{examples/letcase1.tex}
-	\label{fig:LetCase1}
-\end{figure}
-
-\subsection{Example let-case 2}
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\input{examples/letcase2.tex}
-	\label{fig:LetCase1}
-\end{figure}
+\subfile{../examples/index.tex}
 \end{landscape}
 
 \end{document}

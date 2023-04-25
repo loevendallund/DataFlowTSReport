@@ -1,0 +1,30 @@
+\documentclass[../master.tex]{subfiles}
+\begin{document}
+Given the following program
+$$(\lambda x.(x\;z))(\lambda y.y)$$
+Where $z$ is bound to a constant integer and its type is thus $(\emptyset,\emptyset)$.
+
+To type this program, we first construct the tree according to the rules:
+
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\input{absFig/1.tex}
+	\label{fig:Abs-1}
+\end{figure}
+
+After that, we can solve the intermediate types, since we now know the righthand type of the outermost application, and we will get the following:
+
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\input{absFig/2.tex}
+	\label{fig:Abs-2}
+\end{figure}
+
+Lastly, we can solve the last part, to get the prober type:
+
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\input{absFig/3.tex}
+	\label{fig:Abs-3}
+\end{figure}
+\end{document}

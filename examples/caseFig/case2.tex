@@ -1,0 +1,11 @@
+\begin{tabular}{l}
+		\inference[$Pattern$]
+		{
+			\inference[$Ref$]
+			{
+				\inference[$Cons$]{}{\Gamma;\Pi\vdash 10:(\emptyset,\emptyset) }
+			}
+			{\Gamma,\nu z:(\emptyset,\emptyset);\Pi\vdash [ref\;(10)]:(\emptyset,\{\nu z\})}
+		}
+		{\Gamma;\Pi\vdash [3\;(ref\;(1))]:(\emptyset,\{\nu z\})}
+\end{tabular}
