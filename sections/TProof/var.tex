@@ -1,9 +1,9 @@
-\item[\runa{Var}] By the induction hypothesis for $[Var]$, we know that:
+\item[\runa{Var}] Here, $e^p=x^p$, where we have:
 			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\cup(\{x^p\},\emptyset)$,
-				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $v\neq\loc$, $inf_p(x,w)=p''$, and $w(x^{p''})=(L,V)$,
+				\item $\Gamma,\Pi\vdash x^p:T$, where $\Lambda(x,p)=p''$, $\Gamma(x^{p''})=T'$, and $T=T'\sqcup(\{x^p\},\emptyset)$,
+				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V\cup\{x^p\}),p\right\rangle$, where $env(x)=v$, $inf_p(x^p,w)=p''$, and $w(x^{p''})=(L,V)$,
 			\end{itemize}
-			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models T$.
+			and that $(w,env)\models\Gamma$ and $(w,env)\models T$.
 
-			By the induction hypothesis we can immediately conclude that $\Gamma,\Upsilon,\Pi\vdash v:T$ $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models T$, where $w'=w$, and $(L,V\cup\{x^p\})\models T$
-
+			We can the immediately get that $(w,env)\models T$ and $(w,env)\models \Gamma$.
+			From this we can get that $(L,V\cup\{x^p\})\models T$, and then we can conclude that $\Gamma,\Pi\vdash v:T$.

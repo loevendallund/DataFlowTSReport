@@ -1,7 +1,7 @@
 \documentclass[../../../master.tex]{subfiles}
 \begin{document}
 \begin{proof}
-	The proof proceeds by induction on the height for the derivation tree for $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$ and $\Gamma,\Pi\vdash e^p:T$
+	The proof proceeds by induction on the height for the derivation tree for $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V,p\right\rangle$ and $\Gamma,\Pi\vdash e^p:T$
 	Note that the proof follows the rules from the type system.
 	First, we consider the base case, where the hight $n=0$.
 	Here, there are two rules \runa{Const} and \runa{Var}:
@@ -12,47 +12,8 @@
 
 	In the induction step, assume that $i\leq n$, show for $n+1$:
 	\begin{description}
-		\item[$\lbrack Let \rbrack$] By the induction hypothesis for $[Let]$, we know that:
-			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash [\mbox{let}\;x\;e_1^{p'}\;e_2^{p''}]^{p_3}:T$,
-				\item $env\vdash\left\langle [\mbox{let}\;x\;e_1^{p'}\;e_2^{p''}]^{p_3},w,sto,p\right\rangle\rightarrow\left\langle v,w',sto',(L,V),p_3\right\rangle$,
-			\end{itemize}
-			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$.
+		\input{sections/TProof/let.tex}
 
-			To conclude the $[let]$ rule, we need to analyse the premises in the collection semantics and type system.
-			In the collection semantics, we have the following:
-			\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-				\inference[]
-				{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p' \right\rangle &\\
-				env[x\mapsto v]\vdash \left\langle e_2^{p''},sto'',w_3,p' \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p'' \right\rangle}
-				{env\vdash \left\langle [\mbox{let}\;x\;e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}\\
-				Where $w_3=w''[x^{p'}\mapsto(L,V)]$\\[1cm]
-			\end{tabular}
-			\end{figure}
-			And in the type system, we have the following:
-			\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-				\inference[]
-				{\Gamma;\Upsilon;\Pi\vdash e_1^{p'}:T_1 &\\
-				\Gamma,x^{p'}:T_1;\Upsilon,\kappa';\Pi\vdash e_2^{p''}:T}
-				{\Gamma;\Upsilon;\Pi\vdash [\mbox{let}\; x \; e_1^{p'} \; e_2^{p''}]^{p_3}:T}\\[1cm]
-			\end{tabular}
-			\end{figure}
-
-			In the first premise, if we know that $(w,env)\models T_1$, then from the induction hypothesis, we can immediately get that $\Gamma;\Upsilon;\Pi\vdash v':T_1$, $(w'',env)\models T_1$, $(w',env)\models(\Gamma,\Upsilon)$, and $(L',V')\models T_1$.
-			We only need to know that $(w,env)\models T_1$, where we know by the substitution of the value $v'$ in $e_2^{p''}$, where $v'$ has type $T_1$, we also know that $(w,env)\models T_1$ holds if $x$ is used in $e_2^{p''}$.
-
-			%For $(w,env)\models(\delta',\kappa')$ to hold, we know that if the variable $x$ occures in $e_2^{p''}$, then $\delta'\subseteq\delta$, however, we can't make say the same about $\kappa'$, as if were using the dereferencing for the abstract locations in $\kappa'$, then those will probably not appear in $\kappa$.
-
-			In the second premise, we already know that $(w'',env)\models(\delta,\kappa)$ since we know that $w=w''\mid_p$.
-			For the second premise to hold, we also need to show for $env[x\mapsto v]$.
-			If we know that $(w'',env[x\mapsto v])\models T$, then by our induction hypothesis we can immediately get $\Gamma,x^{p'}:T_1;\Upsilon,\kappa';\Pi\vdash v:T$, $(w',env[x\mapsto v])\models(\Gamma,x^{p'}:T_1,\Upsilon,\kappa')$, $(w',env[x\mapsto v])\models T$, and $(L,V)\models T$.
-			Since $env[x\mapsto v]$ is a local extension, and we know the type and dependencies of $v$, we also know that $(w'',env[x\mapsto v])\models T$.
-			From this, the conclusion is immediate.
-			
 		\item[$\lbrack Let \; rec \rbrack$] ss
 		\item[$\lbrack Abs \rbrack$] By the induction hypothesis for $[Abs]$, we know that:
 			\begin{itemize}

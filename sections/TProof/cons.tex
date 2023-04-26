@@ -1,8 +1,10 @@
-\item[\runa{Cons}] By the induction hypothesis for $[Const]$, we know that:
+\item[\runa{Cons}] Here, $e^p=c^p$, where we have:
 			\begin{itemize}
-				\item $\Gamma,\Upsilon,\Pi\vdash c^p :(\emptyset,\emptyset)$,
+				\item $\Gamma,\Pi\vdash c^p :(\emptyset,\emptyset)$,
 				\item $env\vdash\left\langle c^p,w,sto,p'\right\rangle\rightarrow\left\langle c,w,sto,(\emptyset,\emptyset),p\right\rangle$
 			\end{itemize}
-			and that $(w,env)\models(\Gamma,\Upsilon)$ and $(w,env)\models(\delta,\kappa)$.
+			and that $(w,env)\models\Gamma$ and $(w,env)\models(\emptyset,\emptyset)$.
 
-			By the induction hypothesis we can immediately conclude that $\Gamma,\Upsilon,\Pi\vdash c:(\emptyset,\emptyset)$, $(w',env)\models(\Gamma,\Upsilon)$ and $(w',env)\models(\delta,\kappa)$, where $w'=w$, and $(\emptyset,\emptyset)\models(\emptyset,\emptyset)$
+			This case follows immediately, since we can conclude that $\Gamma,\Pi\vdash c:(\emptyset,\emptyset)$, because $(\emptyset,\emptyset)\models(\emptyset,\emptyset)$.
+			We also get $(w,env)\models\Gamma$ and $(w,env)\models(\emptyset,\emptyset)$.
+
