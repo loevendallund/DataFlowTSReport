@@ -9,14 +9,24 @@ The occurrences is used in the type system to analyse and distinguish between ex
 
 \subsection{Abstract syntax}
 In this section we will introduce the abstract syntax, based on (previous paper), with some notable changes.
-We reintroduce the syntactic categories as the previous paper, that is, $\Con$ denotes the category of constants, $\Val$ denotes the category of values, and $\Exp$ denotes the category of expressions.
-Where $e, \; m \in \Exp$ and $c \in \Con$.
+We reintroduce the syntactic categories as the previous paper, that is, \cat{Con} denotes the category of constants and \cat{Exp} denotes the category of expressions.
+Where $c \in \cat{Con}$ and $e\in\cat{Exp}$.
 
-The syntactic categories for variables is changed, where we now have $\Var$ denotes the category for placeholder variables, that is variables from $\lambda$-abstractions, and $\IVar$ denotes the category for imperative variables, variables from binding expressions.
-The syntactic category $\Loc$ denotes the category for locations, and $\Point$ that denotes the category for program point labels.
-We then have $x,\;f\in(\Var\cup\IVar)$, $\loc\in\Loc$, and $p,\;p',\;p'',p_1,\cdots,p_n\in\Point$.
+We introduce a syntactic category for terms, denoted as $t\in\cat{Term}$, and a syntactic category for locations, denoted as $\loc\in\cat{Loc}$.
+The syntactic categories for variables is changed, compared to there previous paper, such that there are placeholder and imperative variables.
+The placeholder variables, denoted \cat{Var}, are variables from abstractions and imperative variables, denoted \cat{IVar}, are from bindings.
+We denote identifiers, in the language, as an union of placeholder and imperative variables, denoted $\cat{Id}=\cat{Var}\cup\cat{IVar}$, where we then have $x,\;f\in\cat{Id}$.
+The syntactic category for program point are denoted as $p\in\cat{P}$.
+\bigskip
 
-The formation rules is then defined, in \cref{fig:coresyntax}:
+As explained earlier, the language presented here introduces the notion of occurrences.
+We firstly introduce a notion of labelling for expressions, identifiers and locations, where we write $e^p$ for expressions labelled with a program point, and are similar to identifiers and locations.
+We further also introduce a notion for categories and sets that represent occurrences, where they are labelled with the category for program points \cat{P}, i.e., for expressions \cat{Exp}, we then have the category for expression occurrences $e^p\in\cat{Exp}^P$.
+
+We can then properly define the occurrences, where we introduce 2 types of occurrences, that is, for syntactical occurrences, denoted as $e^p\in\cat{Exp}^P$, and semantical occurrences.
+The semantical occurrences is further divided into two types, for identifiers and locations and denoted as $x^p,\;f^p\in\cat{Id}^P$ and $\loc^p\in\cat{Loc}^P$ respectively.
+
+The formation rules is then defined, as in \cref{fig:coresyntax}:
 
 \begin{figure}[H]
 	\begin{minipage}[t]{0.45\textwidth}
@@ -88,7 +98,8 @@ We also denote $|\pi|$ as the number of pattern that occurs in $\pi$.
 We will now introduce the big-step semantics extended with the collection of occurrence dependencies.
 The collection of occurrence dependencies is done through the dependency function $w$, defined as:
 $$w:\Var^P\cup\IVar^P\cup\Loc^P\rightharpoonup\Pow{\Loc^P\times\Var^P\cup\IVar^P}$$
-where a lookup in the function would look like $w(x^p)=(L,V)$, where $L=\{\loc^{p_1},\cdots,\loc^{p_n}\}$ and $V=\{x_1^{p'_1},\cdots,x_y^{p'_y}\}$ is the set of location occurrences and variables occurrences, respectively.
+A lookup in the dependency function are $w(x^p)=(\{\loc^{p_1},\cdots,\loc^{p_n}\},x_1^{p'_1},\cdots,x_y^{p'_y})$.
+In the rest of the paper, we will denotes the dependency pair by $(L,V)$, where $L$ is a set of location occurrences and $V$ is the set of variable occurrences.
 
 With the dependency function defined, we can now present the transition system, which is similarly defined in (previous paper), and are of the form:
 \begin{align*}
@@ -123,6 +134,16 @@ This function is only used on the $next$ location placeholder to find the next f
 
 Note that, in the semantics we refer to syntactic occurrences, $e^p$, directly instead of terms.
 This is done, as will be obvious later, to directly refer to program points.
+
+Before introducing some transition rules, we first need to introduce a function that for a given semantical occurrence, $x^p$ or $\loc^p$, finds the closest semantical occurrence.
+It should be noted that, for an occurrence $x^p$, the closest occurrence should be for the same variable, and the same holds for locations.
+
+\begin{definition}[$inf_p$ function]
+	Let $x^p$ be a semantical occurrence and $w$ be a dependency function, then $inf_p(x^p,w)=x^{p'}$ is as follows:
+	\begin{align*}
+		inf_p(x^p,w)=\forall x^{p''}\in dom(w). p''<p\Rightarrow \exists x^{p'}\in dom(w).p''<p\wedge p'<p''
+	\end{align*}
+\end{definition}
 \bigskip
 
 Only a couple of interesting transition rules will be shown here, the rest can be found in \cref{App:ColSem}.
@@ -174,6 +195,12 @@ Since the value of a write expression, in ReScript, does not return a value, the
 				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle}
 				{env\vdash \left\langle [\mbox{ref}\;e^{p'}]^{p''},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto''[\loc\mapsto v],w'',(L,V),p'' \right\rangle}\\
 			Where $\loc = next$, $sto''=sto'[next\mapsto new\;\loc]$ and $w''=w'[\loc^{p''}\mapsto (L,V)]$\\[1cm]
+
+		\InfName{Loc\;read}\\[0.2cm]
+			\inference[]
+				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto',w',L,V,p' \right\rangle}
+				{env\vdash \left\langle [!e^{p'}]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',L\cup\{\loc^{p''}\},V,p'' \right\rangle}\\
+			Where $sto'(\loc)=v$\\[1cm]
 
 
 		\InfName{Loc\;write}\\[0.2cm]

@@ -11,7 +11,7 @@ We further denote the set of all variables as $Id=\Var\cup\IVar\cup\AVar$.
 Similar to type systems, we denote the syntactic category for types as \cat{Types} and is ranged over by $T$
 A subset of \cat{Types} is the set of base types, ranged over by the pair $(\delta,\kappa)$, where $\delta\subseteq Id^P$ is a set of variable occurrences and $\kappa\subseteq\AVar$ is a set of internal variables.
 
-The composite type for abstractions, denoted as $T_1\rightarrow T_2$, represents a function that takes a value of type $T_1$ as input and returns a value of type $T_2$.
+The composite type for abstractions, denoted as $T_1\rightarrow T_2$, is that of a function that takes a value of type $T_1$ as input and returns a value of type $T_2$.
 
 The formation rules for types is thus given as:
 $$T::=(\delta,\kappa)\mid T_1 \rightarrow T_2$$
@@ -69,6 +69,7 @@ The extension of $\Gamma$ for internal variables can be similarly defined.
 \bigskip
 
 The last base, $\Pi$, is the approximated order of program points, where we denote $p\sqsubseteq p'\in\Pi$, if $p$ is an earlier or the same program point as $p'$.
+We also denote $p \sqsubset p'\in\Pi$ if $p$ is an earlier program point than $p'$.
 The order of program points is also transitive, i.e., if $p\sqsubseteq p'\in\Pi$ and $p'\sqsubseteq p''\in\Pi$ then $p\sqsubseteq p''\in\Pi$.
 
 
@@ -76,7 +77,16 @@ The order of program points is also transitive, i.e., if $p\sqsubseteq p'\in\Pi$
 The type judgement is defined as:
 $$\Gamma;\Pi\vdash e^p: T$$
 And should be read as, the occurrence $e^p$ has type $T$, given the dependency bindings $\Gamma$ and the approximated order of program points $\Pi$.
+
+\begin{definition}[$\Lambda$ function]
+	Let $x^p\in \cat{Id}$, $\Gamma$ be the type base, and $\Pi$ be the approximated order of program points, the $\Lambda(x^p,\Gamma,\Pi)=x^{p'}$ is as follows
+	\begin{align*}
+		\Lambda(x^p,\Gamma,\Pi)=\forall x^{p''}\in dom(\Gamma). p''\sqsubset p\in\Pi\Rightarrow \exists x^{p'}\in dom(\Gamma).p''\sqsubset p\in\Pi\wedge p'\sqsubseteq p''\in\Pi
+	\end{align*}
+\end{definition}
+
 \todo[inline]{Pick some examples of type system that would be good to present}
+
 
 \begin{landscape}
 \subfile{../examples/index.tex}

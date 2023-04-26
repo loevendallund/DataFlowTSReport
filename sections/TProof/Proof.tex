@@ -1,14 +1,13 @@
 \documentclass[../../../master.tex]{subfiles}
 \begin{document}
 \begin{proof}
-	The proof proceeds by induction on the height for the derivation tree for $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$ and $\Gamma,\Upsilon,\Pi\vdash e^p:T$
+	The proof proceeds by induction on the height for the derivation tree for $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V\cup\{x^p\},p\right\rangle$ and $\Gamma,\Pi\vdash e^p:T$
 	Note that the proof follows the rules from the type system.
 	First, we consider the base case, where the hight $n=0$.
-	Here, there are two rules $[Const]$, $[Var]$:
+	Here, there are two rules \runa{Const} and \runa{Var}:
 	\begin{description}
 		\input{sections/TProof/cons.tex}
 		\input{sections/TProof/var.tex}
-		%Var-r rule
 	\end{description}
 
 	In the induction step, assume that $i\leq n$, show for $n+1$:

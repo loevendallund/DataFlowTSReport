@@ -121,15 +121,15 @@ For the liveness type, $(\delta,\kappa)$, and $w$ to be in agreement, it follows
 \begin{theorem}{[Soundness of type system]}
 	Suppose $e^p$ is an occurrence where
 	\begin{itemize}
-		\item $\Gamma,\Upsilon,\Pi\vdash e^p : T$, and 
+		\item $\Gamma,\Pi\vdash e^p : T$, and 
 		\item $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w',sto',L,V,p''\right\rangle$
 	\end{itemize}
-	and that $(w,env)\models T$ and $(w,env)\models(\Gamma,\Upsilon)$.
+	and that $(w,env)\models T$ and $(w,env)\models\Gamma$.
 	Then we have that:
 	\begin{itemize}
-		\item $\Gamma,\Upsilon,\Pi\vdash v : T$
+		\item $\Gamma,\Pi\vdash v : T$
 		\item $(w',env)\models T$
-		\item $(w',env)\models(\Gamma,\Upsilon)$
+		\item $(w',env)\models\Gamma$
 		\item $(L,V)\models T$
 	\end{itemize}
 \end{theorem}
