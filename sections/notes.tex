@@ -7,7 +7,8 @@ I have split it into sections, for each topic where I will talk about:
 	\item Types: Some updated notations, based on how the types is currently used in the dependency system.
 	\item Agreements: What I see would be an updated view on the agreements, based on the types.
 \end{itemize}
-	
+
+In this section, I call $(L,V)$ as a dependency pair.
 
 \subsection{Types}
 The types here differs from traditional type systems in a couple of areas.
@@ -39,9 +40,15 @@ For clarity the dependency pair $(L,V)$, from the semantics, should be understoo
 \end{itemize}
 
 \subsection{Agreement}
-I will here present some ideas and definitions, for how I see the agreements should be changed to.
+I will present here some agreement ideas that I think are appropriate for to be able to prove the dependency system.
 
+I will show agreements for the dependency base $\Gamma$ and for the types.
+Based on the ideas from the previous section, I also introduces agreements for both $\delta$ and $\kappa$, as they should be viewed differently, that is, for the agreements of dependencies and aliasing.
+The agreement for aliasing should not be confused with the internal variables in $\delta$, which also contains aliasing lookup.
+Here $\kappa$ should be viewed as the alias for a value, that is, if the value of an expression (in the semantics) is a location, then $\kappa$ will not be empty.
+\bigskip
 
+The first agreement presented is the type agreement, where if the type is a function type, then it is the same as before, but if the type is a base type, then we use the agreement for dependencies and aliasing for $\delta$ and $\kappa$, respectively.
 \begin{definition}[Type agreement]
 	Let $w$ be a dependency function, $env$ be an environment, $(L,V)$ be a dependency pair, $\Gamma$ be the dependency base, and $T$ be a type.
 	We say that:
@@ -52,6 +59,14 @@ I will here present some ideas and definitions, for how I see the agreements sho
 		\item $T=(\delta,\kappa)$ then $(env,(L,V))\models(\Gamma,\delta)$ and $(w,env)\models(\Gamma,\kappa)$
 	\end{itemize}
 \end{definition}
+\bigskip
+
+The dependency agreement is similar to how the agreement for type where handled before, but instead of having $\kappa$ with, it now only has $\delta$.
+Since $\delta$ can contain both variable occurrences and internal variable occurrences, I found it most appropriate to do the agreement only on $\delta$ (also, since $\kappa$ is not directly telling which locations are used).
+
+As before, the variable occurrences should be a subset of $\delta$, while for the location occurrence we have two scenarios.
+One for when the exists an alias of a location, where we need to check for the alias variable is the same in both the environment and can be derived from $\Gamma$.
+As for the second scenario, when there is no aliased variable for a location, then we need to make sure that there exists an internal variable, where there are no variables in $\delta$ that is an alias to that internal variable.
 
 \todo[inline]{The following agreement is maybe a bit hard to read, but I hope that some of the points gets across}
 \begin{definition}[Dependency agreement]
@@ -73,7 +88,9 @@ For $V$ to agree with $\delta$, is should hold that $V$ is a subset of $\delta$.
 For $L$ to agree with $\delta$, is a bit more complicated, as a location and internal variable cannot be directly compared.
 Instead, we need to look at aliasing of variables, where we know that there either must be a variable occurrence in $\delta$ such that this variable is an alias for that location and is also an alias for an internal variable.
 Otherwise, the location must be a free location, that is, a location that is not currently aliased to a variable, and there must therefore also exists a similar internal variable that is not aliased.
+\bigskip
 
+The Aliasing agreement is a bit special, as it is only meant to check if that, if an internal variable exists $\kappa$ then there either exists an aliased variable which both can be found from $(w, env)$ and in $\Gamma$, and if there is not aliased variable, means that there is a free location.
 
 \todo[inline]{The aliasing agreement is also weird, as either there exists and aliasing for a location and internal variable, or the does not, but the checks for it does not really show that}
 \begin{definition}[Aliasing agreement]
@@ -86,5 +103,48 @@ Otherwise, the location must be a free location, that is, a location that is not
 		\item $\not\exists \loc^p\in dom(w).\exists x\in dom(env).env(x)=\loc\wedge x\notin\kappa$
 	\end{itemize}
 \end{definition}
+\bigskip
 
+The last agreement is for the agreement of the dependency base.
+This is simply used to check that, for all dependencies in $w$, we can then also find a type in $\Gamma$ that agrees on this.
+This more specifically means that, for all variable occurrences in $w$, this occurrence should also exists in $\Gamma$, and the dependency pair and type should agree.
+For locations, it is somewhat different, as this is meant to only enforce that there then exists an internal variable, for the same program point, where the dependency pair and type agrees.
+
+\todo[inline]{For the dependency base agreement, I am not sure if we need to also enforce that the location and internal variables need to alias the same variables, or just enforce it through the program points.}
+\begin{definition}[Dependency base agreement]
+	Let $w$ be a dependency function, $env$ be an environment, and $\Gamma$ be a dependency base.
+	We say that:
+	$$(w,env)\models\Gamma$$
+	if 
+	\begin{itemize}
+		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow w(x^p)=(L,V)\wedge\Gamma(x^p)=T.(w,env,(L,V))\models(\Gamma,T)$
+		\item $\forall \loc^p \in dom(w).\exists\nu x^{p'}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p'})=T.(w,env,(L,V))\models(\Gamma,T)$
+	\end{itemize}
+\end{definition}
+
+\subsection{Dependency system changes}
+This section shows changes to the dependency system, that is, for the \runa{Let} rule.
+
+This rule is split into two parts, where \runa{Let-1} is used for aliasing when the type of $e_1^{p}$ is a base type and the $\kappa$ part is not the empty set.
+In this case, $x$ should be an alias to the internal variables, and is therefore added the $\kappa$.
+
+The \runa{Let-2} rule, on the other hand, is the same as before, and should handle every other case.
+
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{Let-1}\\[0.2cm]
+			\inference[]
+				{\Gamma;\Pi\vdash e_1^{p}:(\delta,\kappa) &\\
+				\Gamma,x^p:(\delta,\kappa\cup\{x\});\Pi\vdash e_2^{p}:T_2}
+				{\Gamma;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[0.3cm]
+				Where $\kappa\neq\emptyset$\\[1cm]
+
+		\runa{Let-2}\\[0.2cm]
+			\inference[]
+				{\Gamma;\Pi\vdash e_1^{p}:T_1 &\\
+				\Gamma,x^p:T_1;\Pi\vdash e_2^{p}:T_2}
+				{\Gamma;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\
+	\end{tabular}
+\end{figure}
 \end{document}
