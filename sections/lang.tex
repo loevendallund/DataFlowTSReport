@@ -14,8 +14,7 @@ Where $c \in \cat{Con}$ and $e\in\cat{Exp}$.
 
 We introduce a syntactic category for terms, denoted as $t\in\cat{Term}$, and a syntactic category for locations, denoted as $\loc\in\cat{Loc}$.
 The syntactic categories for variables is changed, compared to there previous paper, such that there are placeholder and imperative variables.
-The placeholder variables, denoted \cat{Var}, are variables from abstractions and imperative variables, denoted \cat{IVar}, are from bindings.
-We denote identifiers, in the language, as an union of placeholder and imperative variables, denoted $\cat{Id}=\cat{Var}\cup\cat{IVar}$, where we then have $x,\;f\in\cat{Id}$.
+The placeholder variables, denoted \cat{Var}, are variables from abstractions and bindings where we then have $x,\;f\in\cat{Var}$.
 The syntactic category for program point are denoted as $p\in\cat{P}$.
 \bigskip
 
@@ -24,7 +23,7 @@ We firstly introduce a notion of labelling for expressions, identifiers and loca
 We further also introduce a notion for categories and sets that represent occurrences, where they are labelled with the category for program points \cat{P}, i.e., for expressions \cat{Exp}, we then have the category for expression occurrences $e^p\in\cat{Exp}^P$.
 
 We can then properly define the occurrences, where we introduce 2 types of occurrences, that is, for syntactical occurrences, denoted as $e^p\in\cat{Exp}^P$, and semantical occurrences.
-The semantical occurrences is further divided into two types, for identifiers and locations and denoted as $x^p,\;f^p\in\cat{Id}^P$ and $\loc^p\in\cat{Loc}^P$ respectively.
+The semantical occurrences is further divided into two types, for identifiers and locations and denoted as $x^p,\;f^p\in\cat{Var}^P$ and $\loc^p\in\cat{Loc}^P$ respectively.
 
 The formation rules is then defined, as in \cref{fig:coresyntax}:
 
@@ -97,9 +96,33 @@ We also denote $|\pi|$ as the number of pattern that occurs in $\pi$.
 \subsection{Semantics}\label{sec:sem}
 We will now introduce the big-step semantics extended with the collection of occurrence dependencies.
 The collection of occurrence dependencies is done through the dependency function $w$, defined as:
-$$w:\Var^P\cup\IVar^P\cup\Loc^P\rightharpoonup\Pow{\Loc^P\times\Var^P\cup\IVar^P}$$
+
+$$w:\cat{Var}^P\cup\cat{Loc}^P\rightharpoonup\Pow{\cat{Loc}^P}\times\Pow{\cat{Var}^P}$$
+
 A lookup in the dependency function are $w(x^p)=(\{\loc^{p_1},\cdots,\loc^{p_n}\},x_1^{p'_1},\cdots,x_y^{p'_y})$.
 In the rest of the paper, we will denotes the dependency pair by $(L,V)$, where $L$ is a set of location occurrences and $V$ is the set of variable occurrences.
+
+In the big-step semantics, shown later, the dependency function $w$ models a control flow, as all bindings for an occurrence, $u^p$, is always bound to occurrence at an earlier point, i.e., to occurrences that is evaluated before $u^p$.
+
+\begin{definition}[$\sqsubseteq_w$]
+	Let $w:\cat{Var}^P\cup\cat{Loc}^P\rightharpoonup\Pow{\cat{Loc}^P}\times\Pow{\cat{Var}^P}$ be a dependency function.
+	Then $\sqsubseteq_w\subseteq\cat{P}\times\cat{P}$, is then given by:
+	$$p_2\sqsubseteq p_1$$
+	iff
+	\begin{itemize}
+		\item $u_1^{p_1}\in dom(w)\Rightarrow\exists u_2^{p_2}\;\dot{\in}\; w(u_1^{p_1})$, or
+		\item $p_1=p_2$
+	\end{itemize}
+	Where $u^{p'}\;\dot{\in}\;w(v^{p''})$ is given by:
+	$w(v)=(L,V)$ and $u^{p'}\in L\wedge u^{p'}\in V$
+\end{definition}
+
+This definition is used to define an order between two program points, in respect to the dependency function $w$.
+
+\begin{definition}[Partial order]
+	We say that $w$ is po-pular iff $\sqsubseteq_w$ is a partial order.
+\end{definition}
+We then say that $w$ is a partial order, called po-polar, if the order relation $\sqsubseteq_w$ gives a partial order relation.
 
 With the dependency function defined, we can now present the transition system, which is similarly defined in (previous paper), and are of the form:
 \begin{align*}
@@ -133,15 +156,16 @@ We, similarly to (prev paper), assume the existence of a function $new:\Loc\righ
 This function is only used on the $next$ location placeholder to find the next free location, i.e. a location that is not already bound in $sto$.
 
 Note that, in the semantics we refer to syntactic occurrences, $e^p$, directly instead of terms.
-This is done, as will be obvious later, to directly refer to program points.
+This is done, as many transition rules when evaluating, evaluates to the program point of the occurrence.
+\bigskip
 
 Before introducing some transition rules, we first need to introduce a function that for a given semantical occurrence, $x^p$ or $\loc^p$, finds the closest semantical occurrence.
 It should be noted that, for an occurrence $x^p$, the closest occurrence should be for the same variable, and the same holds for locations.
 
 \begin{definition}[$inf_p$ function]
-	Let $x^p$ be a semantical occurrence and $w$ be a dependency function, then $inf_p(x^p,w)=x^{p'}$ is as follows:
+	Let $x^p$ be a semantical occurrence and $w$ be a dependency function that is po-polar, then $inf_p(x^p,w)=x^{p'}$ is as follows:
 	\begin{align*}
-		inf_p(x^p,w)=\forall x^{p''}\in dom(w). p''<p\Rightarrow \exists x^{p'}\in dom(w).p''<p\wedge p'<p''
+		inf_p(x^p,w)=\forall x^{p''}\in dom(w). p''\sqsubseteq_w p\Rightarrow \exists x^{p'}\in dom(w).p''\sqsubseteq_w p\wedge p'\sqsubseteq_w p''
 	\end{align*}
 \end{definition}
 \bigskip

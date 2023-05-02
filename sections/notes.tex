@@ -1,35 +1,90 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \section{Notes}
-If we remove $\Upsilon$, as $\kappa$ is already stored as a part of the type in $\Gamma$, then we could do the following:
-
-\begin{align*}
-	let\;x\;&(ref\;(10))\;(\\
-			  & let\;y\;(let\;z\;(x)\;(z))\;(\\
-			  &\alpha)\\
-			  &)
-\end{align*}
-
+This section contains notes for what we discussed last and what I figured out since.
+I have split it into sections, for each topic where I will talk about:
 \begin{itemize}
-	\item $\Gamma=[\nu\;x\mapsto(\emptyset,\emptyset),x\mapsto(\emptyset,\{\nu x\}), z\mapsto(\{x\},\{\nu x\}),y\mapsto(\{z,x\},\{\nu x\})]$
-	\item If $\alpha$ is
+	\item Types: Some updated notations, based on how the types is currently used in the dependency system.
+	\item Agreements: What I see would be an updated view on the agreements, based on the types.
+\end{itemize}
+	
+
+\subsection{Types}
+The types here differs from traditional type systems in a couple of areas.
+The function type is very similar to those known from a type system, while the base type differs.
+Here the base type describes both the dependencies for a term, and also the aliasing information (when a term evaluates to a location).
+
+The aliasing can be explicitly viewed in the use case of the references, where the type of \runa{Ref} is $(\emptyset,\{\nu x\}$, and in the semantics the value is $\loc$, while the dependency pair is $(\emptyset,\emptyset)$.
+
+In the read reference rule, \runa{Ref-read}, it can be seen that the type is $(\delta,\emptyset)$, where all internal variables, and their dependencies, is moved into $\delta$.
+Here, the semantics does something similar, as the value of a location is found in the environment, and the location occurrence is added the dependency pair, $(V,L\cup\{\loc^p\})$.
+
+From this observation, I have changed how some parts of a type should be read, where types have the same formation rule:
+$$T::= (\delta,\kappa)\mid T_1\rightarrow T_2$$
+But should be understood as:
+\begin{itemize}
+	\item $T_1\rightarrow T_2$: a function type, defined the same as before.
+	\item $(\delta,\kappa)$: the base type, where:
 	\begin{itemize}
-		\item $\alpha=x$ then the type is $(\{x\},\{\nu x\})$
-		\item $\alpha=y$ then the type is $(\{z,x,y\},\{\nu x\})$
-		\item Thus $!\alpha$ would be $(\{x, \nu x\},\emptyset)$ or $(\{z,x,y,\nu x\},\emptyset)$
+		\item $\delta\subseteq\Pow{\cat{Var}^P\cup\cat{IVar}^P}$: is a set containing variable occurrences a term is dependent on.
+		\item $\kappa\subseteq\Pow{\cat{Var}\cup\cat{IVar}}$: is a set containing aliasing between variables and internal variables.
+			This set is comparable to the value, from evaluating a term, is a location.
 	\end{itemize}
 \end{itemize}
 
-The new type rule for \runa{ref-read}:
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
-		\InfName{Ref-read}\\[0.2cm]
-			\inference[]
-				{\Gamma;\Upsilon;\Pi\vdash  e^{p}:(\delta,\kappa)}
-				{\Gamma;\Upsilon;\Pi\vdash [!e^{p}]^{p'}:(\delta\cup\delta',\kappa')}\\
-Where $(\delta',\kappa')=\bigcup_{\nu x\in\kappa}(\Gamma(\nu x^{p''}))$, \\and where $p''=\Lambda(x,p')$\\[1cm]
-	\end{tabular}
-\end{figure}
+For clarity the dependency pair $(L,V)$, from the semantics, should be understood as:
+\begin{itemize}
+	\item $L$: the set containing the location occurrences used to evaluate a term
+	\item $V$: the set containing the variable occurrences used to evaluate a term
+\end{itemize}
+
+\subsection{Agreement}
+I will here present some ideas and definitions, for how I see the agreements should be changed to.
+
+
+\begin{definition}[Type agreement]
+	Let $w$ be a dependency function, $env$ be an environment, $(L,V)$ be a dependency pair, $\Gamma$ be the dependency base, and $T$ be a type.
+	We say that:
+	$$(w,env,(L,V))\models(\Gamma,T)$$
+	if
+	\begin{itemize}
+		\item $T=T_1\rightarrow T_2$ then $(w,env,(L,V))\models(\Gamma,T_1)\Rightarrow(w,env,(L,V))\models(\Gamma,T_2)$
+		\item $T=(\delta,\kappa)$ then $(env,(L,V))\models(\Gamma,\delta)$ and $(w,env)\models(\Gamma,\kappa)$
+	\end{itemize}
+\end{definition}
+
+\todo[inline]{The following agreement is maybe a bit hard to read, but I hope that some of the points gets across}
+\begin{definition}[Dependency agreement]
+	Let $env$ be an environment, $(L,V)$ be a dependency pair, $\Gamma$ be the dependency base, and $\delta$ be the dependency set.
+	We say that:
+	$$(env,(L,V))\models(\Gamma,\delta)$$
+	if
+	\begin{itemize}
+		\item $V\subseteq\delta$,
+		\item $\forall \loc^p\in L$ then:
+		\begin{itemize}
+			\item $\exists \nu x^p, x^{p'}\in\delta. env(x)=\loc\wedge\Gamma(x^{p'})=(\delta',\kappa')\wedge \nu x\in\kappa'$, or
+			\item $\not\exists x\in dom(env).env(x)=\loc\Rightarrow\exists\nu x^p\in\delta.\not\exists x^{p'}\in\delta.\Gamma(x^{p'})=(\delta',\kappa')\wedge \nu x\in\kappa'$
+		\end{itemize}
+	\end{itemize}
+\end{definition}
+The dependency agreements should be read as, $(env,(L,V))\models(\Gamma,\delta)$ holds only if $V$ and $L$ agrees with $\delta$.
+For $V$ to agree with $\delta$, is should hold that $V$ is a subset of $\delta$.
+For $L$ to agree with $\delta$, is a bit more complicated, as a location and internal variable cannot be directly compared.
+Instead, we need to look at aliasing of variables, where we know that there either must be a variable occurrence in $\delta$ such that this variable is an alias for that location and is also an alias for an internal variable.
+Otherwise, the location must be a free location, that is, a location that is not currently aliased to a variable, and there must therefore also exists a similar internal variable that is not aliased.
+
+
+\todo[inline]{The aliasing agreement is also weird, as either there exists and aliasing for a location and internal variable, or the does not, but the checks for it does not really show that}
+\begin{definition}[Aliasing agreement]
+	Let $w$ be a dependency function, $env$ be an environment, $\Gamma$ be a dependency base, and $\kappa$ be the set of aliasing.
+	We say that:
+	$$(w,env)\models(\Gamma,\kappa)$$
+	if $\forall \nu x\in\kappa$
+	\begin{itemize}
+		\item $\exists x\in\kappa. env(x)=\loc\Rightarrow \exists x^p\in dom(\Gamma).\Gamma(x^p)=(\delta',\kappa')\wedge\nu x\in\kappa'$, or
+		\item $\not\exists \loc^p\in dom(w).\exists x\in dom(env).env(x)=\loc\wedge x\notin\kappa$
+	\end{itemize}
+\end{definition}
 
 \end{document}

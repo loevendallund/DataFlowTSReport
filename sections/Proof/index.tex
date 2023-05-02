@@ -1,0 +1,14 @@
+\documentclass[../../master.tex]{subfiles}
+\begin{document}
+\section{Soundness}
+In this section we present the soundness of the liveness system with respect to the collection semantics, shown in \cref{App:ColSem}.
+The liveness system is sound, if the liveness type contains at least all live occurrences at a given program point.
+The liveness system is sound in respect to the collection semantics, that is, the liveness type is an overapproximation of the occurrences in the collection semantics.
+
+The liveness system depends on three global bases, one for variable occurrences, for abstract locations, and for an approximation of program points.
+To show that these bases are good, we need to define when they agree with the semantics, i.e., to show that the bases overapproximate the dependency function, and that the approximated order of program points is a good approximation.
+
+\subfile{agreement.tex}
+\subfile{valueTRules.tex}
+\subfile{proof.tex}
+\end{document}

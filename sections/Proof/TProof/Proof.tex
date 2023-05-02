@@ -6,14 +6,15 @@
 	First, we consider the base case, where the hight $n=0$.
 	Here, there are two rules \runa{Const} and \runa{Var}:
 	\begin{description}
-		\input{sections/TProof/cons.tex}
-		\input{sections/TProof/var.tex}
+		\input{sections/Proof/TProof/cons.tex}
+		\input{sections/Proof/TProof/var.tex}
 	\end{description}
 
 	In the induction step, assume that $i\leq n$, show for $n+1$:
 	\begin{description}
-		\input{sections/TProof/let.tex}
+		\input{sections/Proof/TProof/let.tex}
 
+		\iffalse
 		\item[$\lbrack Let \; rec \rbrack$] ss
 		\item[$\lbrack Abs \rbrack$] By the induction hypothesis for $[Abs]$, we know that:
 			\begin{itemize}
@@ -185,6 +186,7 @@
 		\item[$\lbrack Case \; match \rbrack$] ss
 		\item[$\lbrack Case \; fail \rbrack$] ss
 		\item[$\lbrack Case \; \epsilon \rbrack$] ss
+		\fi
 	\end{description}
 \end{proof}
 \end{document}

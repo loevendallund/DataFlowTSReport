@@ -1,14 +1,6 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
-\section{Soundness}
-In this section we present the soundness of the liveness system with respect to the collection semantics, shown in \cref{App:ColSem}.
-The liveness system is sound, if the liveness type contains at least all live occurrences at a given program point.
-The liveness system is sound in respect to the collection semantics, that is, the liveness type is an overapproximation of the occurrences in the collection semantics.
-
-The liveness system depends on three global bases, one for variable occurrences, for abstract locations, and for an approximation of program points.
-To show that these bases are good, we need to define when they agree with the semantics, i.e., to show that the bases overapproximate the dependency function, and that the approximated order of program points is a good approximation.
-\bigskip
-
+\subsection{Agreement}
 The tracking of dependencies is handled differently between the liveness system and the semantics.
 In the collection semantics, the dependencies of variable and location occurrences are tracked using the $w$ function.
 The liveness system need to keep track of dependencies differently, as the notion of locations are purely semantical, throught the global basis for variable occurrences.
@@ -103,36 +95,4 @@ For the liveness type, $(\delta,\kappa)$, and $w$ to be in agreement, it follows
 %For the liveness system to be sound, it is important to make sure that the three basis agrees with the collection system.
 %This agreement is done in the following manner, given a sound agreement before an evaluation, we can show that the agreement is still sound after an evaluation.
 %Other than the agreement for the three basis, the soundness type must also agree with the semantics, this is done in a similar way.
-
-\begin{lemma}{[Substitution]}
-	Suppose that $e^p$ is an occurrence, that 
-	$\Gamma,x^{p'}:T_1;\Upsilon;\Pi\vdash e^p:T$ 
-	and 
-	$\Gamma;\Upsilon;\Pi\vdash v:T_1$.
-	Then we have that
-	$\Gamma;\Upsilon;\Pi\vdash e^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
-	where $x^{p'}\not\in dom(\Gamma)$.
-\end{lemma}
-
-%Other than having the agreement, we must also show that the liveness type is a good approximation, i.e., that the liveness type contains at least all used variables.
-%To show this, we compare the liveness type to the set of variable occurrences.
-
-
-\begin{theorem}{[Soundness of type system]}
-	Suppose $e^p$ is an occurrence where
-	\begin{itemize}
-		\item $\Gamma,\Pi\vdash e^p : T$, and 
-		\item $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w',sto',L,V,p''\right\rangle$
-	\end{itemize}
-	and that $(w,env)\models T$ and $(w,env)\models\Gamma$.
-	Then we have that:
-	\begin{itemize}
-		\item $\Gamma,\Pi\vdash v : T$
-		\item $(w',env)\models T$
-		\item $(w',env)\models\Gamma$
-		\item $(L,V)\models T$
-	\end{itemize}
-\end{theorem}
-
-\subfile{TProof/Proof.tex}
 \end{document}

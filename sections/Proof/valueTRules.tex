@@ -1,0 +1,66 @@
+\documentclass[../../master.tex]{subfiles}
+\begin{document}
+\subsection{Type rules for values}
+Before introducing the soundness theorem, we will first introduce the notion of typing values.
+Many of these rules can be directly derived from the type system, while we need to introduce some new rules.
+
+The type rules for values are, shown in \cref{fig:ValTypeRules}, as follows:
+
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\hline\\
+		\runa{Constant}\\[0.2cm]
+			\inference[]{}
+				{\Gamma;\Pi\vdash  c:(\emptyset, \emptyset)}\\[1cm]
+
+		\runa{Location}\\[0.2cm]
+			\inference[]{}
+				{\Gamma;\Pi\vdash  \loc:(\delta, \kappa)}\\[1cm]
+
+		\runa{Closure}\\[0.2cm]
+			\inference[]
+				{
+					\Gamma;\Pi\vdash env \;\;\;
+					\Gamma,x^{p}:T_1;\Pi\vdash e^{p'}:T_2
+				}
+				{\Gamma;\Pi\vdash \left\langle x^{p}, e^{p'}, env \right\rangle^{p''}:T_1\rightarrow T_2}\\[1cm]
+
+				\todo[inline]{The \runa{Recursive closure} type rule is pretty shady}\\
+		\runa{Recursive closure}\\[0.2cm]
+			\inference[]
+				{
+					\Gamma;\Pi\vdash env \;\;\;
+					\Gamma,x^{p}:T_1;\Pi\vdash e^{p''}:T_2
+				}
+				{\Gamma;\Pi\vdash \left\langle x^{p}, f^{p'}, e^{p''}, env \right\rangle^{p_3}:T_1\rightarrow T_2}\\[1cm]
+
+		\runa{Unit}\\[0.2cm]
+			\inference[]{}
+			{\Gamma;\Pi\vdash  ():(\delta, \kappa)}\\[0.5cm]
+		\hline
+	\end{tabular}
+	\caption{Type rules for values}
+	\label{fig:ValTypeRules}
+\end{figure}
+
+\paragraph{Constants}
+The first type rule for constants, \runa{Constant}, is nearly identical to \runa{Const}, where the only difference is that \runa{Const} is for a constant occurrence, and \runa{Constant} is for a constant.
+
+\paragraph{Locations}
+The location type rule, \runa{Location}, is given to a base type, where $\kappa\neq\emptyset$ as there must be exist a corresponding internal variable.
+
+\todo[inline]{The \runa{Closure} rule should be discussed further, mostly in regards to the typing of $env$}
+\paragraph{Closure}
+The closure type rule, \runa{Closure}, types a closure with the function type.
+This rule is similar to the \runa{Abs} rule, where the input type is $T_1$ and the body produces the type $T_2$.
+In addition, it also types the environment $env$, where this typing is an agreement between the variable occurrences in $\Gamma$ and variables in $env$.
+
+\paragraph{Recursive closure}
+ss
+
+\paragraph{Unit}
+The unit type rule, \runa{Unit}, only appears in the \runa{Ref read} rule, when writing to a reference.
+This rule retains the dependencies used to evaluate the left-hand side of the write rule.
+
+\end{document}
