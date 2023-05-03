@@ -1,29 +1,32 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \section{Language}\label{sec:lang}
-In this section, we will present a subset of ReScript, which is based on the OCaml family.
-The language introduced, contains the typical lambda expressions, bindings, pattern matching, and mutability.
-For the purpose of the type system that will be presented later, we also extends to language with program points, such that each expression has its own unique program point, which we call syntactic occurrences.
+This section will introduce a functional programming language, based on a subset of ReScript.
+The language presented here is basically a $\lambda$-calculus with bindings, pattern matching and mutability.
+As the purpose of the dependency analysis is to analyse each subexpression of a program and differentiate them, the language is extended to label all expressions and subexpression.
+For the sake of the rest of the paper, we call the label a program point.
+When labelling a syntactical element or semantical element, we call it an occurrence, such that the syntactical occurrences makes up the program, an is thus labelled expressions, while semantical occurrences are then variables and locations.
 
-The occurrences is used in the type system to analyse and distinguish between expressions, where there is syntactic occurrences, that is expressions, and semantic occurrences, those are variables and locations.
+In the rest of the paper, we make a distinction between labelled and unlabelled expressions, such that a term is a labelled expression, and unlabelled expressions are just called expressions.
+
+The rest of this section will first formally introduce the abstract syntax for the language, and then the semantics.
+The semantics introduced here is an operational big-step semantics where we add the notion of program points and a mechanism for collecting dependencies.
+%The main purpose of adding these two notions is to compare it with the dependency system, introduced later, and can thus be safely removed to obtain a 
 
 \subsection{Abstract syntax}
-In this section we will introduce the abstract syntax, based on (previous paper), with some notable changes.
-We reintroduce the syntactic categories as the previous paper, that is, \cat{Con} denotes the category of constants and \cat{Exp} denotes the category of expressions.
-Where $c \in \cat{Con}$ and $e\in\cat{Exp}$.
+We will now introduce the abstract syntax for the language with changes compared to the previous work, found in \cite{DVNicky}.
+We will first introduce the syntactic categories, as also done \cite{DVNicky}, and then introduce the abstract syntax.
 
-We introduce a syntactic category for terms, denoted as $t\in\cat{Term}$, and a syntactic category for locations, denoted as $\loc\in\cat{Loc}$.
-The syntactic categories for variables is changed, compared to there previous paper, such that there are placeholder and imperative variables.
-The placeholder variables, denoted \cat{Var}, are variables from abstractions and bindings where we then have $x,\;f\in\cat{Var}$.
-The syntactic category for program point are denoted as $p\in\cat{P}$.
+Let the Syntactic category $c\in\cat{Con}$ denotes the category of constants, $t\in\cat{Term}$ denote the category of terms, and $e\in\cat{Exp}$ denotes the category of expressions.
+The syntactic category for program points is denoted by $p\in\cat{P}$, for variables is denoted by $x,\;f\in\cat{Var}$, and locations are denoted as $\loc\in\cat{Loc}$.
 \bigskip
 
-As explained earlier, the language presented here introduces the notion of occurrences.
-We firstly introduce a notion of labelling for expressions, identifiers and locations, where we write $e^p$ for expressions labelled with a program point, and are similar to identifiers and locations.
-We further also introduce a notion for categories and sets that represent occurrences, where they are labelled with the category for program points \cat{P}, i.e., for expressions \cat{Exp}, we then have the category for expression occurrences $e^p\in\cat{Exp}^P$.
+We introduce the notion for a category labelled with program points, such that, for \cat{Exp} we have $\cat{Exp}^P=\cat{Exp}\times\cat{P}$.
+We also labels occurrences in a similar way, such that, for \cat{Exp} we have $e^p\in\cat{Exp}^P$, if $e\in\cat{Exp}$ and $p\in\cat{P}$.
+%We also introduce a notion for categories that represent occurrences, where they are labelled with the category for program points \cat{P}, i.e., for expressions \cat{Exp}, we then have the category for expression occurrences $e^p\in\cat{Exp}^P$.
 
-We can then properly define the occurrences, where we introduce 2 types of occurrences, that is, for syntactical occurrences, denoted as $e^p\in\cat{Exp}^P$, and semantical occurrences.
-The semantical occurrences is further divided into two types, for identifiers and locations and denoted as $x^p,\;f^p\in\cat{Var}^P$ and $\loc^p\in\cat{Loc}^P$ respectively.
+%We can then properly define the occurrences, where we introduce 2 types of occurrences, that is, for syntactical occurrences, denoted as $e^p\in\cat{Exp}^P$, and semantical occurrences.
+%The semantical occurrences is further divided into two types, for identifiers and locations and denoted as $x^p,\;f^p\in\cat{Var}^P$ and $\loc^p\in\cat{Loc}^P$ respectively.
 
 The formation rules is then defined, as in \cref{fig:coresyntax}:
 
@@ -62,83 +65,86 @@ The formation rules is then defined, as in \cref{fig:coresyntax}:
 	\label{fig:coresyntax}
 \end{figure}
 
-Most of these formation rules are similar to (previous paper) there are, however, some changes made in regards to how pattern matching is presented.
-Some of the notable constructs is further explained below.
-
-\paragraph{Constants}
-The constants are either natural numbers $n$, boolean values $b$, or functional constants.
-For each functional constant we introduce a function $apply$, that for each constant returns the result of applying a constant to its arguments.
-Note that, for functional constant that take two or more arguments, $apply$ should be used twice, such that, as an example for $PLUS$ we have:
-$$apply(apply(PLUS,2),2)=2+2$$
+Some notable constructs is further explained below.
 
 \paragraph{Abstractions}
-denotes functions with a parameter $x$ and body $t$, where $x\in\Var$.
+Abstractions denotes functions with a parameter $x$ and body $t$, such that $x\in\Var$.
 Here, abstractions use juxtaposition of expressions, where abstractions have exactly one argument.
 
-\paragraph{bindings}
-are immutable and are done through local declaration, which can be recursive or non-recursive by the use of the $rec$ keyword.
+\paragraph{Constants}
+Constants are either natural numbers $n$, boolean values $b$, or functional constants.
+For each functional constant we introduce a function $apply$, that for each constant returns the result of applying a constant to its arguments.
+Note that, as the abstractions only take a single argument, the same should also apply for the $apply$ function, where if a functional takes more than one argument $apply$ should thus be used twice, as an example for $PLUS$ we have:
+$$apply(apply(PLUS,2),2)=2+2$$
+
+\paragraph{Bindings}
+Bindings are immutable and are done through local declaration, which can be recursive or non-recursive by the use of the $rec$ keyword.
 A binding is done on placeholder variables, such that $x,\;f\in\IVar$.
 Here, if $\mbox{let}\;x\;t_1\;t_2$ has an occurrence of $x$ in $t_1$ it is not treated as a recursive call to $x$ and $x$ should thus be specified elsewhere.
 If we add the $rec$ keyword, then if $x$ appears in $t_1$, it should thus be treated as a recursive call to $x$.
 
 \paragraph{Mutability}
-The mutability is handled as references, that is, for the constructs $\mbox{ref}\;t$, $t_1\;:=\;t_2$, and $!t$, for declaring a new location, writing to a location, or reading from a location, respectively.
-These constructs wraps the mutability to a semantic construct for locations, which are handled on runtime.
-Note that, even though bindings are immutable, a variable can still be bound to a location.
-This does not make the variable mutable, as it will then be bound to this location, and cannot be bound to another value or location.
+Mutability are handled as references, that is, for the constructs $\mbox{ref}\;t$, $t_1\;:=\;t_2$, and $!t$, for declaring a new location, writing to a location, or reading from a location, respectively.
+These constructs wraps the mutability to a semantical construct for locations.
+%Note that, even though bindings are immutable, a variable can still be bound to a location.
+%This does not make the variable mutable, as it will then be bound to this location, and cannot be bound to another value or location.
 
 \paragraph{Pattern matching}
-The pattern matching construct matches a term $t$ with the pattern in $\pi$.
+The pattern matching construct matches a term $t$ with the patterns in $\pi$.
 The pattern matching is done by matching on each pattern, until a match is found, in the order given by the syntax.
 A pattern is of the form $(s\;t)$, with at least one pattern.
 We also denote $|\pi|$ as the number of pattern that occurs in $\pi$.
 
-\subsection{Semantics}\label{sec:sem}
+\subsection{Collection semantics}\label{sec:sem}
 We will now introduce the big-step semantics extended with the collection of occurrence dependencies.
-The collection of occurrence dependencies is done through the dependency function $w$, defined as:
+This collection of occurrence dependencies is done through the dependency function $w$, defined as:
 
-$$w:\cat{Var}^P\cup\cat{Loc}^P\rightharpoonup\Pow{\cat{Loc}^P}\times\Pow{\cat{Var}^P}$$
+$$w:\cat{Loc}^P\cup\cat{Var}^P\rightharpoonup\Pow{\cat{Loc}^P}\times\Pow{\cat{Var}^P}$$
 
-A lookup in the dependency function are $w(x^p)=(\{\loc^{p_1},\cdots,\loc^{p_n}\},x_1^{p'_1},\cdots,x_y^{p'_y})$.
-In the rest of the paper, we will denotes the dependency pair by $(L,V)$, where $L$ is a set of location occurrences and $V$ is the set of variable occurrences.
+A lookup in the dependency function are $w(x^p)=(\{\loc^{p_1},\cdots,\loc^{p_n}\},\{x_1^{p'_1},\cdots,x_y^{p'_y}\})$.
+We denote the pair retrieved from the dependency function as $(L,V)$, where $L\subseteq\Pow{\cat{Loc}^P}$ is a set of location occurrences and $V\subseteq\Pow{\cat{Var}^P}$ is a set of variable occurrences.
 
-In the big-step semantics, shown later, the dependency function $w$ models a control flow, as all bindings for an occurrence, $u^p$, is always bound to occurrence at an earlier point, i.e., to occurrences that is evaluated before $u^p$.
+The dependency function $w$ can be used to derive a control flow, as all bindings of an occurrence, $u^p\in\cat{Loc}^P\cup\cat{Var}^P$, is always bound to occurrences that is evaluated before $u^p$.
+This control flow can thus be used to derive an ordering $\sqsubseteq_w$ of program points, defined as:
+
+%In the big-step semantics, shown later, the dependency function $w$ models a control flow, as all bindings for an occurrence, $u^p$, is always bound to occurrence at an earlier point, i.e., to occurrences that is evaluated before $u^p$.
 
 \begin{definition}[$\sqsubseteq_w$]
-	Let $w:\cat{Var}^P\cup\cat{Loc}^P\rightharpoonup\Pow{\cat{Loc}^P}\times\Pow{\cat{Var}^P}$ be a dependency function.
-	Then $\sqsubseteq_w\subseteq\cat{P}\times\cat{P}$, is then given by:
+	Let $w:\cat{Loc}^P\cup\cat{Var}^P\rightharpoonup\Pow{\cat{Loc}^P}\times\Pow{\cat{Var}^P}$ be a dependency function.
+	Then $\sqsubseteq_w\subseteq\cat{P}\times\cat{P}$, is given by:
 	$$p_2\sqsubseteq p_1$$
 	iff
 	\begin{itemize}
 		\item $u_1^{p_1}\in dom(w)\Rightarrow\exists u_2^{p_2}\;\dot{\in}\; w(u_1^{p_1})$, or
 		\item $p_1=p_2$
 	\end{itemize}
-	Where $u^{p'}\;\dot{\in}\;w(v^{p''})$ is given by:
-	$w(v)=(L,V)$ and $u^{p'}\in L\wedge u^{p'}\in V$
+	Where $u^{p}\;\dot{\in}\;w(v^{p'})$, for $u^p,v^{p'}\in\cat{Loc}^P\cup\cat{Var}^P$, is given by:
+	if $w(v^{p'})=(L,V)$ then $u^{p}\in L\vee u^{p}\in V$
 \end{definition}
 
 This definition is used to define an order between two program points, in respect to the dependency function $w$.
 
-\begin{definition}[Partial order]
+\begin{definition}[Partial order of $w$]
 	We say that $w$ is po-pular iff $\sqsubseteq_w$ is a partial order.
 \end{definition}
-We then say that $w$ is a partial order, called po-polar, if the order relation $\sqsubseteq_w$ gives a partial order relation.
+%We then say that $w$ is a partial order, called po-polar, if the order relation $\sqsubseteq_w$ gives a partial order relation.
 
-With the dependency function defined, we can now present the transition system, which is similarly defined in (previous paper), and are of the form:
+With the dependency function defined, the transition system can now be presented:
+%we can now present the transition system, which is similarly defined in (previous paper), and are of the form:
 \begin{align*}
 env\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle
 \end{align*}
-Where $env\in\Env$ and $sto\in\Sto$
-This should be read as, given the store $sto$, dependency function $w$, and the previous program point $p$, the syntactic occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, the liveness pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
+Where $env\in\cat{Env}$ is the environment and $sto\in\cat{Sto}$ is the store.
+This should be read as, given the store $sto$, dependency function $w$, and the previous program point $p$, the occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, the dependency pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
 
 The environment keeps the bindings currently known, such that:
-$$\Env=\Var\cup\IVar\rightharpoonup\Val$$
+$$\cat{Env}=\cat{Var}\rightharpoonup\cat{Values}$$
 
-The store keeps the location bindings known and a placeholder $next$ that represent the next free location.
+The store keeps the location bindings known, and a placeholder $next$ that represent the next free location.
 
-$$\Sto=\Loc\cup\{next\}\rightharpoonup\Val$$
+$$\cat{Sto}=\cat{Loc}\cup\{next\}\rightharpoonup\cat{Values}$$
 
-Where $\Val$ is similarly defined, as in (previous paper):
+Where $\cat{Values}$ is defined as:
 \begin{itemize}
 	\item All constants are values.
 	\item Locations are values.
@@ -152,24 +158,25 @@ In other words, we have
 	&(\Var\cup\IVar)\times(\Var\cup\IVar)\times\Exp\times\Val\cup()
 \end{align*}
 
-We, similarly to (prev paper), assume the existence of a function $new:\Loc\rightharpoonup\Loc$, which takes a location and finds the next location.
-This function is only used on the $next$ location placeholder to find the next free location, i.e. a location that is not already bound in $sto$.
+We also assume the existence of a function $new:\cat{Loc}\rightharpoonup\cat{Loc}$, which takes a location and finds the next location.
+This function is only used on the placeholder location, $next$, to find the next free location, i.e. a location that is not already bound in $sto$.
 
 Note that, in the semantics we refer to syntactic occurrences, $e^p$, directly instead of terms.
-This is done, as many transition rules when evaluating, evaluates to the program point of the occurrence.
+This is done as many transition rules, when evaluating, evaluates to the program point of the occurrence.
 \bigskip
 
-Before introducing some transition rules, we first need to introduce a function that for a given semantical occurrence, $x^p$ or $\loc^p$, finds the closest semantical occurrence.
+Before introducing some transition rules, we first need to introduce a function that, for a given occurrence $x^p$ or $\loc^p$, finds the closest occurrence.
 It should be noted that, for an occurrence $x^p$, the closest occurrence should be for the same variable, and the same holds for locations.
 
 \begin{definition}[$inf_p$ function]
-	Let $x^p$ be a semantical occurrence and $w$ be a dependency function that is po-polar, then $inf_p(x^p,w)=x^{p'}$ is as follows:
+	Let $x^p$ be a occurrence and $w$ be a dependency function that is po-pular, then $\inf(x^p,w)=x^{p'}$ is as follows:
 	\begin{align*}
-		inf_p(x^p,w)=\forall x^{p''}\in dom(w). p''\sqsubseteq_w p\Rightarrow \exists x^{p'}\in dom(w).p''\sqsubseteq_w p\wedge p'\sqsubseteq_w p''
+		\inf(x^p,w)=x^q \;\;\; \mbox{if} \; q=\inf\{q'\mid x^{q'}\in dom(w), q'\sqsubseteq_w p\}
 	\end{align*}
 \end{definition}
 \bigskip
 
+\todo[inline]{Rewrite rest of this section}
 Only a couple of interesting transition rules will be shown here, the rest can be found in \cref{App:ColSem}.
 The first transition rule, $\runa{Con}$, is the simplest rule that shows part of the transition system.
 Here, as a constant is directly evaluated there is no side effects, the pair $(L,V)$ is empty, and the program point reached after evaluating $c^p$ is $p$.
