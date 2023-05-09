@@ -1,0 +1,236 @@
+\documentclass[../../master.tex]{subfiles}
+\begin{document}
+\section{Notes}
+
+\subsection{Basis}
+%\begin{definition}[Type Base for dependencies]
+%	The type base $\delta^0$
+%\end{definition}
+
+\begin{definition}[Type Base for aliasing]
+	The type base $\kappa^0$ is a partition of $\cat{Var}\cup\cat{IVar}$, such that:
+	$$\cat{Var}\subseteq\bigcup_{i\in I}(\kappa_i^0)$$
+	and that $\kappa_i^0\neq\kappa_j^0$ for all $i\neq j$
+\end{definition}
+
+\subsection{Type environment}
+\begin{definition}[Type Environment]
+	The type environment $\Gamma$ is a partial function $\Gamma:Id^P\rightharpoonup TYPES$
+\end{definition}
+
+\begin{definition}[Approximated order of program points]
+	The approximated order of program points $\Pi$, where:
+	\begin{itemize}
+		\item  $p\sqsubseteq p'\in\Pi$, if $p$ is an earlier or the same program point as $p'$
+		\item The order of program points is transitive, such that if $p\sqsubseteq p'\in\Pi$ and $p'\sqsubseteq p''\in\Pi$ then $p\sqsubseteq p''\in\Pi$.
+	\end{itemize}
+\end{definition}
+
+\subsection{Agreement}
+\todo[inline]{Something is fishy for the first agreement, since $w$ collects all dependencies (also local bindings), while $\Gamma$ only knows about local bindings inside the "scope" of $e_2$ in the \runa{Let} rules}
+\begin{definition}[Dependency environment agreement]
+	Let $w$ be a dependency function, $env$ be an environment, and $\Gamma$ be a type environment.
+	We say that:
+	$$(w,env)\models\Gamma$$
+	if 
+	\begin{itemize}
+		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow w(x^p)=(L,V)\wedge\Gamma(x^p)=T.(env,(L,V))\models(\Gamma,T)$
+		\item $\forall \loc^p \in dom(w).\exists\nu x^{p'}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p'})=T.(env,(L,V))\models(\Gamma,T)$
+	\end{itemize}
+\end{definition}
+
+\begin{definition}[Type agreement]
+	Let $env$ be an environment, $(L,V)$ be a dependency pair, $\Gamma$ be the dependency base, and $T$ be a type.
+	We say that:
+	$$(env,(L,V))\models(\Gamma,T)$$
+	if
+	\begin{itemize}
+		\item $T=T_1\rightarrow T_2$ then:
+		\begin{itemize}
+			\item $(w,env,(L,V))\models(\Gamma,T_1)\Rightarrow(w,env,(L,V))\models(\Gamma,T_2)$
+		\end{itemize}
+		\item $T=(\delta,\kappa)$ then:
+		\begin{itemize}
+			\item $V\subseteq\delta$,
+			\item For all $\loc^p\in L$ where $\exists x\in dom(env).env(x)=\loc$, we then have $\{x\in dom(env)\mid env(x)=\loc\}\subseteq \kappa_i^0$ for a $\kappa_i^0\in\kappa$
+			\item For all $\loc^p\in L$ where $\forall x\in dom(env).env(x)\neq \loc$, we then have a $\kappa_i^0\in\kappa$, where for every $u\in\kappa_i^0$ is an internal variable, i.e., $u\in\cat{IVar}$
+		\end{itemize}
+	\end{itemize}
+\end{definition}
+
+\subsection{Judgement}
+\begin{definition}[Environment judgement]
+	Let $env$ be an environment, $\Gamma$ be a type environment, and $\Pi$ be the approximated order of program points.
+	We say that:
+	$$\Gamma;\Pi\vdash env$$
+	if 
+	\begin{itemize}
+		\item For all $x\in dom(env)$ and for all $x^p\in dom(\Gamma).\Gamma(x^p)=T_x$ then 
+			$$\Gamma,\Pi\vdash env(x):T_x$$
+	\end{itemize}
+\end{definition}
+
+\subsection{Type rules for values}
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\hline\\
+		\runa{Constant}\\[0.4cm]
+			\inference[]{}
+				{\Gamma;\Pi\vdash  c:(\emptyset, \emptyset)}\\[1cm]
+
+		\runa{Location}\\[0.4cm]
+			\inference[]{}
+				{\Gamma;\Pi\vdash  \loc:(\delta, \kappa)}\\[1cm]
+
+		\runa{Closure}\\[0.4cm]
+			\inference[]
+				{
+					\Gamma;\Pi\vdash env \\
+					\Gamma,x^{p}:T_1;\Pi\vdash e^{p'}:T_2
+				}
+				{\Gamma;\Pi\vdash \left\langle x^{p}, e^{p'}, env \right\rangle^{p''}:T_1\rightarrow T_2}\\[1cm]
+
+		\runa{Recursive closure}\\[0.4cm]
+			\inference[]
+				{
+					\Gamma;\Pi\vdash env \\
+					\Gamma,x^{p}:T_1,f^{p'}:T_1\rightarrow T_2;\Pi\vdash e^{p''}:T_2
+				}
+				{\Gamma;\Pi\vdash \left\langle x^{p}, f^{p'}, e^{p''}, env \right\rangle^{p_3}:T_1\rightarrow T_2}\\[1cm]
+
+		\runa{Unit}\\[0.4cm]
+			\inference[]{}
+			{\Gamma;\Pi\vdash  ():(\delta, \kappa)}\\[0.5cm]
+		\hline
+	\end{tabular}
+	\caption{Type rules for values}
+	\label{fig:ValTypeRules}
+\end{figure}
+
+\subsection{Proof}
+\begin{definition}[Substitutions]
+	Suppose $e^p$ is an occurrence, then we say that
+	$$e^p[x\mapsto v]$$
+	is a substitution of $v$ for all occurrences of the variable $x$ on the structure of $e^p$ defined by:
+	\begin{align*}
+		c^p[x\mapsto v]&=c^p\\
+		x^p[x\mapsto v]&=	\left\{\begin{matrix}
+									y & \mbox{if}\;y \neq x\\ 
+									v & \mbox{if}\;y = x\\ 
+								\end{matrix}\right.\\
+		[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p[x\mapsto v]&=	\left\{\begin{matrix}
+																[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p & \mbox{if}\;y = x\\ 
+																[\mbox{let}\;y\;e_1^{p'}[x\mapsto v]\;e_2^{p''}[x\mapsto v]]^p & \mbox{if}\;y \neq x\\ 
+															\end{matrix}\right.\\
+		[\lambda\;y\;e_1^{p'}]^p[x\mapsto v]&=	\left\{\begin{matrix}
+																[\lambda\;y\;e_1^{p'}]^p & \mbox{if}\;y = x\\ 
+																[\lambda\;y\;e_1^{p'}[x\mapsto v]]^p & \mbox{if}\;y \neq x\\ 
+															\end{matrix}\right.\\
+	\end{align*}
+
+\end{definition}
+
+\begin{lemma}[Type substitution]
+	Suppose that $e^p$ is an occurrence, that 
+	$\Gamma,x^{p'}:T_1;\Pi\vdash e^p:T$ 
+	and 
+	$\Gamma;\Pi\vdash v:T_1$.
+	Then we have that
+	$\Gamma;\Pi\vdash e^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
+	where $x^{p'}\not\in dom(\Gamma)$.
+\end{lemma}
+\begin{proof}
+	The proof proceeds by induction on the height for the derivation tree of the judgement $\Gamma,\Pi\vdash e^p:T$.
+	
+	In the base case we have the \runa{Cons} and \runa{Var} rule:
+	\begin{description}
+		\item[\runa{Cons}] Here $e^p=c^p$, since $c^p\begin{Bmatrix} ^v/_x \end{Bmatrix}=c^p$ and we have $\Gamma;\Pi\vdash v:(\emptyset,\emptyset)$ this case follows immediately.
+
+		\item[\runa{Var}] Here $e^p=x^p$, since $x^p\begin{Bmatrix} ^v/_x \end{Bmatrix}=v$ and we have $\Gamma;\Pi\vdash v:T$ this case follows immediately.
+	\end{description}
+
+	Next, follows the induction step:
+	\begin{description}
+		\item[\runa{Abs}] Here $e^p=[\lambda\;y\;e_1^{p'}]^p$, $x\neq y$, and $e^p\begin{Bmatrix} ^v/_x \end{Bmatrix}=[\lambda\;y\;e_1^{p'}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
+			By the induction hypothesis, we have $\Gamma,y:T_1;\Pi\vdash e_1^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ where $x\notin dom(\Gamma)$.
+			By using \runa{Abs}, we get $[\lambda\;y\;e_1^{p'}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
+
+		\item[\runa{App}] Here $e^p=[e_1^{p'}\;e_2^{p''}]^p$ and $e^p\begin{Bmatrix} ^v/_x \end{Bmatrix}=[e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
+			By the induction hypothesis, we have $\Gamma;\Pi\vdash e_1^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ and $\Gamma;\Pi\vdash e_2^{p''}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ where $x\notin dom(\Gamma)$.
+			By using \runa{App}, we get $[e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
+
+		\item[\runa{Let-1}] Here $e^p=[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p$, $x\neq y$, and $e^p\begin{Bmatrix} ^v/_x \end{Bmatrix}=[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
+			By the induction hypothesis, we have $\Gamma;\Pi\vdash e_1^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ and $\Gamma,y:(\delta,\kappa\cup\{y\});\Pi\vdash e_2^{p''}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ where $x\notin dom(\Gamma)$.
+			By using \runa{Let-1}, we get $[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
+
+		\item[\runa{Let-2}] Here $e^p=[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p$, $x\neq y$, and $e^p\begin{Bmatrix} ^v/_x \end{Bmatrix}=[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
+			By the induction hypothesis, we have $\Gamma;\Pi\vdash e_1^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ and $\Gamma,y:T_1;\Pi\vdash e_2^{p''}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ where $x\notin dom(\Gamma)$.
+			By using \runa{Let-2}, we get $[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
+
+		\item[\runa{Let rec}] Here $e^p=[\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p$, $x\neq y$, and $e^p\begin{Bmatrix} ^v/_x \end{Bmatrix}=[\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
+			By the induction hypothesis, we have $\Gamma;\Pi\vdash e_1^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ and $\Gamma,f:T_1\rightarrow T_2;\Pi\vdash e_2^{p''}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ where $x\notin dom(\Gamma)$.
+			By using \runa{Let rec}, we get $[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
+	\end{description}
+\end{proof}
+
+\begin{theorem}[Soundness of type system]
+	Suppose $e^p$ is an occurrence where
+	\begin{itemize}
+		\item $\Gamma,\Pi\vdash e^p : T$, and 
+		\item $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w',sto',(L,V),p''\right\rangle$
+	\end{itemize}
+	and that $(w,env)\models\Gamma$.
+	Then we have that:
+	\begin{itemize}
+		\item $\Gamma,\Pi\vdash v : T$
+		\item $(w',env)\models\Gamma$
+		\item $(env,(L,V))\models (\Gamma,T)$
+	\end{itemize}
+\end{theorem}
+\begin{proof}
+	The proof proceeds by induction on the height for the derivation tree for $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,L,V,p\right\rangle$ and $\Gamma,\Pi\vdash e^p:T$
+	In the base case we have the \runa{Cons} and \runa{Var} rule:
+	\begin{description}
+		\item[\runa{Cons}] Here $e^p=c^p$, where
+			\begin{itemize}
+				\item $\Gamma,\Pi\vdash c^p : (\emptyset,\emptyset)$, and 
+				\item $env\vdash\left\langle c^p,w,sto,p'\right\rangle\rightarrow\left\langle c,w',sto',(\emptyset,\emptyset),p\right\rangle$
+			\end{itemize}
+			and $(w,env)\models\Gamma$.
+			We then immediately get:
+			\begin{itemize}
+				\item $\Gamma,\Pi\vdash c : (\emptyset,\emptyset)$
+				\item $(w,env)\models\Gamma$
+				\item $(env,(\emptyset,\emptyset))\models (\Gamma,(\emptyset,\emptyset))$
+			\end{itemize}
+			Here, the conclusion is immediate, since there is no extensions to $w$ or $env$ and the type is $(\emptyset,\emptyset)$.
+
+		\item[\runa{Var}] Here $e^p=x^p$, where
+			\begin{itemize}
+				\item $\Gamma,\Pi\vdash x^p : T\sqcup (\{x^p\},\emptyset)$, and 
+				\item $env\vdash\left\langle x^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w',sto',(\emptyset,\emptyset),p\right\rangle$
+			\end{itemize}
+			and $(w,env)\models\Gamma$.
+			Since $(w,env)\models\Gamma$, and there is no update to $w$, we then immediately get:
+			\begin{itemize}
+				\item $\Gamma,\Pi\vdash v : T$
+				\item $(w,env)\models\Gamma$
+				\item $(env,(L,V)\models (\Gamma,T)$
+			\end{itemize}
+	\end{description}
+
+	Next, follows the induction step:
+	\begin{description}
+		\item[\runa{Abs}] Here $e^p=[\lambda\;y\;e_1^{p'}]^p$
+
+		\item[\runa{App}] Here $e^p=[e_1^{p'}\;e_2^{p''}]^p$ 
+
+		\item[\runa{Let-1}] Here $e^p=[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p$
+
+		\item[\runa{Let-2}] Here $e^p=[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p$
+
+		\item[\runa{Let rec}] Here $e^p=[\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p$
+	\end{description}
+\end{proof}
+\end{document}
