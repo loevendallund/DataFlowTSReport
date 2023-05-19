@@ -96,6 +96,7 @@ The intuition behind an approximated order of program points is the execution or
 		\item $T=T_1\rightarrow T_2$ then:
 		\begin{itemize}
 			\item $(w,env,(L,V))\models T_1\Rightarrow(w,env,(L,V))\models T_2$
+			\todo[inline]{The $T_1\Rightarrow T_2$ agreement part is wrong, either we need to remove the agreement for $T_1$ part or modify the \runa{Var} rule}
 		\end{itemize}
 		\item $T=(\delta,\kappa)$ then:
 		\begin{itemize}
@@ -407,11 +408,11 @@ The intuition behind an approximated order of program points is the execution or
 				\begin{tabular}{l}
 					\InfName{App}\\[0.2cm]
 					\inference[]
-						{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v',w_1, sto_1,(L_1,V_2),p' \right\rangle &\\
+						{env \vdash \left\langle e_1^{p'},sto,w,p_3 \right\rangle \rightarrow \left\langle v',w_1, sto_1,(L_1,V_2),p' \right\rangle &\\
 						env \vdash \left\langle e_2^{p''},w_1, sto_1,p' \right\rangle \rightarrow \left\langle v'',w_2, sto_2,(L_2,V_2),p'' \right\rangle &\\
 						env[x\mapsto v''] \vdash \left\langle e^{p_1},w_2, sto_2, p'' \right\rangle \rightarrow \left\langle v,w', sto',(L_3,V_3),p_1 \right\rangle}
 						{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p},sto,w,p_3 \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p \right\rangle}\\
-					Where $v=\left\langle x,e^{p_1},env\right\rangle$, $L=L_1\cup L_2\cup L_3$, and $V=V_1\cup V_2\cup V_3$\\[1cm]
+					Where $v'=\left\langle x,e^{p_1},env\right\rangle$, $L=L_1\cup L_2\cup L_3$, and $V=V_1\cup V_2\cup V_3$\\[1cm]
 				\end{tabular}
 			\end{figure}
 			We need to show for: \runa{1} $(w',env)\models\Gamma$, \runa{2} $\Gamma;\Pi\vdash v:T$, and \runa{3} $((L,V),env)\models(\Gamma,T)$.
@@ -440,7 +441,7 @@ The intuition behind an approximated order of program points is the execution or
 						\item[\runa{*1}] $\Gamma,\Pi\vdash v':T_1\rightarrow T_2$
 						\item[\runa{*2}] $\Gamma,\Pi\vdash v'':T_1$
 					\end{description}
-					Where we then need to show that $\Gamma,\Pi\vdash v:T_2$ where $v=\left\langle x,e^{p_1},env\right\rangle$, which get concluded by \runa{Closure}:
+					Where we then need to show that $\Gamma,\Pi\vdash v:T_2$ where $v=\left\langle x,e^{p_1},env\right\rangle$, which got concluded by \runa{Closure}:
 					\begin{figure}[H]
 						\setlength\tabcolsep{8pt}
 						\begin{tabular}{l}
