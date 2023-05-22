@@ -12,12 +12,12 @@ $$
 		\end{matrix}\right.
 $$
 
-\begin{definition}[Free variables]
+\begin{definition}[Free variables]\label{def:fv}
 	The set of free variables is given by:
 	\begin{align*}
 		fv(x^p)&=\{x\}\\
 		fv(c^p)&=\emptyset\\
-		fv([\lambda\;y.e_1^{p'}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\backslash\{y\}\\
+		fv([\lambda\;y.e_1^{p'}]^p)&=fv(e_1^{p''})\backslash\{y\}\\
 		fv([e_1^{p'}\;e_2^{p''}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\\
 		fv([\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\backslash\{y\}\\
 		fv([\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\backslash\{f\}\\
@@ -179,118 +179,7 @@ The intuition behind an approximated order of program points is the execution or
 	\label{fig:ValTypeRules}
 \end{figure}
 
-\subsection{Proof}
-\iffalse
-\begin{definition}[Substitutions]
-	Suppose $e^p$ is an occurrence, then we say that
-	$$e^p[x\mapsto v]$$
-	is a substitution of $v$ for all occurrences of the variable $x$ on the structure of $e^p$ defined by:
-	\begin{align*}
-		c^p[x\mapsto v]&=c^p\\
-		x^p[x\mapsto v]&=	\left\{\begin{matrix}
-									y & \mbox{if}\;y \neq x\\ 
-									v & \mbox{if}\;y = x\\ 
-								\end{matrix}\right.\\
-		[\lambda\;y\;e_1^{p'}]^p[x\mapsto v]&=
-			\left\{\begin{matrix}
-				[\lambda\;y\;e_1^{p'}]^p & \mbox{if}\;y = x\\ 
-				[\lambda\;y\;e_1^{p'}[x\mapsto v]]^p & \mbox{if}\;y \neq x\\
-			\end{matrix}\right.\\
-		[e_1^{p'}\;e_2^{p''}]^p[x\mapsto v]&=[e_1^{p'}[x\mapsto v]\;e_2^{p''}[x\mapsto v]]^p\\
-		[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p[x\mapsto v]&=	
-			\left\{\begin{matrix}
-				[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p & \mbox{if}\;y = x\\ 
-				[\mbox{let}\;y\;e_1^{p'}[x\mapsto v]\;e_2^{p''}[x\mapsto v]]^p & \mbox{if}\;y \neq x\\ 
-			\end{matrix}\right.\\
-		[\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p[x\mapsto v]&=
-			\left\{\begin{matrix}
-				[\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p & \mbox{if}\;f = x\\ 
-				[\mbox{let rec}\;f\;e_1^{p'}[x\mapsto v]\;e_2^{p''}[x\mapsto v]]^p & \mbox{if}\;f \neq x\\ 
-			\end{matrix}\right.\\
-		[\mbox{case}\;e^{p'}\;\pi^{p''}]^p[x\mapsto v]&=[\mbox{case}\;(e^{p'}[x\mapsto v])\;(\pi[x\mapsto v])]^p\\
-		[\mbox{ref}\;e^{p'}]^p[x\mapsto v]&=[\mbox{ref}\;(e^{p'}[x\mapsto v])]^p\\
-		[!e^{p'}]^p[x\mapsto v]&=[!(e^{p'}[x\mapsto v])]^p\\
-		[e_1^{p'}\;:=\;e_2^{p''}]^p[x\mapsto v]&=[e_1^{p'}[x\mapsto v]\;e_2^{p''}[x\mapsto v]]^p\\
-	\end{align*}
-\end{definition}
-
-\begin{definition}[Pattern substitutions]
-	Suppose $\pi$ is patterns construct, we say that
-	$$\pi[x\mapsto v]$$
-	is a substitution of $v$ for all occurrences of the variable $x$ on the structure of $\pi$ defined by:
-	\begin{align*}
-		[(s\;e^{p'})\;\pi][x\mapsto v]&=[(s\;(e^{p'}[x\mapsto v]))\;(\pi[x\mapsto v])]\\
-		[(s\;e^{p'})][x\mapsto v]&=[(s\;(e^{p'}[x\mapsto v]))]\\
-	\end{align*}
-\end{definition}
-
-\todo[inline]{The type substitution lemma only works for placeholder variables and not internal variables, which is a bit of a problem. To handle internal variables, the value $v$ should be changed when meeting a \runa{Ref write} operation, and the substitution should be on \runa{Ref read}. This can be usefull to explain the \runa{Ref} and \runa{Ref write} rules as they extend upon the global $\Gamma$}
-\begin{lemma}[Type substitution]
-	Suppose that $q$ is either an occurrence, $e^p$, or a pattern $(s\;e^p)$, that 
-	$\Gamma,x^{p'}:T_1;\Pi\vdash q:T$
-	and 
-	$\Gamma;\Pi\vdash v:T_1$.
-	Then we have that
-	$\Gamma;\Pi\vdash q\begin{Bmatrix} ^v/_x \end{Bmatrix}$
-	where $x^{p'}\not\in dom(\Gamma)$.
-\end{lemma}
-
-\begin{proof}
-	The proof proceeds by induction on the height for the derivation tree of the judgement $\Gamma,\Pi\vdash q:T$.
-	
-	In the base case we have the \runa{Cons} and \runa{Var} rule:
-	\begin{description}
-		\item[\runa{Cons}] Here $q=c^p$, since $c^p\begin{Bmatrix} ^v/_x \end{Bmatrix}=c^p$ and we have $\Gamma;\Pi\vdash v:(\emptyset,\emptyset)$ this case follows immediately.
-
-		\item[\runa{Var}] Here $q=x^p$, since $x^p\begin{Bmatrix} ^v/_x \end{Bmatrix}=v$ and we have $\Gamma;\Pi\vdash v:T$ this case follows immediately.
-	\end{description}
-
-	Next, follows the induction step:
-	\begin{description}
-		\item[\runa{Abs}] Here $q=[\lambda\;y\;e_1^{p'}]^p$, $x\neq y$, and $q\begin{Bmatrix} ^v/_x \end{Bmatrix}=[\lambda\;y\;e_1^{p'}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-			By the induction hypothesis, we have $\Gamma,y:T_1;\Pi\vdash e_1^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ where $x\notin dom(\Gamma)$.
-			By using \runa{Abs}, we get $[\lambda\;y\;e_1^{p'}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
-
-		\item[\runa{App}] Here $q=[e_1^{p'}\;e_2^{p''}]^p$ and $q\begin{Bmatrix} ^v/_x \end{Bmatrix}=[e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-			By the induction hypothesis, we have $\Gamma;\Pi\vdash e_1^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ and $\Gamma;\Pi\vdash e_2^{p''}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ where $x\notin dom(\Gamma)$.
-			By using \runa{App}, we get $[e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
-
-		\item[\runa{Let-1}] Here $q=[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p$, $x\neq y$, and $q\begin{Bmatrix} ^v/_x \end{Bmatrix}=[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-			By the induction hypothesis, we have $\Gamma;\Pi\vdash e_1^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ and $\Gamma,y:(\delta,\kappa\cup\{y\});\Pi\vdash e_2^{p''}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ where $x\notin dom(\Gamma)$.
-			By using \runa{Let-1}, we get $[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
-
-		\item[\runa{Let-2}] Here $q=[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p$, $x\neq y$, and $q\begin{Bmatrix} ^v/_x \end{Bmatrix}=[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-			By the induction hypothesis, we have $\Gamma;\Pi\vdash e_1^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ and $\Gamma,y:T_1;\Pi\vdash e_2^{p''}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ where $x\notin dom(\Gamma)$.
-			By using \runa{Let-2}, we get $[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
-
-		\item[\runa{Let rec}] Here $q=[\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p$, $x\neq y$, and $q\begin{Bmatrix} ^v/_x \end{Bmatrix}=[\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-			By the induction hypothesis, we have $\Gamma;\Pi\vdash e_1^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ and $\Gamma,f:T_1\rightarrow T_2;\Pi\vdash e_2^{p''}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ where $x\notin dom(\Gamma)$.
-			By using \runa{Let rec}, we get $[\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
-
-		\item[\runa{Case}] Here $q=[\mbox{case}\;e^{p'}\;\vec{\pi}]^p$, and $q\begin{Bmatrix} ^v/_x \end{Bmatrix}=[\mbox{case}\;e^{p'}\;\vec{\pi}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-			By the induction hypothesis, we have $\Gamma;\Pi\vdash e^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ and $\sigma(\Gamma,s_i,p',T');\Pi\vdash (s_i\;e_i^{p'})\begin{Bmatrix} ^v/_x \end{Bmatrix}$ for each $1\leq i \leq |\vec{\pi}|$, and where $x\notin dom(\Gamma)$.
-			By using \runa{Case}, we get $[\mbox{case}\;e^{p'}\;\vec{\pi}]^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
-
-		\item[\runa{Match}] Here $q=(s\;e^{p'})$, $s\neq x$, and $q\begin{Bmatrix} ^v/_x \end{Bmatrix}=(s\;e^{p'})\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-		By the induction hypothesis, we have $\Gamma;\Pi\vdash e^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$, where $x\notin dom(\Gamma)$.
-		By using \runa{Match}, we get $(s\;e^{p'})\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-
-		\item[\runa{Ref}] Here $q=[\mbox{ref}\;e^{p'}]^{p}$ and $q\begin{Bmatrix} ^v/_x \end{Bmatrix}=[\mbox{ref}\;e^{p'}]^{p}\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-		By the induction hypothesis, we have $\Gamma;\Pi\vdash e^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$, where $x\notin dom(\Gamma)$.
-		By using \runa{Ref}, we get $[\mbox{ref}\;e^{p'}]^{p}\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-
-
-		\item[\runa{Ref read}] Here $q=[!e^{p'}]^{p}$, and $q\begin{Bmatrix} ^v/_x \end{Bmatrix}=[!e^{p'}]^{p}\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-		By the induction hypothesis, we have $\Gamma;\Pi\vdash e^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$, where $x\notin dom(\Gamma)$.
-		By using \runa{Ref read}, we get $[\mbox{ref}\;e^{p'}]^{p}\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-
-		\item[\runa{Ref write}] Here $q=[e_1^{p'}\;:=\;e_2^{p''}]^{p}$, and $q\begin{Bmatrix} ^v/_x \end{Bmatrix}=[e_1^{p'}\;:=\;e_2^{p''}]^{p}\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-		By the induction hypothesis, we have $\Gamma;\Pi\vdash e_1^{p'}\begin{Bmatrix} ^v/_x \end{Bmatrix}$ and $\Gamma;\Pi\vdash e_2^{p''}\begin{Bmatrix} ^v/_x \end{Bmatrix}$, where $x\notin dom(\Gamma)$.
-		By using \runa{Ref write}, we get $[e_1^{p'}\;:=\;e_2^{p''}]^{p}\begin{Bmatrix} ^v/_x \end{Bmatrix}$.
-	\end{description}
-\end{proof}
-\fi
-
+\subsection{Lemma}
 \begin{lemma}[History]\label{lemma:His}
 	If 
 	$$env\vdash\left\langle e^{p'},w,sto,p\right\rangle\rightarrow\left\langle v,w',sto',(L,V),p''\right\rangle$$
@@ -298,15 +187,171 @@ The intuition behind an approximated order of program points is the execution or
 \end{lemma}
 \begin{proof}
 	The proof proceeds by induction on the height of the derivation tree for $env\vdash\left\langle e^{p'},w,sto,p\right\rangle\rightarrow\left\langle v,w',sto',(L,V),p''\right\rangle$.
+	\begin{description}
+		\item[\runa{Cons}] Here $e^{p'}=c^{p'}$, where
+		$$env\vdash\left\langle c^{p'},w,sto,p\right\rangle\rightarrow\left\langle c,w',sto',(\emptyset,\emptyset),p'\right\rangle$$
+		Where $w=w'$ and $sto'=sto$.
+		This case follows immediate as $dom(w')\backslash dom(w)=\emptyset$.
+
+		\item[\runa{Var}] Here $e^{p'}=x^{p'}$, where
+		$$env\vdash\left\langle x^{p'},w,sto,p'\right\rangle\rightarrow\left\langle v,w',sto',(L,V),p'\right\rangle$$
+		Where $w=w'$, $sto'=sto$, $env(x)=v$, $inf_{p'}(x,w)=p''$, and $w(x^{p''})=(L,V)$.
+		This case follows immediate as $dom(w')\backslash dom(w)=\emptyset$.
+	\end{description}
+	Next, follows the induction step:
+	\begin{description}
+		\item[\runa{Abs}] Here $e^{p'}=[\lambda y.e_1^{p''}]^{p'}$, where
+		$$env\vdash\left\langle [\lambda y.e_1^{p''}]^{p'},w,sto,p\right\rangle\rightarrow\left\langle v,w',sto',(\emptyset,\emptyset),p'\right\rangle$$
+		Where $w=w'$, $sto'=sto$, and $v=\left\langle y,e_1^{p''},env\right\rangle$.
+		This case follows immediate as $dom(w')\backslash dom(w)=\emptyset$.
+		
+		\item[\runa{App}] Here $e^{p'}=[e_1^{p_1}\;e_2^{p_2}]^{p'}$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+					\inference[]
+					{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
+					env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle &\\
+					env[x\mapsto v'] \vdash \left\langle e_3^{p_1},sto'',w'',p'' \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L'',V''),p_1 \right\rangle}
+					{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L\cup L'',V\cup V''),p_1 \right\rangle}\\
+			\end{tabular}
+		\end{figure}
+		Where $v=\left\langle y,e_3^{p_1},env\right\rangle$.
+		By our induction hypothesis, we have:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w')\backslash dom(w)$ then $x\notin fv(e_1^{p'})$
+			\item if $x^{p_3}\in dom(w'')\backslash dom(w')$ then $x\notin fv(e_2^{p''})$
+			\item if $x^{p_3}\in dom(w_3)\backslash dom(w'')$ then $x\notin fv(e_3^{p_1})$
+		\end{itemize}
+		Then by \cref{def:fv}, we must also have
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w_3)\backslash dom(w)$ then $x\notin fv(e^{p'})$
+		\end{itemize}
+
+	\item[\runa{Let}] Here $e^{p'}=[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
+				env[y\mapsto v]\vdash \left\langle e_2^{p''},sto',w'',p' \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p'' \right\rangle}
+				{env\vdash \left\langle [\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p_3 \right\rangle}
+			\end{tabular}
+		\end{figure}
+		Where $w''=w'[y^{p'}\mapsto(L,V)]$.
+		By our induction hypothesis, we have:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w')\backslash dom(w)$ then $x\notin fv(e_1^{p'})$
+			\item if $x^{p_3}\in dom(w_3)\backslash dom(w'')$ then $x\notin fv(e_2^{p''})$
+		\end{itemize}
+		Then by \cref{def:fv}, we must also have
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w_3)\backslash dom(w)$ then $x\notin fv(e^{p'})$
+		\end{itemize}
+		This also hold true for the extension, $w'[y^{p'}\mapsto(L,V)]$, since by \cref{def:fv} we know that $y\notin fv(e^{p'})$.
+
+	\item[\runa{Let rec}] Here $e^{p'}=[\mbox{let rec}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
+				env[f\mapsto\left\langle x,f,e_1^{p'},env''\right\rangle]\vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle}
+				{env\vdash \left\langle [\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto,w_3,(L',V'),p_3 \right\rangle}
+			\end{tabular}
+		\end{figure}
+		Where $v=\left\langle y,e_1^{p'},env''\right\rangle$ and $w_3=w''[f^{p''}\mapsto(L',V')]$.
+		By our induction hypothesis, we have:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w')\backslash dom(w)$ then $x\notin fv(e_1^{p'})$
+			\item if $x^{p_3}\in dom(w_3)\backslash dom(w'')$ then $x\notin fv(e_2^{p''})$
+		\end{itemize}
+		Then by \cref{def:fv}, we must also have
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w_3)\backslash dom(w)$ then $x\notin fv(e^{p'})$
+		\end{itemize}
+		This also hold true for the extension, $w'[f^{p'}\mapsto(L,V)]$, since by \cref{def:fv} we know that $f\notin fv(e^{p'})$.
+
+	\item[\runa{Ref}] Here $e^{p'}=[\mbox{ref}\;e_1^{p_1}]^{p'}$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{env \vdash \left\langle e^{p_1},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_1 \right\rangle}
+				{env\vdash \left\langle [\mbox{ref}\;e^{p_1}]^{p'},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto''[\loc\mapsto v],w'',(\emptyset,\emptyset),p' \right\rangle}
+			\end{tabular}
+		\end{figure}
+		Where $sto''=sto'[next\mapsto new\;\loc]$ and $w''=w'[\loc^{p'}\mapsto (L,V)]$.
+		By our induction hypothesis, we have:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w')\backslash dom(w)$ then $x\notin fv(e_1^{p_1})$
+		\end{itemize}
+		Then by \cref{def:fv}, we must also have
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w')\backslash dom(w)$ then $x\notin fv(e^{p'})$
+		\end{itemize}
+
+	\item[\runa{Ref read}] Here $e^{p'}=[!e_1^{p_1}]^{p'}$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{env \vdash \left\langle e^{p_1},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto',w',(L,V),p_1 \right\rangle}
+				{env\vdash \left\langle [!e^{p_1}]^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L\cup\{\loc^{p'}\},V),p' \right\rangle}
+			\end{tabular}
+		\end{figure}
+		Where $sto'(\loc)=v$.
+		By our induction hypothesis, we have:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w')\backslash dom(w)$ then $x\notin fv(e_1^{p_1})$
+		\end{itemize}
+		Then by \cref{def:fv}, we must also have
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w')\backslash dom(w)$ then $x\notin fv(e^{p'})$
+		\end{itemize}
+
+	\item[\runa{Ref write}] Here $e^{p'}=[e_1^{p_1}:=e_2^{p_2}]^{p'}$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{env \vdash \left\langle e_1^{p_1},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto',w',(L,V),p_1 \right\rangle &\\
+				env \vdash \left\langle e_2^{p_2},sto',w',p_1 \right\rangle \rightarrow \left\langle v,sto'',w'',(L',V'),p_2 \right\rangle}
+				{env\vdash \left\langle [e_1^{p_1}:=e_2^{p_2}]^{p'},sto,w,p \right\rangle \rightarrow \left\langle (),sto_3,w_3,(L,V),p' \right\rangle}
+			\end{tabular}
+		\end{figure}
+		Where $sto_3=sto''[\loc\mapsto v]$ and $w_3=w''[\loc^{p_3}\mapsto(L',V')]$.
+		By our induction hypothesis, we have:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w')\backslash dom(w)$ then $x\notin fv(e_1^{p_1})$
+			\item if $x^{p_3}\in dom(w'')\backslash dom(w')$ then $x\notin fv(e_2^{p_2})$
+		\end{itemize}
+		Then by \cref{def:fv}, we must also have
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w'')\backslash dom(w)$ then $x\notin fv(e^{p'})$
+		\end{itemize}
+	\end{description}
 \end{proof}
 
 \begin{lemma}[Strengthening]\label{lemma:Strength}
-	If $\Gamma,x^{p'}:T_1;\Pi\vdash e^{p}:T$ and $x\notin fv(e)$, then $\Gamma;\Pi\vdash e^{p}:T$
+	If $\Gamma,x^{p'}:T_1;\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma;\Pi\vdash e^{p}:T$
 \end{lemma}
 \begin{proof}
 	The proof proceeds by induction on the height of the derivation tree for $\Gamma;\Pi\vdash e^{p}:T$.
+	\begin{description}
+		\item[\runa{Cons}] Here $e^p=c^p$, where
+		$$\Gamma,\Pi\vdash c^p : (\emptyset,\emptyset)$$
+		This case follows immediately as $x\notin fv(c^p)$
+
+		\item[\runa{Var}] Here $e^p=y^p$, where
+		$$\Gamma,\Pi\vdash y^p : T$$
+		Where $\Lambda{y,p}=p'$ and $\Gamma(y^{p'}=T)$.
+		This case follows immediately as $x\notin fv(c^p)$
+	\end{description}
+	Next, follows the induction step:
 \end{proof}
 
+\subsection{Proof}
 \begin{theorem}[Soundness of type system]
 	Suppose $e^p$ is an occurrence where
 	\begin{itemize}

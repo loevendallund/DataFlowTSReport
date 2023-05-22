@@ -20,10 +20,10 @@
 
 		\runa{App}\\[0.2cm]
 			\inference[]
-				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',L,V,p' \right\rangle &\\
-				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',L',V',p'' \right\rangle &\\
-				env[x\mapsto v'] \vdash \left\langle e^{p_1},sto'',w'',p'' \right\rangle \rightarrow \left\langle v'',sto_3,w_3,L'',V'',p_1 \right\rangle}
-				{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto_3,w_3,L\cup L'\cup L'',V\cup V'\cup V'',p_1 \right\rangle}\\
+				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
+				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle &\\
+				env[x\mapsto v'] \vdash \left\langle e^{p_1},sto'',w'',p'' \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L'',V''),p_1 \right\rangle}
+				{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L\cup L'',V\cup V''),p_1 \right\rangle}\\
 			Where $v=\left\langle x,e^{p_1},env\right\rangle$\\[1cm]
 
 		\runa{App const}\\[0.2cm]
