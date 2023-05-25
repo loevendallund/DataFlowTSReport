@@ -6,11 +6,11 @@
 	\begin{tabular}{l}
 		\runa{Const}\\[0.2cm]
 			\inference[]{}
-				{env\vdash \left\langle c^{p'},sto,w,p \right\rangle \rightarrow \left\langle c,sto,w,\emptyset,\emptyset,p' \right\rangle}\\[1cm]
+				{env\vdash \left\langle c^{p'},sto,w,p \right\rangle \rightarrow \left\langle c,sto,w,(\emptyset,\emptyset),p' \right\rangle}\\[1cm]
 			
 		\runa{Var}\\[0.2cm]
 			\inference[]{}
-				{env\vdash \left\langle x^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto,w,L,V\cup\{x^{p'}\},p' \right\rangle}\\
+				{env\vdash \left\langle x^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto,w,(L,V\cup\{x^{p'}\}),p' \right\rangle}\\
 				Where $env(x)=v$, $p''=\inf_{p} (x,w)$, and $w(x^{p''})=(L,V)$\\[1cm]
 
 		\runa{Abstraction}\\[0.2cm]
@@ -22,23 +22,23 @@
 			\inference[]
 				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
 				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle &\\
-				env[x\mapsto v'] \vdash \left\langle e^{p_1},sto'',w'',p'' \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L'',V''),p_1 \right\rangle}
-				{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L\cup L'',V\cup V''),p_1 \right\rangle}\\
-			Where $v=\left\langle x,e^{p_1},env\right\rangle$\\[1cm]
+				env[x\mapsto v'] \vdash \left\langle e^{p_1},sto'',w_3,p'' \right\rangle \rightarrow \left\langle v'',sto_3,w_4,(L'',V''),p_1 \right\rangle}
+				{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto_3,w_4,(L\cup L'',V\cup V''),p_1 \right\rangle}\\
+			Where $v=\left\langle x,e^{p_1},env\right\rangle$ and $w_3=w''[x^{p''}\mapsto (L',V')]$\\[1cm]
 
 		\runa{App const}\\[0.2cm]
 			\inference[]
-				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle c,sto',w',L,V,p' \right\rangle &\\
-				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v,sto'',w'',L',V',p'' \right\rangle}
-				{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',L\cup L',V\cup V',p_3 \right\rangle}\\
+				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle c,sto',w',(L,V),p' \right\rangle &\\
+				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v,sto'',w'',(L',V'),p'' \right\rangle}
+				{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L\cup L',V\cup V'),p_3 \right\rangle}\\
 			Where $apply(c,v)=v'$\\[1cm]
 
 		\runa{App rec}\\[0.2cm]
 			\inference[]
-				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',L,V,p' \right\rangle &\\
-				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',L',V',p'' \right\rangle &\\
-				env[x\mapsto v', f\mapsto\left\langle x,f,e,env'\right\rangle] \vdash \left\langle e^{p_1},sto'',w'',p'' \right\rangle \rightarrow \left\langle v'',sto_3,w_3,L'',V'',p_1 \right\rangle}
-				{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto_3,w_3,L\cup L'\cup L'',V\cup V'\cup V'',p_1 \right\rangle}\\
+				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
+				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle &\\
+				env[x\mapsto v', f\mapsto\left\langle x,f,e,env'\right\rangle] \vdash \left\langle e^{p_1},sto'',w'',p'' \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L'',V''),p_1 \right\rangle}
+				{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L\cup L'',V\cup V''),p_1 \right\rangle}\\
 			Where $v=\left\langle x,f,e^{p_1},env\right\rangle$\\
 	\end{tabular}
 	\label{fig:InfDV}
@@ -65,8 +65,7 @@
 			\inference[]
 				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
 				env \vdash \left\langle (v,\pi^{p''}),sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle}
-				{env\vdash \left\langle [\mbox{case}\;e^{p'}\;\pi^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L\cup L',V\cup V'),p_3 \right\rangle}\\
-				Where $match(v)=\sigma$\\[1cm]
+				{env\vdash \left\langle [\mbox{case}\;e^{p'}\;\pi^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L\cup L',V\cup V'),p_3 \right\rangle}\\[1cm]
 
 		\runa{match}\\[0.2cm]
 			\inference[]

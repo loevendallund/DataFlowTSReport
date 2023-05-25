@@ -35,7 +35,7 @@ $$
 	\begin{align*}
 		bv(x^p)&=\emptyset\\
 		bv(c^p)&=\emptyset\\
-		bv([\lambda\;y.e_1^{p'}]^p)&=bv(e_1^{p'})\cup bv(e_2^{p''})\cup\{y\}\\
+		bv([\lambda\;y.e_1^{p'}]^p)&=bv(e_1^{p'})\cup\{y\}\\
 		bv([e_1^{p'}\;e_2^{p''}]^p)&=bv(e_1^{p'})\cup bv(e_2^{p''})\\
 		bv([\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p)&=bv(e_1^{p'})\cup bv(e_2^{p''})\cup\{y\}\\
 		bv([\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p)&=bv(e_1^{p'})\cup bv(e_2^{p''})\cup\{f\}\\
@@ -76,16 +76,40 @@ As such, $\Gamma$ represents the dependencies for variables and internal variabl
 The intuition behind an approximated order of program points is the execution order, and should as such follow all possible evaluation paths for a given program.
 
 \subsection{Agreement}
+The first agreement we present here is the agreement for the type environment $\Gamma$ and dependency function $w$.
+The $\Gamma$ contains both local dependencies for variable occurrences and global dependencies for internal variable occurrences, while $w$ contains global dependencies for variable and location occurrences.
+
+As such. it is clear that $\Gamma$ is not a direct model of $w$, but models the current state that is evaluated, thus it models both the environment, store, and dependency function.
+This is clear, as both the environment and type environment both only contains local information for variables.
+
+On the other hand, locations are treated as global information in the type system, which are represented as internal variables, as such if a location exists in the store it would thus the equivalent would exists in the type environment.
+Since the type environment contains only occurrences, locations and internal variables can thus be compared by program points, as locations and internal variables are created and updated at the same program points.
+This relation is done by comparing between between the store, dependency function and type environment.
+
+Lastly, since the dependency function and type environment collects information about dependencies, the dependencies ar then compared.
+Since there a both local and global information, and the dependency function collects all information globally, the dependency comparison is done only on the the information  for occurrences that exists in the domain of both $w$ and $\Gamma$.
+
 \begin{definition}[Environment agreement]\label{def:EnvAgree}
-	Let $w$ be a dependency function, $env$ be an environment, and $\Gamma$ be a type environment.
+	Let $w$ be a dependency function, $env$ be an environment, $sto$ be the a store, and $\Gamma$ be a type environment.
 	We say that:
-	$$(w,env)\models\Gamma$$
+	$$(w,env,sto)\models\Gamma$$
 	if 
 	\begin{itemize}
+		\item $\forall x\in dom(env)\Rightarrow\exists x^p\in dom(w)$
+		\item $\forall x\in dom(env).x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma)$
 		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow w(x^p)=(L,V)\wedge\Gamma(x^p)=T.(w,env,(L,V))\models T$
-		\item $\forall \loc^p \in dom(w).\exists\nu x^{p'}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p'})=T.(w,env,(L,V))\models T$
+		\item $\forall \loc\in dom(sto)\Rightarrow\exists \loc^p\in dom(w)$
+		\item $\forall \loc\in dom(sto)\Rightarrow\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}$ then $\nu x^p\in dom(\Gamma)$
+		\item $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(w,env,(L,V))\models T$
 	\end{itemize}
 \end{definition}
+In \cref{def:EnvAgree}, the agreement contains a lot of conditions, but in essence it states:
+\begin{description}
+	\item[variables] If a variable exists in $env$, then there exists an occurrence of that variable in both $w$ and $\Gamma$.
+		And for all variable occurrences, $x^p$, that both $w$ and $\Gamma$ knows about, the dependency and type for $x^p$ agrees.
+	\item[locations] The agreement is similar for locations, but there is an extra step as the type system represents locations as internal variables.
+		The comparison is thus done by comparing program points and since this is global, the comparison is done for all program points that exists for a a location $\loc$ in $w$.
+\end{description}
 
 \begin{definition}[Type agreement]
 	Let $w$ be a dependency function, $env$ be an environment, $(L,V)$ be a dependency pair, and $T$ be a type.
@@ -95,8 +119,7 @@ The intuition behind an approximated order of program points is the execution or
 	\begin{itemize}
 		\item $T=T_1\rightarrow T_2$ then:
 		\begin{itemize}
-			\item $(w,env,(L,V))\models T_1\Rightarrow(w,env,(L,V))\models T_2$
-			\todo[inline]{The $T_1\Rightarrow T_2$ agreement part is wrong, either we need to remove the agreement for $T_1$ part or modify the \runa{Var} rule}
+			\item $(w,env,(L,V))\models T_2$
 		\end{itemize}
 		\item $T=(\delta,\kappa)$ then:
 		\begin{itemize}
@@ -199,6 +222,7 @@ The intuition behind an approximated order of program points is the execution or
 		This case follows immediate as $dom(w')\backslash dom(w)=\emptyset$.
 	\end{description}
 	Next, follows the induction step:
+
 	\begin{description}
 		\item[\runa{Abs}] Here $e^{p'}=[\lambda y.e_1^{p''}]^{p'}$, where
 		$$env\vdash\left\langle [\lambda y.e_1^{p''}]^{p'},w,sto,p\right\rangle\rightarrow\left\langle v,w',sto',(\emptyset,\emptyset),p'\right\rangle$$
@@ -212,20 +236,23 @@ The intuition behind an approximated order of program points is the execution or
 					\inference[]
 					{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
 					env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle &\\
-					env[x\mapsto v'] \vdash \left\langle e_3^{p_1},sto'',w'',p'' \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L'',V''),p_1 \right\rangle}
-					{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto_3,w_3,(L\cup L'',V\cup V''),p_1 \right\rangle}\\
+					env[y\mapsto v'] \vdash \left\langle e_3^{p_1},sto'',w_3,p'' \right\rangle \rightarrow \left\langle v'',sto_3,w_4,(L'',V''),p_1 \right\rangle}
+					{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto_3,w_4,(L\cup L'',V\cup V''),p_1 \right\rangle}\\
 			\end{tabular}
 		\end{figure}
-		Where $v=\left\langle y,e_3^{p_1},env\right\rangle$.
+		Where $v=\left\langle y,e_3^{p_1},env\right\rangle$ and $w_3=w''[y^{p''}\mapsto(L',V')]$.
 		By our induction hypothesis, we have:
 		\begin{itemize}
 			\item if $x^{p_3}\in dom(w')\backslash dom(w)$ then $x\notin fv(e_1^{p'})$
 			\item if $x^{p_3}\in dom(w'')\backslash dom(w')$ then $x\notin fv(e_2^{p''})$
-			\item if $x^{p_3}\in dom(w_3)\backslash dom(w'')$ then $x\notin fv(e_3^{p_1})$
+			\item if $x^{p_3}\in dom(w_4)\backslash dom(w_3)$ then $x\notin fv(e_3^{p_1})$
 		\end{itemize}
-		Then by \cref{def:fv}, we must also have
+		To show that this holds, we need to show for the extension \runa{App} introduces to $w$.
+		By \cref{def:fv}, we know that the first premise evaluates to a closure, and $fv([e_1^{p_1}\;e_2^{p_2}]^{p'})=fv(e_1^{p_1})\cup fv(e_2^{p_2})$.
+		Since we know that $y\notin fv(e_1^{p_1})$, and all variables are destinct, we also know that $y\notin fv([e_1^{p_1}\;e_2^{p_2}]^{p'})$.
+		We can thus conclude that:
 		\begin{itemize}
-			\item if $x^{p_3}\in dom(w_3)\backslash dom(w)$ then $x\notin fv(e^{p'})$
+			\item if $x^{p_3}\in dom(w_4)\backslash dom(w)$ then $x\notin fv(e^{p'})$
 		\end{itemize}
 
 	\item[\runa{Let}] Here $e^{p'}=[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, where
@@ -334,21 +361,95 @@ The intuition behind an approximated order of program points is the execution or
 \end{proof}
 
 \begin{lemma}[Strengthening]\label{lemma:Strength}
-	If $\Gamma,x^{p'}:T_1;\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma;\Pi\vdash e^{p}:T$
+	If $\Gamma,x^{p'}:T';\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma;\Pi\vdash e^{p}:T$
 \end{lemma}
 \begin{proof}
 	The proof proceeds by induction on the height of the derivation tree for $\Gamma;\Pi\vdash e^{p}:T$.
 	\begin{description}
 		\item[\runa{Cons}] Here $e^p=c^p$, where
-		$$\Gamma,\Pi\vdash c^p : (\emptyset,\emptyset)$$
-		This case follows immediately as $x\notin fv(c^p)$
+		$$\Gamma,x^{p'}:T';\Pi\vdash c^p : (\emptyset,\emptyset)$$
+		and $x\notin fv(c^p)$.
+		We can thus conclude that:
+		$$\Gamma;\Pi\vdash c^p : (\emptyset,\emptyset)$$
 
 		\item[\runa{Var}] Here $e^p=y^p$, where
-		$$\Gamma,\Pi\vdash y^p : T$$
-		Where $\Lambda{y,p}=p'$ and $\Gamma(y^{p'}=T)$.
-		This case follows immediately as $x\notin fv(c^p)$
+		$$\Gamma,x^{p'}:T';\Pi\vdash y^p : T$$
+		and $x\notin fv(y^p)$.
+		We can thus conclude that:
+		$$\Gamma;\Pi\vdash y^p : T$$
 	\end{description}
 	Next, follows the induction step:
+
+	\begin{description}
+		\item[\runa{Abs}] Here $e^p=[\lambda\;y.e_1^{p_1}]^p$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{\Gamma,y^{p''}:T_1;\Pi\vdash  e_1^{p_1}:T_2}
+				{\Gamma,x^{p'}:T';\Pi\vdash  [\lambda\;y.e_1^{p_1}]^{p}:T_1\rightarrow T_2}\\[1cm]
+			\end{tabular}
+		\end{figure}
+		and $x\notin fv([\lambda\;y.e_1^{p_1}]^p)$
+		Then by \cref{def:fv} we know that $x\notin fv(e^{p})$.
+		We can then conclude that $\Gamma;\Pi\vdash[\lambda\;y.e_1^{p_1}]^{p}:T_1\rightarrow T_2$.
+
+		\item[\runa{App}] Here $e^p=[e_1^{p_1}\;e_2^{p_2}]^p$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{
+					\Gamma;\Pi\vdash e_1^{p_1}:T_1\rightarrow T_2 &\\
+					\Gamma;\Pi\vdash e_2^{p_2}:T_1
+				}
+				{\Gamma,x^{p'}:T';\Pi\vdash [e_1^{p_1} \; e_2^{p_2}]^{p}:T_2}\\[1cm]
+			\end{tabular}
+		\end{figure}
+		and $x\notin fv([e_1^{p_1} \; e_2^{p_2}]^p)$.
+		By \cref{def:fv}, we then know:
+		\begin{itemize}
+			\item $x\notin fv(e_1^{p_1})$,
+			\item $x\notin fv(e_2^{p_2})$
+		\end{itemize}
+		Where we can the conclude that $\Gamma;\Pi\vdash [e_1^{p_1} \; e_2^{p_2}]^{p}:T_2$.
+
+		\item[\runa{Let 1}] Here $e^p=[\mbox{let}\;y\;e_1^{p_1}\;e_2^{p_2}]^p$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{\Gamma;\Pi\vdash e_1^{p_1}:(\delta,\kappa) &\\
+				\Gamma,y^p:(\delta,\kappa\cup\{x\});\Pi\vdash e_2^{p_2}:T_2}
+				{\Gamma,x^{p'}:T';\Pi\vdash [\mbox{let}\; y \; e_1^{p_1} \; e_2^{p_2}]^{p}:T_2}
+			\end{tabular}
+		\end{figure}
+		and $x\notin fv([\mbox{let}\; y \; e_1^{p_1} \; e_2^{p_2}]^p)$.
+		By \cref{def:fv}, we then know:
+		\begin{itemize}
+			\item $x\notin fv(e_1^{p_1})$,
+			\item $x\notin fv(e_2^{p_2})$
+		\end{itemize}
+		Where we can then conclude that $\Gamma;\Pi\vdash [\mbox{let}\; y \; e_1^{p_1} \; e_2^{p_2}]^{p}:T_2$.
+
+		\item[\runa{Let 2}] Here $e^p=[\mbox{let}\;y\;e_1^{p_1}\;e_2^{p_2}]^p$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{\Gamma;\Pi\vdash e_1^{p_1}:T_1 &\\
+				\Gamma,y^p:T_1;\Pi\vdash e_2^{p_2}:T_2}
+				{\Gamma,x^{p'}:T';\Pi\vdash [\mbox{let}\; y \; e_1^{p_1} \; e_2^{p_2}]^{p}:T_2}
+			\end{tabular}
+		\end{figure}
+		and $x\notin fv([\mbox{let}\; y \; e_1^{p_1} \; e_2^{p_2}]^p)$.
+		By \cref{def:fv}, we then know:
+		\begin{itemize}
+			\item $x\notin fv(e_1^{p_1})$,
+			\item $x\notin fv(e_2^{p_2})$
+		\end{itemize}
+		Where we can then conclude that $\Gamma;\Pi\vdash [\mbox{let}\; y \; e_1^{p_1} \; e_2^{p_2}]^{p}:T_2$.
+	\end{description}
 \end{proof}
 
 \subsection{Proof}
@@ -363,7 +464,7 @@ The intuition behind an approximated order of program points is the execution or
 	\begin{itemize}
 		\item $\Gamma,\Pi\vdash v : T$
 		\item $(w',env)\models\Gamma$
-		\item $(env,(L,V))\models (\Gamma,T)$
+		\item $((L,V), w', env)\models (\Gamma,T)$
 	\end{itemize}
 \end{theorem}
 \begin{proof}
@@ -455,9 +556,10 @@ The intuition behind an approximated order of program points is the execution or
 					\inference[]
 						{env \vdash \left\langle e_1^{p'},sto,w,p_3 \right\rangle \rightarrow \left\langle v',w_1, sto_1,(L_1,V_2),p' \right\rangle &\\
 						env \vdash \left\langle e_2^{p''},w_1, sto_1,p' \right\rangle \rightarrow \left\langle v'',w_2, sto_2,(L_2,V_2),p'' \right\rangle &\\
-						env[x\mapsto v''] \vdash \left\langle e^{p_1},w_2, sto_2, p'' \right\rangle \rightarrow \left\langle v,w', sto',(L_3,V_3),p_1 \right\rangle}
+						env[x\mapsto v''] \vdash \left\langle e^{p_1},w_3, sto_2, p'' \right\rangle \rightarrow \left\langle v,w', sto',(L_3,V_3),p_1 \right\rangle}
 						{env\vdash \left\langle [e_1^{p'}\;e_2^{p''}]^{p},sto,w,p_3 \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p \right\rangle}\\
-					Where $v'=\left\langle x,e^{p_1},env\right\rangle$, $L=L_1\cup L_2\cup L_3$, and $V=V_1\cup V_2\cup V_3$\\[1cm]
+					Where $v=\left\langle x,e^{p_1},env\right\rangle$, $w_3=w_2[x^{p''}\mapsto (L_2,V_2)]$, and \\
+					$(L,V)=(L_1\cup L_3,V_1\cup V_3)$\\[1cm]
 				\end{tabular}
 			\end{figure}
 			We need to show for: \runa{1} $(w',env)\models\Gamma$, \runa{2} $\Gamma;\Pi\vdash v:T$, and \runa{3} $((L,V),env)\models(\Gamma,T)$.
@@ -475,15 +577,15 @@ The intuition behind an approximated order of program points is the execution or
 							\runa{App}\\[0.2cm]
 								\inference[]
 								{
-									\Gamma;\Pi\vdash e_1^{p'}:T_1\rightarrow T_2 &\\
+									\Gamma;\Pi\vdash e_1^{p'}:T_1\rightarrow T &\\
 									\Gamma;\Pi\vdash e_2^{p''}:T_1
 								}
-								{\Gamma;\Pi\vdash [e_1^{p'} \; e_2^{p''}]^{p}:T_2}\\
+								{\Gamma;\Pi\vdash [e_1^{p'} \; e_2^{p''}]^{p}:T}\\
 						\end{tabular}
 					\end{figure}
 					And per induction hypothesis, we have:
 					\begin{description}
-						\item[\runa{*1}] $\Gamma,\Pi\vdash v':T_1\rightarrow T_2$
+						\item[\runa{*1}] $\Gamma,\Pi\vdash v':T_1\rightarrow T$
 						\item[\runa{*2}] $\Gamma,\Pi\vdash v'':T_1$
 					\end{description}
 					Where we then need to show that $\Gamma,\Pi\vdash v:T_2$ where $v=\left\langle x,e^{p_1},env\right\rangle$, which got concluded by \runa{Closure}:
@@ -494,14 +596,23 @@ The intuition behind an approximated order of program points is the execution or
 							\inference[]
 							{
 								\Gamma;\Pi\vdash env \\
-								\Gamma,x^{p'_1}:T_1;\Pi\vdash e^{p_1}:T_2
+								\Gamma,x^{p'_1}:T_1;\Pi\vdash e^{p_1}:T
 							}
-							{\Gamma;\Pi\vdash \left\langle x^{p'_1}, e^{p_1}, env \right\rangle:T_1\rightarrow T_2}\\[1cm]
+							{\Gamma;\Pi\vdash \left\langle x^{p'_1}, e^{p_1}, env \right\rangle:T_1\rightarrow T}\\[1cm]
 						\end{tabular}
 					\end{figure}
 					Since $\Gamma;\Pi\vdash env$, then we lastly also need to show that $\Gamma,x^{p'_1}:T_1;\Pi\vdash env[x\mapsto v]$.
-					By the induction hypothesis, we have $\Gamma,x^{p'_1};\Pi\vdash v:T_2$, and by strengthening, \cref{lemma:Strength}, we have $\Gamma;\Pi\vdash v:T_2$, since $v$ is instantiated we know that $x\in dom(env)$ then $x\notin fv(v)$.
-				\item[\runa{3}] $((L,V),env)\models(\Gamma,T)$
+					By the induction hypothesis, we have $\Gamma,x^{p'_1};\Pi\vdash v:T$, and by strengthening, \cref{lemma:Strength}, we have $\Gamma;\Pi\vdash v:T$, since $v$ is instantiated we know that $x\in dom(env)$ then $x\notin fv(v)$.
+				\item[\runa{3}] $((L,V), w', env)\models T$
+					By our induction hypothesis, we have:
+					\begin{itemize}
+						\item $((L_1,V_1),env,w_1)\models T_1\rightarrow T$,
+						\item $((L_2,V_2),env,w_2)\models T_1$
+					\end{itemize}
+					To show that $((L,V),env,w')\models T$ we need to conclude the application.
+					Since we have $\Gamma;\Pi\vdash v:T$ is concluded by \runa{Closure}, where the type got concluded by the second premise, we can then from our induction hypothesis get:
+					$$((L_3,V_3),env,w')\models T$$
+					Since the pair $(L,V)$ is $(L_1\cup L_3,V_1\cup V_3)$, we can then conclude that $((L,V),env,w')\models T$.
 			\end{description}
 			
 
