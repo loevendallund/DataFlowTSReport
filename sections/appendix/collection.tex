@@ -64,25 +64,26 @@
 		\runa{Case}\\[0.2cm]
 			\inference[]
 				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
-				env \vdash \left\langle (v,\pi^{p''}),sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle}
+				env \vdash \left\langle (v,(L,V),\pi^{p''}),sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle}
 				{env\vdash \left\langle [\mbox{case}\;e^{p'}\;\pi^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L\cup L',V\cup V'),p_3 \right\rangle}\\[1cm]
 
-		\runa{match}\\[0.2cm]
+		\runa{match 1}\\[0.2cm]
 			\inference[]
-				{env\sigma \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle}
-				{env\vdash \left\langle [(v,(s\;e^{p'})\pi^{p''})]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}\\
-			Where $match(v,s)=\sigma$\\[1cm]
+				{env\sigma \vdash \left\langle e^{p'},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p' \right\rangle}
+				{env\vdash \left\langle [(v,(L,V),(s\;e^{p'})\pi^{p''})]^{p_3},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p_3 \right\rangle}\\
+			Where $match(v,s)=\sigma$, $\phi=match_w(s,(L,V))$ and $w'=w\phi$\\[1cm]
+
+		\runa{match 2}\\[0.2cm]
+			\inference[]
+				{env\sigma \vdash \left\langle e^{p'},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p' \right\rangle}
+				{env\vdash \left\langle [(v,(L,V),(s\;e^{p'}))]^{p_3},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p_3 \right\rangle}\\
+			Where $match(v,s)=\sigma$, $\phi=match_w(s,(L,V))$ and $w'=w\phi$\\[1cm]
 
 		\runa{match $\perp$}\\[0.2cm]
 			\inference[]
-				{env \vdash \left\langle (v,\pi^{p''}),sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p'' \right\rangle}
-				{env\vdash \left\langle [(v,(s\;e^{p'})\pi^{p''})]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}\\
+				{env \vdash \left\langle (v,(L,V),\pi^{p''}),sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p'' \right\rangle}
+				{env\vdash \left\langle [(v,(L,V),(s\;e^{p'})\pi^{p''})]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}\\
 			Where $match(v,s)=\perp$\\[1cm]
-
-		\runa{match error}\\[0.2cm]
-			\inference[]{}
-				{env\vdash \left\langle [(v,(s\;e^{p'}))]^{p''},sto,w,p \right\rangle \rightarrow \left\langle '(),sto,w,(\emptyset,\emptyset),p'' \right\rangle}\\
-			Where $match(v,s)=\perp$\\
 	\end{tabular}
 	\label{fig:InfDV}
 \end{figure}
@@ -145,4 +146,18 @@ $\sigma_i=match(\{l_i=e_i\}^n_{i \in I},\{l_i\}^n_{i \in I})$
 \paragraph{wildcard and fail}
 The last two patterns to match are the wildcard and fail cases.
 The wildcard accepts any input $e$ and gives an emtpy sybstitution, the fail case just return a false boolean value, since it were an unsuccessful match.
+
+
+\subsection{Extending $w$}
+Similarly to the pattern matching function, we define a function that extends the dependency function for binding pattern bindings to it liveness information.
+This is similarly defined, where $match_w(s,(L,V))=\phi$ is a function that returns an extension $\phi$.
+The $match_w$ function can thus be defined by:
+\begin{align}
+	match_w(s,(L,V))) =
+	\left\{\begin{matrix}
+		[x\mapsto (L,V)] & \mbox{if}\; s=x\\ 
+		[] & \mbox{otherwise}
+	\end{matrix}\right.
+\end{align}
+
 \end{document}

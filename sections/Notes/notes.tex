@@ -165,6 +165,10 @@ In \cref{def:EnvAgree}, the agreement contains a lot of conditions, but in essen
 \end{definition}
 
 \subsection{Type rules for values}
+For the sake of proving the type system, we present type rules for values.
+The formation rules for values can be given by:
+$$v::=c\mid\loc\mid\left\langle x^{p},e^{p'},env\right\rangle\mid\left\langle x^{p},f^{p'},e^{p''},env\right\rangle\mid ()$$
+Where the type rules is given in \cref{fig:ValTypeRules}.
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
@@ -195,7 +199,7 @@ In \cref{def:EnvAgree}, the agreement contains a lot of conditions, but in essen
 
 		\runa{Unit}\\[0.4cm]
 			\inference[]{}
-			{\Gamma;\Pi\vdash  ():(\delta, \kappa)}\\[0.5cm]
+			{\Gamma;\Pi\vdash  ():T}\\[0.5cm]
 		\hline
 	\end{tabular}
 	\caption{Type rules for values}
@@ -298,6 +302,85 @@ In \cref{def:EnvAgree}, the agreement contains a lot of conditions, but in essen
 			\item if $x^{p_3}\in dom(w_3)\backslash dom(w)$ then $x\notin fv(e^{p'})$
 		\end{itemize}
 		This also hold true for the extension, $w'[f^{p'}\mapsto(L,V)]$, since by \cref{def:fv} we know that $f\notin fv(e^{p'})$.
+
+	\item[\runa{Case}] Here $e^{p'}=[\mbox{case}\;e_1^{p_1}\;\pi^{p_2}]^{p'}$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{env \vdash \left\langle e_1^{p_1},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_1 \right\rangle &\\
+				env \vdash \left\langle (v,(L,V),\pi^{p_2}),sto',w',p_1 \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p_2 \right\rangle}
+				{env\vdash \left\langle [\mbox{case}\;e_1^{p_1}\;\pi^{p_2}]^{p'},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L\cup L',V\cup V'),p' \right\rangle}
+			\end{tabular}
+		\end{figure}
+		By our induction hypothesis, we have:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w')\backslash dom(w)$ then $x\notin fv(e_1^{p'})$
+			\item if $x^{p_3}\in dom(w'')\backslash dom(w')$ then $x\notin fv(\pi^{p''})$
+		\end{itemize}
+		Then by \cref{def:fv}, we must also have
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w'')\backslash dom(w)$ then $x\notin fv(e^{p'})$
+		\end{itemize}
+
+	\item[\runa{Match 1}] Here $e^{p'}=[(v,(L,V),(s\;e_1^{p_1})\;\pi^{p_2}]^{p'}$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{env\sigma \vdash \left\langle e_1^{p_1},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p_1 \right\rangle}
+				{env\vdash \left\langle [(v,(L,V),(s\;e_1^{p_1})\;\pi^{p_2})]^{p'},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p' \right\rangle}
+			\end{tabular}
+		\end{figure}
+		Where $match(v,s)=\sigma$, $\phi=match_w(s,(L,V))$ and $w'=w\phi$.
+		By our induction hypothesis, we have:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w'')\backslash dom(w')$ then $x\notin fv(e_1^{p_1})$
+		\end{itemize}
+		Then by \cref{def:fv}, for $fv(e^{p'})$, we know that it holds for all $x\notin\tau(s)$.
+		From \cref{def:fv} we know that for all $x\in\tau(s)$, then $fv([(v,(L,V),(s\;e^{p_1})\;\pi^{p_2})]^{p'})= fv(e^{p_1}) \cup fv(\pi^{p_2})\backslash\tau(s)$, as such the we can conclude that:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w'')\backslash dom(w)$ then $x\notin fv(e^{p'})$
+		\end{itemize}
+
+	\item[\runa{Match 2}] Here $e^{p'}=[(v,(L,V),(s\;e_1^{p_1}))]^{p'}$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{env\sigma \vdash \left\langle e_1^{p_1},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p' \right\rangle}
+				{env\vdash \left\langle [(v,(L,V),(s\;e_1^{p_1}))]^{p_3},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p_3 \right\rangle}
+			\end{tabular}
+		\end{figure}
+		Where $match(v,s)=\sigma$, $\phi=match_w(s,(L,V))$ and $w'=w\phi$.
+		By our induction hypothesis, we have:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w'')\backslash dom(w')$ then $x\notin fv(e_1^{p_1})$
+		\end{itemize}
+		Then by \cref{def:fv}, for $fv(e^{p'})$, we know that it holds for all $x\notin\tau(s)$.
+		From \cref{def:fv} we know that for all $x\in\tau(s)$, then $fv([(v,(L,V),(s\;e^{p_1})\;\pi^{p_2})]^{p'})= fv(e^{p_1}) \cup fv(\pi^{p_2})\backslash\tau(s)$, as such the we can conclude that:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w'')\backslash dom(w)$ then $x\notin fv(e^{p'})$
+		\end{itemize}
+
+	\item[\runa{Match $\perp$}] Here $e^{p'}=[(v,(L,V),(s\;e_1^{p_1})\;\pi^{p_2}]^{p'}$, where
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+			\inference[]
+				{env \vdash \left\langle (v,(L,V),\pi^{p''}),sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p'' \right\rangle}
+				{env\vdash \left\langle [(v,(L,V),(s\;e^{p'})\pi^{p''})]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}
+			\end{tabular}
+		\end{figure}
+		Where $match(v,s)=\perp$
+		By our induction hypothesis, we have:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w'')\backslash dom(w')$ then $x\notin fv(\pi^{p_2})$
+		\end{itemize}
+		From \cref{def:fv} we know that is must also hold for:
+		\begin{itemize}
+			\item if $x^{p_3}\in dom(w'')\backslash dom(w)$ then $x\notin fv(e^{p'})$
+		\end{itemize}
 
 	\item[\runa{Ref}] Here $e^{p'}=[\mbox{ref}\;e_1^{p_1}]^{p'}$, where
 		\begin{figure}[H]
