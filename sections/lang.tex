@@ -13,7 +13,7 @@ The rest of this section will first formally introduce the abstract syntax for t
 The semantics introduced here is an operational big-step semantics where we add the notion of program points and a mechanism for collecting dependencies.
 %The main purpose of adding these two notions is to compare it with the dependency system, introduced later, and can thus be safely removed to obtain a 
 
-\subsection{Abstract syntax}
+\subsection{Syntax}
 We will now introduce the abstract syntax for the language with changes compared to the previous work, found in \cite{DVNicky}.
 We will first introduce the syntactic categories, as also done \cite{DVNicky}, and then introduce the abstract syntax.
 
@@ -96,6 +96,44 @@ A pattern is of the form $(s\;t)$, with at least one pattern.
 We also denote $|\pi|$ as the number of pattern that occurs in $\pi$.
 For the sake of distinguishing the patterns $\pi$, for use in the proof, the patterns are numbered in the order given by the syntax, such that $(s_1\;t_1),(s_2\;t_2),\cdots,(s_n\;t_n)$ where $n=|\pi|$.
 
+\subsubsection{Free and bound variables}
+The free and bound variables are defined in the usual way for $\lambda$-calculus and can be defined as:
+\begin{definition}[Free variables]\label{def:fv}
+	The set of free variables is given by:
+	\begin{align*}
+		fv(x^p)&=\{x\}\\
+		fv(c^p)&=\emptyset\\
+		fv([\lambda\;y.e_1^{p'}]^p)&=fv(e_1^{p''})\backslash\{y\}\\
+		fv([e_1^{p'}\;e_2^{p''}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\\
+		fv([\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\backslash\{y\}\\
+		fv([\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\backslash\{f\}\\
+		fv([\mbox{case}\;e^{p'}\;\pi^{p''}]^p)&=fv(e_1^{p'})\cup fv(\pi)\\
+		fv([(s\;e^{p'})\;\pi])&=fv(e^{p'})\cup fv(\pi)\backslash\tau(s)\\
+		fv([(s\;e^{p'})])&=fv(e^{p'})\backslash\tau(s)\\
+		fv([\mbox{ref}\;e^{p'}]^p)&=fv(e^{p'})\\
+		fv([!e^{p'}]^p)&=fv(e^{p'})\\
+		fv([e_1^{p'}\;:=\;e_2^{p''}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\\
+	\end{align*}
+\end{definition}
+
+\begin{definition}[Bound variables]\label{def:bv}
+	The set of bound variables is given by:
+	\begin{align*}
+		bv(x^p)&=\emptyset\\
+		bv(c^p)&=\emptyset\\
+		bv([\lambda\;y.e_1^{p'}]^p)&=bv(e_1^{p'})\cup\{y\}\\
+		bv([e_1^{p'}\;e_2^{p''}]^p)&=bv(e_1^{p'})\cup bv(e_2^{p''})\\
+		bv([\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p)&=bv(e_1^{p'})\cup bv(e_2^{p''})\cup\{y\}\\
+		bv([\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p)&=bv(e_1^{p'})\cup bv(e_2^{p''})\cup\{f\}\\
+		bv([\mbox{case}\;e^{p'}\;\pi^{p''}]^p)&=bv(e_1^{p'})\cup bv(\pi)\\
+		bv([(s\;e^{p'})\;\pi])&=bv(e^{p'})\cup bv(\pi)\cup\tau(s)\\
+		bv([(s\;e^{p'})])&=bv(e^{p'})\cup\tau(s)\\
+		bv([\mbox{ref}\;e^{p'}]^p)&=bv(e^{p'})\\
+		bv([!e^{p'}]^p)&=bv(e^{p'})\\
+		bv([e_1^{p'}\;:=\;e_2^{p''}]^p)&=bv(e_1^{p'})\cup bv(e_2^{p''})\\
+	\end{align*}
+\end{definition}
+
 \subsection{Collection semantics}\label{sec:sem}
 We will now introduce the big-step semantics extended with the collection of occurrence dependencies.
 This collection of occurrence dependencies is done through the dependency function $w$, defined as:
@@ -108,9 +146,7 @@ We denote the pair retrieved from the dependency function as $(L,V)$, where $L\s
 The dependency function $w$ can be used to derive a control flow, as all bindings of an occurrence, $u^p\in\cat{Loc}^P\cup\cat{Var}^P$, is always bound to occurrences that is evaluated before $u^p$.
 This control flow can thus be used to derive an ordering $\sqsubseteq_w$ of program points, defined as:
 
-%In the big-step semantics, shown later, the dependency function $w$ models a control flow, as all bindings for an occurrence, $u^p$, is always bound to occurrence at an earlier point, i.e., to occurrences that is evaluated before $u^p$.
-
-\begin{definition}[$\sqsubseteq_w$]
+\begin{definition}[$\sqsubseteq_w$]\label{def:popular}
 	Let $w:\cat{Loc}^P\cup\cat{Var}^P\rightharpoonup\Pow{\cat{Loc}^P}\times\Pow{\cat{Var}^P}$ be a dependency function.
 	Then $\sqsubseteq_w\subseteq\cat{P}\times\cat{P}$, is given by:
 	$$p_2\sqsubseteq p_1$$
@@ -140,12 +176,18 @@ This should be read as, given the store $sto$, dependency function $w$, and the 
 
 The environment keeps the bindings currently known, such that:
 $$\cat{Env}=\cat{Var}\rightharpoonup\cat{Values}$$
+We also define a function that, for a given value, return the set of variables bound to this variable.
+\begin{definition}[inverse env]
+	Let $v$ be a value, $env$ be an environment, the inverse function $env{-1}$ is thus:
+	$$env^{-1}(v)=\{x\in dom(env)\mid env(x)=v\}$$
+\end{definition}
+
 
 The store keeps the location bindings known, and a placeholder $next$ that represent the next free location.
 
 $$\cat{Sto}=\cat{Loc}\cup\{next\}\rightharpoonup\cat{Values}$$
 
-Where $\cat{Values}$ is defined as:
+Where we consider the following as values:
 \begin{itemize}
 	\item All constants are values.
 	\item Locations are values.
@@ -153,11 +195,11 @@ Where $\cat{Values}$ is defined as:
 	\item Recursive closures, \InfVal{f,x,e,env}, are values.
 	\item Unit values, $()$, are values.
 \end{itemize}
-In other words, we have
-\begin{align*}
-	&\Val=\Con\cup\Loc\cup(\Var\cup\IVar)\times\Exp\times\Val\cup\\
-	&(\Var\cup\IVar)\times(\Var\cup\IVar)\times\Exp\times\Val\cup()
-\end{align*}
+The set of values is denoted as \cat{Values} and defined as:
+\begin{definition}[Values]
+	A value $v\in\cat{Values}$ is an expression given by the following formation rule:
+	$$v::=c\mid\loc\mid\left\langle x^{p},e^{p'},env\right\rangle\mid\left\langle x^{p},f^{p'},e^{p''},env\right\rangle\mid ()$$
+\end{definition}
 
 We also assume the existence of a function $new:\cat{Loc}\rightharpoonup\cat{Loc}$, which takes a location and finds the next location.
 This function is only used on the placeholder location, $next$, to find the next free location, i.e. a location that is not already bound in $sto$.
