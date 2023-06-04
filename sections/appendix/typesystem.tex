@@ -4,47 +4,47 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{Var}\\[0.2cm]
+		\runa{T-Var}\\[0.2cm]
 			\inference[]{}
 				{\Gamma;\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}\\[0.3cm]
 				Where $p'=\Lambda(x,p)$, $\Gamma(x^{p'})=T$\\[1cm]
 
-		\runa{Const}\\[0.2cm]
+		\runa{T-Const}\\[0.2cm]
 			\inference[]{}
 				{\Gamma;\Pi\vdash  c^{p}:(\emptyset,\emptyset)}\\[1cm]
 
-		\runa{Abs}\\[0.2cm]
+		\runa{T-Abs}\\[0.2cm]
 			\inference[]
 				{\Gamma,x^{p_0}:T_1;\Pi\vdash  e^{p}:T_2}
 				{\Gamma;\Pi\vdash  [\lambda\;x.e^{p}]^{p'}:T_1\rightarrow T_2}\\[0.3cm]
 				Where $p'\sqsubseteq_\Pi p_0\wedge p_0\sqsubseteq_\Pi p$\\[1cm]
 
-		\runa{App}\\[0.2cm]
+		\runa{T-App}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Pi\vdash e_1^{p}:T_1\rightarrow T_2 &\\
 				\Gamma;\Pi\vdash e_2^{p'}:T_1}
 {\Gamma;\Pi\vdash [e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[1cm]
 
-		%\runa{Let}\\[0.2cm]
+		%\runa{T-Let}\\[0.2cm]
 		%	\inference[]
 		%		{\Gamma;\Pi\vdash e_1^{p}:T_1 &\\
 		%		\Gamma,x^p:T_1;\Pi\vdash e_2^{p}:T_2}
 		%		{\Gamma;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[1cm]
 
-		\runa{Let-1}\\[0.2cm]
+		\runa{T-Let-1}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Pi\vdash e_1^{p}:(\delta,\kappa) &\\
 				\Gamma,x^p:(\delta,\kappa\cup\{x\});\Pi\vdash e_2^{p}:T_2}
 				{\Gamma;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[0.3cm]
 				Where $\kappa\neq\emptyset$\\[1cm]
 
-		\runa{Let-2}\\[0.2cm]
+		\runa{T-Let-2}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Pi\vdash e_1^{p}:T_1 &\\
 				\Gamma,x^p:T_1;\Pi\vdash e_2^{p}:T_2}
 				{\Gamma;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[1cm]
 
-		\runa{Let\;rec}\\[0.2cm]
+		\runa{T-Let-rec}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Pi\vdash e_1^{p}:T_1\rightarrow T_2 &\\
 				\Gamma,f^p:T_1\rightarrow T_2;\Pi\vdash e_2^{p}:T}
@@ -56,31 +56,31 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{Case}\\[0.2cm]
+		\runa{T-Case}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Pi\vdash e^{p}:T' &\\
 				\sigma(\Gamma,s_i,p,T');\Pi\vdash (s_i \; e^{p_i}):T_i\;\;\;(1\leq i\leq|\vec{\pi}|)}
 				{\Gamma;\Pi\vdash [\mbox{case}\;e^{p} \vec{\pi}]^{p'}:T\sqcup(\delta,\kappa)}\\[0.3cm]
 			Where $T=\bigcup_{i}T_i$\\[1cm]
 
-		\runa{Match}\\[0.2cm]
+		\runa{T-Match}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Pi\vdash e^{p}:T}
 				{\Gamma;\Pi\vdash (s \; e^{p}):T}\\[1cm]
 
-		\runa{Ref}\\[0.2cm]
+		\runa{T-Ref}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Pi\vdash  e^{p}:(\delta',\kappa')}
 				{\Gamma,\nu x^{p'}:(\delta',\kappa');\Pi\vdash [\mbox{ref}\;e^{p}]^{p'}:(\emptyset,\kappa)}\\
 				Where $\kappa=\{\nu x\}$\\[1cm]
 
-		\runa{Ref read}\\[0.2cm]
+		\runa{T-Ref read}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Pi\vdash  e^{p}:(\delta,\kappa)}
 {\Gamma;\Pi\vdash [!e^{p}]^{p'}:T\sqcup(\delta\cup\delta',\emptyset)}\\
 			Where $\delta'=\{\nu x^{p'}\mid\nu x\in\kappa\}$,\\ $T=\bigcup_{\nu x\in\kappa}(\Gamma(\nu x^{p''}))$ and $p''=\Lambda(x,p')$\\[1cm]
 
-		\runa{Ref write}\\[0.2cm]
+		\runa{T-Ref write}\\[0.2cm]
 			\inference[]
 				{\Gamma;\Pi\vdash  e_1^{p}:(\delta,\kappa)&\\
 				\Gamma;\Pi\vdash  e_2^{p'}:(\delta',\kappa')}

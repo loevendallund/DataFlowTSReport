@@ -52,9 +52,8 @@ $$
 \subsection{Basis}
 This section introduces the basis for the type checker, as such the type bases er assumptions.
 \begin{definition}[Type Base for aliasing]
-	The type base $\kappa^0$ is a partition of $\cat{Var}\cup\cat{IVar}$, such that:
-	$$\cat{Var}\subseteq\bigcup_{i\in I}(\kappa_i^0)$$
-	and that $\kappa_i^0\neq\kappa_j^0$ for all $i\neq j$
+	For a program $p$, let $var\in\cat{Var}$ be a set of all variables in $p$ and $ivar\in\cat{IVar}$ be the set of all internal variables in $p$.
+	The type base $\kappa^0=\{\kappa^0_1,\cdots,\kappa^0_n\}$ is a then partition of $var\cup ivar$, where $\kappa_i^0\cap\kappa_j^0=\emptyset$ for all $i\neq j$.
 \end{definition}
 The type base for aliasing is an assumption for which variables that shares the same internal variable, and as such, shares the same location.
 As such, if we have a an assumption for a variable $x$, such that $\{x\}=\kappa_i$, then $x$ would not be an alias to a location.
@@ -674,16 +673,14 @@ Where the type rules is given in \cref{fig:ValTypeRules}.
 	\begin{itemize}
 		\item $env\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle$,
 		\item $\Gamma;\Pi\vdash e^{p'} : T$
-		\item $w\models\Pi$
-		\item $(env,sto,w)\models\Gamma$
+		\item $(env,sto,w)\models(\Gamma,\Pi)$
 		\item $\Gamma;\Pi\vdash env$
 	\end{itemize}
 	Then we have that:
 	\begin{itemize}
 		\item $\Gamma;\Pi\vdash v:T$
 		\item $w'\models\Pi$
-		\item $(env,sto',w')\models\Gamma$
-		\item $(env,w',(L,V))\models(\Gamma,T)$
+		\item $(env,sto',w')\models(\Gamma,\Pi)$
 	\end{itemize}
 \end{theorem}
 \begin{proof}
@@ -738,22 +735,21 @@ Where the type rules is given in \cref{fig:ValTypeRules}.
 			And from our assumptions, we have that:
 			\begin{itemize}
 				\item $\Gamma,\Pi\vdash \left[\lambda\;x.e_1^{p_1}\right]^{p'}:T$, and 
-				\item $w\models\Pi$
-				\item $(env,sto,w)\models\Gamma$
+				\item $(env,sto,w)\models(\Gamma,\Pi)$
 				\item $\Gamma;\Pi\vdash env$
 			\end{itemize}
-			Where we know that, to type $e^{p'}$ we need to use the \runa{Abs} type rule, where we then have:
+			Where we know that, to type $e^{p'}$ we need to use the \runa{T-Abs} rule, where we then have:
 			\begin{figure}[H]
 				\setlength\tabcolsep{8pt}
 				\begin{tabular}{l}
-					\InfName{Abs}\\[0.2cm]
+					\InfName{T-Abs}\\[0.2cm]
 						\inference[]
 						{\Gamma,x^{p_0}:T_1;\Pi\vdash  e_1^{p_1}:T_2}
 						{\Gamma;\Pi\vdash  \left[\lambda\;x.e_1^{p_1}\right]^{p'}:T_1\rightarrow T_2}\\
 				\end{tabular}
 			\end{figure}
 			Where $p'\sqsubseteq_\Pi p_0\wedge p_0\sqsubseteq_\Pi p_1$.
-			We must show that \cat{(1)} $\Gamma,\Pi\vdash v:T$, \cat{(2)} $w'\models\Pi$, \cat{(3)} $(env,sto',w')\models\Gamma$, and \cat{(4)} $(env,w',(L,V))\models(\Gamma,T)$.
+			We must show that \cat{(1)} $\Gamma,\Pi\vdash v:T$, \cat{(2)} $(env,sto',w')\models(\Gamma,\Pi)$, and \cat{(3)} $(env,w',(L,V))\models(\Gamma,T)$.
 
 			\begin{description}
 				\item[(1)] Since the value is a closure, we must type it with the \runa{Closure} rule:
@@ -770,41 +766,8 @@ Where the type rules is given in \cref{fig:ValTypeRules}.
 						\end{tabular}
 					\end{figure}
 					Where we know $\Gamma;\Pi\vdash env$ from our assumption and $\Gamma,x^{p_0}:T_1;\Pi\vdash e_1^{p_1}:T_2$ from the premise of \runa{Abs} type rule.
-				\item[(2)] Is immediate since $w'=w$.
-				\item[(3)] Is immediate since $sto'=sto$ and $w'=w$.
-				\item[(4)] Is immediate by \cref{def:TAgree}, since we know that the value $v$ is a closure and the dependency pair is $(\emptyset,\emptyset)$.
-					\iffalse
-					From \cref{def:TAgree} we have:
-					\begin{itemize}
-						\item if $T=T_1\rightarrow T_2$ the $(env,w,(L,V))\models T_2$
-						\item if $T=(\delta,\kappa)$ then
-						\begin{itemize}
-							\item $(env,(L,V))\models\delta$
-							\item $(env,w)\models(\Gamma,\kappa)$
-						\end{itemize}
-					\end{itemize}
-					And since we know that $T=T_1\rightarrow T_2$, we must then show that $(env,w,(L,V))\models T_2$.
-					From \cref{def:TAgree}, we can see that, since $(L,V)=(\emptyset,\emptyset)$ then for any base type $(\delta,\kappa)$ in $T$ the first condition holds, i.e., for $(env,(\emptyset,\emptyset))\models\delta$.
-					We then only need to show $(env,w)\models(\Gamma,\kappa)$.
-					To show this, we must then show that, for an arbitrary $e_2^{p_2}$, where $e_2^{p_2}:T_1$, we have that $[e^{p'}\;e_2^{p_2}]^{p''}:T_2$ for some $p''$ where $p'\sqsubseteq_\Pi p''$.
-					We then know that there is a value $v_2$ such that $e_2^{p_2}\rightarrow v_2$ and that $env[x\mapsto v_2]$.
-					From the \runa{App} rule we see that:
-					\begin{figure}[H]
-						\setlength\tabcolsep{8pt}
-						\begin{tabular}{l}
-							\InfName{App}\\[0.2cm]
-							\inference[]
-							{
-								env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,w', sto',(\emptyset,\emptyset),p' \right\rangle &\\
-								env \vdash \left\langle e_2^{p_2},w', sto',p' \right\rangle \rightarrow \left\langle v_2,w_2, sto_2,(L_2,V_2),p_2 \right\rangle &\\
-								env[x\mapsto v_2] \vdash \left\langle e_1^{p_1}, sto_2, w_3, p_2 \right\rangle \rightarrow \left\langle v', sto'',w'',(L_3,V_3),p_1 \right\rangle}
-							{env\vdash \left\langle \left[e^{p'}\;e_2^{p_2}\right]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle}\\
-				\end{tabular}
-			\end{figure}
-			Where $w_3=w_2[x^{p_2}\mapsto(L_2,V_2)]$ and $(L',V')=(\emptyset\cup L_3,\emptyset\cup V_3)$.
-			Since $e_2^{p_2}:T_1$ and we bind $x$ at program point $p_2$ we then know that the following condition $p'\sqsubseteq_\Pi p_0\wedge p_0\sqsubseteq_\Pi p_1$, where $p_2=p_0$, must hold.
-			And thus, by our induction hypothesis, we then know that $(env,w'',(L_3,V_3))\models (\Gamma,T_2)$ and thus, by \cref{def:TAgree} we know that $(env,w'',(\emptyset,\emptyset))\models (\Gamma,T)$
-			\fi
+				\item[(2)] Is immediate since $sto'=sto$ and $w'=w$.
+				\item[(3)] Is immediate by \cref{def:TAgree}, since we know that the value $v$ is a closure and the dependency pair is $(\emptyset,\emptyset)$.
 			\end{description}
 
 		\item[\runa{App}] Here $e^{p'}=\left[e_1^{p'}\;e_2^{p''}\right]^{p'}$, where
