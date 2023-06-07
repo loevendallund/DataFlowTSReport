@@ -4,14 +4,14 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{T-Var}\\[0.2cm]
-			\inference[]{}
-				{\Gamma;\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}\\[0.3cm]
-				Where $p'=\Lambda(x,p)$, $\Gamma(x^{p'})=T$\\[1cm]
-
 		\runa{T-Const}\\[0.2cm]
 			\inference[]{}
 				{\Gamma;\Pi\vdash  c^{p}:(\emptyset,\emptyset)}\\[1cm]
+
+		\runa{T-Var}\\[0.2cm]
+			\inference[]{}
+			{\Gamma;\Pi \vdash x^p:T \sqcup (\{x^p, x^{p'}\},\emptyset)}\\[0.3cm]
+				Where $p'=\Lambda(x,p)$, $\Gamma(x^{p'})=T$\\[1cm]
 
 		\runa{T-Abs}\\[0.2cm]
 			\inference[]
@@ -82,10 +82,11 @@
 
 		\runa{T-Ref write}\\[0.2cm]
 			\inference[]
-				{\Gamma;\Pi\vdash  e_1^{p}:(\delta,\kappa)&\\
-				\Gamma;\Pi\vdash  e_2^{p'}:(\delta',\kappa')}
-				{\Gamma';\Pi\vdash [e_1^{p}\;:=\;e_2^{p'}]^{p''}:(\delta,\kappa)}\\
-			Where $\Gamma'=\forall \nu x\in\kappa.\Gamma,\nu x^{p''}:(\delta',\kappa')$
+				{\Gamma;\Pi\vdash  e_1^{p_1}:(\delta,\kappa)&\\
+				\Gamma;\Pi\vdash  e_2^{p_2}:(\delta_2,\kappa_2)}
+				{\Gamma';\Pi\vdash [e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}:(\delta,\kappa)}\\
+			Where $\Gamma'=\Gamma,\nu x_1:(\delta_2,\kappa_2),\cdots,\nu x_n:(\delta_2,\kappa_2)$\\
+			and $\nu x_1,\cdots,\nu x_n\in\{\nu x\mid\nu x\in\kappa\}$
 	\end{tabular}
 	\label{fig:TypeSys2}
 \end{figure}

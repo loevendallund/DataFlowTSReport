@@ -224,7 +224,7 @@ This function is primarily used on the placeholder pointer $next$ to find a new 
 
 
 
-\subsection{Dependency function}\label{sec:DepFunc}
+\subsection{Dependencies}\label{sec:DepFunc}
 Next, we will present the dependency function, used to collect the variable and location occurrences a semantic occurrence is dependent on.
 This function is also used to model the semantic data-flow in an evaluation, where we also present the binary relation on the dependency function.
 The binary relation is used to define an ordering of program points, which we use when doing a lookup in the dependency function.
@@ -235,7 +235,8 @@ The binary relation is used to define an ordering of program points, which we us
 \end{definition}
 Where $w\in\cat{W}$ denotes an arbitrary dependency function in \cat{W}.
 
-A lookup in a dependency function $w$ is, for a $u^p\in\cat{Loc}^P\cup\cat{Var}^P$, $w(u^p)=(\{\loc^{p_1},\cdots,\loc^{p_n}\},\{x_1^{p'_1},\cdots,x_y^{p'_y}\})$.
+A lookup in a dependency function $w$ is, for a $u^p\in\cat{Loc}^P\cup\cat{Var}^P$, such that:
+$$w(u^p)=(\{\loc^{p_1},\cdots,\loc^{p_n}\},\{x_1^{p'_1},\cdots,x_y^{p'_y}\})$$
 We also denote the pair retrieved from $w$ as $(L,V)$, where $L\subseteq\cat{Loc}^P$ is a set of location occurrences and $V\subseteq\cat{Var}^P$ is a set of variable occurrences.
 
 \begin{definition}[Extension of $w$]\label{def:DepExt}
@@ -293,18 +294,18 @@ Where $env\in\cat{Env}$, $sto\in\cat{Sto}$, and $w,\;w'\in\cat{W}$.
 This should be read as, given the store $sto$, dependency function $w$, and the previous program point $p$, the occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, the dependency pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
 
 The transition system is given by:
-$$(\cat{Term}\cup\cat{Values},\rightarrow,\cat{Values})$$
-A highlight of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}, the rest of the rules can be found in \cref{App:ColSem}.
+$$((\cat{Term}\cup\cat{Values})\times\cat{Store}\times\cat{W}\times\cat{P},\rightarrow,\cat{Values}\cat{Store}\times\cat{W}\times\Pow{\cat{Loc}^P\times\cat{Var}^P}\times\cat{P})$$
+A highlight of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}, the rest can be found in \cref{App:ColSem}.
 
-In the semantics, we sometimes need to get a fresh program point, where we use \emph{fresh} to denote that a program point is not used in the program.
+%In the semantics, we sometimes need to get a fresh program point, where we use \emph{fresh} to denote that a program point is not used in the program.
 
 \begin{description}
 	\item[\runa{Const}] is the simplest rule, as it has no premises and does not have any side effects.
 		As constants are evaluated to the constant value, no dependencies are used, i.e., no variable or location occurrences are used to evaluate a constant.
 
 	\item[\runa{Var}] This rule uses the environment and dependency function to get the value for a variable $x$ and its dependencies.
-		Here, the $inf$ function is used, to get the greatest lower-bound of a variable, in respect to the ordering $\sqsubseteq_w$ relation.
-		To make sure that we get a proper ordering of program points, we also add both the current occurrence, and the occurrence we used to lookup in $w$.
+		Here, the $inf$ function is used, to get the greatest lower-bound of a variable in respect to the ordering $\sqsubseteq_w$ relation.
+		To make sure that we get a proper ordering of program points, we add both the current occurrence, and the occurrence we used to lookup in $w$.
 
 	\item[\runa{Let}] creates a local binding that can be used later on.
 		This rule extends both the environment and the dependency function by the value of evaluating $e_1^{p_1}$ and its dependencies.
@@ -375,11 +376,11 @@ The following program creates a local binding to the identity function and appli
 The transition tree can be found in \cref{FigEx.Abs}.
 In the transition tree, we see that the dependency function is extended a couple of times, first for the binding of x, then one for each application.
 In the innermost application, when evaluating the body of the abstraction we have the following bindings in our dependency function:
-$$w_2=[x^{p_1}\mapsto(\emptyset,\emptyset), y^{5}\mapsto(\emptyset,\emptyset)]$$
+$$w_2=[x^{2}\mapsto(\emptyset,\emptyset), y^{5}\mapsto(\emptyset,\emptyset)]$$
 Here, the lookup of the parameter $y$ is simple, as there are only one where we then know that $inf(y,w_2)=5$, since we have $5\sqsubseteq_{w_2} 5$ per \cref{def:popular}.
 
 In the second (and outermost) application, when evaluating the body of the abstraction a second time, we have the following bindings in our dependency function:
-$$w_3=[x^{p_1}\mapsto(\emptyset,\emptyset), y^{5}\mapsto(\emptyset,\emptyset), y^{6}\mapsto(\emptyset,\{y^1,y^5,x^4,x^{p_1}\})]$$
+$$w_3=[x^{2}\mapsto(\emptyset,\emptyset), y^{5}\mapsto(\emptyset,\emptyset), y^{6}\mapsto(\emptyset,\{y^1,y^5,x^4,x^{2}\})]$$
 Now, we have two bindings for the parameter $y$.
 We can then use the binary relation for our dependency function, found in \cref{def:popular}, where we get the following order:
 $$1\sqsubseteq_w 6,\;5\sqsubseteq_w 6$$

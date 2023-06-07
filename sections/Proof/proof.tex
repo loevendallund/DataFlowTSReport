@@ -1,35 +1,20 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
-\subsection{Soundness}
-\begin{lemma}{[Substitution]}
-	Suppose that $e^p$ is an occurrence, that 
-	$\Gamma,x^{p'}:T_1;\Upsilon;\Pi\vdash e^p:T$ 
-	and 
-	$\Gamma;\Upsilon;\Pi\vdash v:T_1$.
-	Then we have that
-	$\Gamma;\Upsilon;\Pi\vdash e^p\begin{Bmatrix} ^v/_x \end{Bmatrix}$
-	where $x^{p'}\not\in dom(\Gamma)$.
-\end{lemma}
-
-%Other than having the agreement, we must also show that the liveness type is a good approximation, i.e., that the liveness type contains at least all used variables.
-%To show this, we compare the liveness type to the set of variable occurrences.
-
-
-\begin{theorem}{[Soundness of type system]}
-	Suppose $e^p$ is an occurrence where
+\subsection{Theorem}
+\begin{theorem}[Soundness of type system]
+	Suppose $e^{p'}$ is an occurrence where
 	\begin{itemize}
-		\item $\Gamma,\Pi\vdash e^p : T$, and 
-		\item $env\vdash\left\langle e^p,w,sto,p'\right\rangle\rightarrow\left\langle v,w',sto',L,V,p''\right\rangle$
+		\item $env\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle$,
+		\item $\Gamma;\Pi\vdash e^{p'} : T$
+		\item $(env,sto,w)\models(\Gamma,\Pi)$
+		\item $\Gamma;\Pi\vdash env$
 	\end{itemize}
-	and that $(w,env)\models T$ and $(w,env)\models\Gamma$.
 	Then we have that:
 	\begin{itemize}
-		\item $\Gamma,\Pi\vdash v : T$
-		\item $(w',env)\models T$
-		\item $(w',env)\models\Gamma$
-		\item $(L,V)\models T$
+		\item $\Gamma;\Pi\vdash v:T$
+		\item $w'\models\Pi$
+		\item $(env,sto',w')\models(\Gamma,\Pi)$
 	\end{itemize}
 \end{theorem}
 
-\subfile{TProof/Proof.tex}
 \end{document}
