@@ -1,0 +1,69 @@
+\item[\runa{Case}] Here $e^{p'}=\left[\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}\right]^{p'}$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\InfName{Case}\\[0.2cm]
+		\inference[]
+				{env \vdash \left\langle e^{p''},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_e,sto'',(w'',\sqsubseteq_w''),(L'',V''),p'' \right\rangle &\\
+				env[env'] \vdash \left\langle e_j^{p_j},sto'',(w''',\sqsubseteq_w''),p'' \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L',V'),p_i \right\rangle}
+				{env\vdash \left\langle \left[\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[0.3cm]
+	\end{tabular}
+\end{figure}
+Where $match(v_e,s_i)=\perp$ for all $1\leq u<j\leq|\tilde{\pi}|$, $match(v_e,s_j)=env'$, and $w'''=w''[x\mapsto(L'',V'')]$ if $env'=[x\mapsto v_e]$ else $w'''=w''$.
+
+And from our assumptions, we have that:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash \left[\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}\right]^{p'}:T$,
+	\item $\Gamma,\Pi\vdash env$
+	\item $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$,
+\end{itemize}
+To type $[\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}]^{p'}$ we need to use the \runa{T-Case} rule, where we have:
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{T-Case}\\[0.2cm]
+			\inference[]
+				{\Gamma,\Pi\vdash e^{p}:(\delta,\kappa) &\\
+				\Gamma',\Pi\vdash e_i^{p_i}:T_i\;\;\;(1\leq i\leq|\tilde{\pi}|)}
+				{\Gamma,\Pi\vdash [\mbox{case}\;e^{p}\;\tilde{\pi}\;\tilde{o}]^{p'}:T}
+	\end{tabular}
+\end{figure}
+Where $T=T'\sqcup(\delta,\kappa)$, $T'=\bigcup_{i=1}^{|\tilde{\pi}|}T_i$, $e_i^{p_i}\in\tilde{o}$ and $s_i\in\tilde{\pi}$, and $\Gamma'=\Gamma[x^p:(\delta,\kappa)]$ if $s_i=x$.
+
+We must show that \cat{1)} $\Gamma,\Pi\vdash v:T$, \cat{2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$, and \\
+\cat{3)} $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
+
+To conclude, we first need to show for the premise, where due to our assumption and from the first premise, we can use the induction hypothesis, where we then get:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash v_e:(\delta,\kappa)$,
+	\item $(env,sto'',(w'',\sqsubseteq_w''))\models(\Gamma,\Pi)$,
+	\item $(env,(w'',\sqsubseteq_w''),(L,V))\models(\Gamma,(\delta,\kappa))$
+\end{itemize}
+Since in the rule \runa{T-Case} we take the union of all patterns, we can then from the second premise:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash v:T_j$,
+	\item $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$,
+	\item $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T_j)$
+\end{itemize}
+
+If we have \cat{a)} $\Gamma',\Pi\vdash env[env']$ and \cat{b)} $(env[env'],sto'',(w''',\sqsubset_w''))\models(\Gamma',\Pi)$, we can then conclude by our induction hypothesis.
+\begin{description}
+	\item[a)] We know that either we have $\Gamma'=\Gamma[x\mapsto(\delta,\kappa)]$ and $env[x\mapsto v_e]$ if $s_j=x$, or $\Gamma'=\Gamma$ and $env$ if $s_j\neq x$.
+		\begin{itemize}
+			\item if $s_j\neq x$: Then we just have $\Gamma,\Pi\vdash env$
+			\item if $s_j=x$: Then we have $\Gamma[x\mapsto(\delta,\kappa)],\Pi\vdash env[x\mapsto v_e]$, which hold due to to the first premise.
+		\end{itemize}
+	\item[b)] We know that either we have $\Gamma'=\Gamma[x\mapsto(\delta,\kappa)]$ and $env[x\mapsto v_e]$ if $s_j=x$, or $\Gamma'=\Gamma$ and $env$ if $s_j\neq x$.
+		\begin{itemize}
+			\item if $s_j\neq x$: then we have $(env,sto'',(w'',\sqsubset_w''))\models(\Gamma,\Pi)$.
+			\item if $s_j=x$: then $(env[x\mapsto v_e],sto'',(w''',\sqsubset_w''))\models(\Gamma[x\mapsto(\delta,\kappa)],\Pi)$, since we know that $(env,sto'',(w'',\sqsubset_w''))\models(\Gamma,\Pi)$, we only need to show for $x$.
+				Since we have $x\in dom(env)$ and $x^{p_j}\in dom(w''')$ and $x^{p_j}\in dom(\Gamma')$ and due to the 1 premise, we then know that $(env[x\mapsto v_e],sto'',(w''',\sqsubset_w''))\models(\Gamma[x\mapsto(\delta,\kappa)],\Pi)$.
+		\end{itemize}
+\end{description}
+Based on \cat{a)} and \cat{b)} we can then conclude:
+
+\begin{description}
+	\item[1)] Since $\Gamma',\Pi\vdash v:T_j$, then we also must have $\Gamma',\Pi\vdash v:T$, since $T$ only contains more information than $T_j$.
+	\item[2)] By the second premise, \cref{lemma:His}, and \cref{lemma:Strength}, we can then get $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$.
+	\item[3)] Due to \cat{1)}, \cat{2)}, \cat{a)}, and \cat{b)} we can then conclude that $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
+\end{description}
