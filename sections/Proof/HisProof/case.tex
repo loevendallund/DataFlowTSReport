@@ -1,0 +1,22 @@
+\item[\runa{Case}] Here $e^{p'}=[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{Case}\\[0.2cm]
+			\inference[]
+				{env \vdash \left\langle e^{p''},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_e,sto'',(w'',\sqsubseteq_w''),(L'',V''),p'' \right\rangle &\\
+				env[env'] \vdash \left\langle e_j^{p_j},sto'',(w''',\sqsubseteq_w''),p'' \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L',V'),p_i \right\rangle}
+				{env\vdash \left\langle \left[\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
+	\end{tabular}
+\end{figure}
+Where $match(v_e,s_i)=\perp$ for all $1\leq u<j\leq|\tilde{\pi}|$, 
+$match(v_e,s_j)=env'$, and $w'''=w''[x\mapsto(L'',V'')]$ if $env'=[x\mapsto v_e]$ else $w'''=w''$.
+By virtue of our induction hypothesis, we can get the following from the premises:
+\begin{description}
+	\item[1)] if $y^{p''}\in dom(w'')\backslash dom(w)$ then $y\notin fv(e^{p''})$
+	\item[2)] if $y^{p''}\in dom(w')\backslash dom(w''')$ then $y\notin fv(e_j^{p_j})$
+\end{description}
+We then need to show that: if $y^{p''}\in dom(w')\backslash dom(w)$ then $y\notin fv(e^{p'})$.
+By \cref{def:fv} we know that $fv([\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}]^{p'})=fv(e_1^{p_j})\cup\cdots\cup fv(e_n^{p_n})\backslash(\tau(s_1)\cup\cdots\cup\tau(s_n))$, and the only variable that is not handled by \cat{1)}, \cat{2)}, and \cat{3)} is $x^{p_2}$.
+Where $x$ is not a free variable in $e_1^{p_1}$, but $x$ is possibly free $e_2^{p_2}$.
+From \cref{def:fv}, we know that $x$ is not free in $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, we then get: if $y^{p''}\in dom(w')\backslash dom(w)$ then $y\notin fv(e^{p'})$.

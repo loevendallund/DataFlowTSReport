@@ -1,0 +1,21 @@
+\item[\runa{Let}] Here $e^{p'}=[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\InfName{Let}\\[0.2cm]
+		\inference[]
+			{env\vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
+			env[x\mapsto v_1]\vdash \left\langle e_2^{p_2},sto_1,(w_2,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p_2 \right\rangle}
+			{env\vdash \left\langle \left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
+	\end{tabular}
+\end{figure}
+Where $w_2=(w_1[x^{p_1}\mapsto(L,V)]$.
+By virtue of our induction hypothesis, we can get the following from the premises:
+\begin{description}
+	\item[1)] if $y^{p''}\in dom(w_1)\backslash dom(w)$ then $y\notin fv(e_1^{p_1})$
+	\item[2)] if $y^{p''}\in dom(w')\backslash dom(w_1)$ then $y\notin fv(e_2^{p_2})$
+\end{description}
+We then need to show that: if $y^{p''}\in dom(w')\backslash dom(w)$ then $y\notin fv(e^{p'})$.
+By \cref{def:fv} we know that $fv([\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'})=fv(e_1^{p_1})\cup fv(e_2^{p_2})\backslash\{x\}$, and the only variable that is not handled by \cat{1)}, \cat{2)}, and \cat{3)} is $x^{p_2}$.
+Where $x$ is not a free variable in $e_1^{p_1}$, but $x$ is possibly free $e_2^{p_2}$.
+From \cref{def:fv}, we know that $x$ is not free in $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, we then get: if $y^{p''}\in dom(w')\backslash dom(w)$ then $y\notin fv(e^{p'})$.

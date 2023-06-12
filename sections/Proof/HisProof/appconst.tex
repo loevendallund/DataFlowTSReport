@@ -1,0 +1,19 @@
+\item[\runa{App-const}] Here $e^{p'}=[e_1^{p_1}\;e_2^{p_2}]^{p'}$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\InfName{App-const}\\[0.2cm]
+		\inference[]
+				{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle c,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
+				env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v',sto',(w',\sqsubseteq_w'),(L_2,V_2),p_2 \right\rangle}
+				{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
+	\end{tabular}
+\end{figure}
+Where $apply(c,v')=v$ and $(L,V)=(L_1\cup L_2,V_1\cup V_2)$.
+By virtue of our induction hypothesis, we can get the follow from the premises:
+\begin{description}
+	\item[1)] if $y^{p''}\in dom(w_1)\backslash dom(w)$ then $y\notin fv(e_1^{p_1})$
+	\item[2)] if $y^{p''}\in dom(w')\backslash dom(w_1)$ then $y\notin fv(e_2^{p_2})$
+\end{description}
+We the need to show that: if $y^{p''}\in dom(w')\backslash dom(w)$ then $y\notin fv(e^{p'})$.
+By \cref{def:fv} we know that $fv([e_1^{p_1}\;e_2^{p_2}]^{p'})=fv(e_1^{p_1})\cup fv(e_2^{p_2})$, this case follows immediately.

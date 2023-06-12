@@ -116,7 +116,7 @@ Later on, in (insert ref), we make use of the notion of free variables, which ar
 		fv([e_1^{p_1}\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\\
 		fv([\mbox{let}\;y\;e_1^{p_1}\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\backslash\{y\}\\
 		fv([\mbox{let rec}\;f\;e_1^{p_1}\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\backslash\{f\}\\
-		fv([\mbox{case}\;e^{p'}\;(s_1,\cdots,s_n)\;(e_1^{p_1},\cdots,e_n^{p_n})]^p)&=fv(e^{p'})\cup fv(e_1^{p_1})\cup\cdots\cup fv(e_n^{p_n})\\
+		fv([\mbox{case}\;e^{p'}\;(s_1,\cdots,s_n)\;(e_1^{p_1},\cdots,e_n^{p_n})]^p)&=fv(e^{p'})\cup fv(e_1^{p_1})\cup\cdots\cup fv(e_n^{p_n})\backslash(\tau(s_1)\cup\cdots\cup\tau(s_n))\\
 		fv([\mbox{ref}\;e^{p'}]^p)&=fv(e^{p'})\\
 		fv([!e^{p'}]^p)&=fv(e^{p'})\\
 		fv([e_1^{p_1}\;:=\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\\

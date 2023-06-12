@@ -1,0 +1,10 @@
+\item[\runa{Abs}] Here $e^{p'}=[\lambda\;x.e^{p''}]^{p'}$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{Abs}\\[0.2cm]
+			\inference[]{}
+				{env\vdash \left\langle \left[\lambda\;x.e_1^{p_1}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \left\langle x,e_1^{p_1},env\right\rangle,sto,(w,\sqsubseteq_w),(\emptyset,\emptyset),p'' \right\rangle}
+	\end{tabular}
+\end{figure}
+Since there is no updates to $w$, this case follows immediately.

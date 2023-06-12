@@ -4,32 +4,22 @@
 	The proof proceeds by induction on the height of the derivation tree for 
 	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
 	\begin{description}
-		\item[\runa{Const}]
-
-		\item[\runa{Var}]
+		\input{sections/Proof/HisProof/const.tex}
+		\input{sections/Proof/HisProof/var.tex}
 	\end{description}
 
 	Next, follows the induction step:
 	\begin{description}
-		\item[\runa{Abs}]
-		
-		\item[\runa{App}]
-
-		\item[\runa{App-const}]
-
-		\item[\runa{App-rec}]
-
-		\item[\runa{Let}]
-
-		\item[\runa{Let rec}]
-
-		\item[\runa{Case}]
-
-		\item[\runa{Ref}]
-
-		\item[\runa{Ref read}]
-
-		\item[\runa{Ref write}]
+		\input{sections/Proof/HisProof/abs.tex}
+		\input{sections/Proof/HisProof/app.tex}
+		\input{sections/Proof/HisProof/appconst.tex}
+		\input{sections/Proof/HisProof/apprec.tex}
+		\input{sections/Proof/HisProof/let.tex}
+		\input{sections/Proof/HisProof/letrec.tex}
+		\input{sections/Proof/HisProof/case.tex}
+		\input{sections/Proof/HisProof/ref.tex}
+		\input{sections/Proof/HisProof/refread.tex}
+		\input{sections/Proof/HisProof/refwrite.tex}
 	\end{description}
 \end{proof}
 

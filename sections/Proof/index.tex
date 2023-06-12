@@ -19,7 +19,7 @@ any new variable bindings introduced to the dependency function by evaluating an
 
 \begin{lemma}[History]\label{lemma:His}
 	Suppose $e^p$ is an occurrence, that
-	$$env\vdash\left\langle e^{p},sto,\psi,p'\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
+	$$env\vdash\left\langle e^{p},sto,(w,\sqsubseteq_w),p'\right\rangle\rightarrow\left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p''\right\rangle$$
 		and $x^{p_1}\in dom(w')\backslash dom(w)$.
 		Then $x\notin fv(e^{p})$
 \end{lemma}
