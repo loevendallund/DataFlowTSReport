@@ -1,0 +1,54 @@
+\item[\runa{ref}] Here $e^{p'}=\left[\mbox{ref}\;e_1^{p_1}\right]^{p'}$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{Ref}\\[0.2cm]
+			\inference[]
+				{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto'',(w'',\sqsubseteq_w'),(L,V),p_1 \right\rangle}
+				{env\vdash \left\langle \left[\mbox{ref}\;e_1^{p_1}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto',(w',\sqsubseteq_w'),(\emptyset,\emptyset),p' \right\rangle}
+	\end{tabular}
+\end{figure}
+Where $\loc=next$, $sto'=sto''[next\mapsto new(\loc),\loc\mapsto v]$, and $w'=w''[\loc^{p'}\mapsto (L,V)]$.
+From our assumption, we know that 
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash \left[\mbox{ref}\;e_1^{p_1}\right]^{p'}:T$,
+	\item $\Gamma,\Pi\vdash env$
+	\item $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$,
+\end{itemize}
+To type $[\mbox{ref}\;e_1^{p_1}]^{p'}$ we need to use the \runa{T-Ref} type rule:
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{T-Ref}\\[0.2cm]
+			\inference[]
+				{\Gamma,\Pi\vdash  e_1^{p_1}:(\delta',\kappa')}
+				{\Gamma[\nu x^{p'}:(\delta',\kappa')],\Pi\vdash [\mbox{ref}\;e_1^{p_1}]^{p'}:(\emptyset,\kappa)}
+	\end{tabular}
+\end{figure}
+Where $\kappa=\{\nu x\}$.
+We need to show that \cat{1)} $\Gamma,\Pi\vdash [\lambda\;x.e^{p''}]:T$, \cat{2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$, and \cat{3)} $(env,(w',\sqsubseteq_w'),v,(L,V))\models(\Gamma,T)$.
+
+To conclude, we first need to show for the premise, where due to our assumption and from the premise, we can use the induction hypothesis, where we then get:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash v_1:(\delta',\kappa')$,
+	\item $(env,sto'',(w'',\sqsubseteq_w'))\models(\Gamma,\Pi)$,
+	\item $(env,(w'',\sqsubseteq_w'),(L,V))\models(\Gamma,(\delta',\kappa'))$
+\end{itemize}
+We are also going to denote $\Gamma'=\Gamma[\nu x^{p'}:(\delta',\kappa')]$.
+
+\begin{description}
+	\item[1)] Since we know that \runa{Ref} evaluates to a location, we know it should be concluded by \runa{Closure}.
+	\begin{figure}[H]
+		\setlength\tabcolsep{8pt}
+		\begin{tabular}{l}
+			\runa{Location}\\[0.2cm]
+				\inference[]{}
+					{\Gamma,\Pi\vdash  \loc:(\delta, \kappa)}
+		\end{tabular}
+	\end{figure}
+	Where $\kappa\neq\emptyset$.
+	From the \runa{T-Ref} rule, we know that the type is $(\emptyset,\{\nu x\})$, we can then conclude that $\delta=\emptyset$ and $\kappa=\{\nu x\}$.
+	\item[2)] Since we know that $(env,sto'',(w'',\sqsubseteq_w'))\models(\Gamma,\Pi)$, we then need to show for the extension to $sto''$, $w''$, and $\Gamma'$.
+		Due to \cat{1)}, $(env,(w'',\sqsubseteq_w'),(L,V))\models(\Gamma,(\delta',\kappa'))$, and since we bind $\loc^{p'}$ in $sto''$ and $\nu x^{p'}$ in $\Gamma$, we can then conclude that $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma',\Pi)$
+	\item[3)] Due to \cat{1)} and \cat{2)} we can conclude that $(env,(w',\sqsubseteq_w'),v,(L,V))\models(\Gamma,T)$.
+\end{description}

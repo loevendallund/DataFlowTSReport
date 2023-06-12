@@ -62,7 +62,7 @@
 			\inference[]
 				{\Gamma,\Pi\vdash  e^{p}:(\delta',\kappa')}
 				{\Gamma[\nu x^{p'}:(\delta',\kappa')],\Pi\vdash [\mbox{ref}\;e^{p}]^{p'}:(\emptyset,\kappa)}\\
-				Where $\kappa=\{\nu x\}$\\[1cm]
+				Where $\nu x$ is fresh, and $\kappa=\{\nu x\}$\\[1cm]
 
 		\runa{T-Ref-read}\\[0.2cm]
 			\inference[]
@@ -77,7 +77,7 @@
 				{\Gamma,\Pi\vdash  e_1^{p_1}:(\delta,\kappa)&\\
 				\Gamma,\Pi\vdash  e_2^{p_2}:(\delta_2,\kappa_2)}
 				{\Gamma',\Pi\vdash [e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}:(\delta,\emptyset)}\\
-			Where $\Gamma'=\Gamma,\nu x_1:(\delta_2,\kappa_2),\cdots,\nu x_n:(\delta_2,\kappa_2)$\\
+			Where $\Gamma'=\Gamma[\nu x_1:(\delta_2,\kappa_2),\cdots,\nu x_n:(\delta_2,\kappa_2)]$\\
 			and $\nu x_1,\cdots,\nu x_n\in\{\nu x\mid\nu x\in\kappa\}$
 	\end{tabular}
 	\label{fig:TypeSys2}

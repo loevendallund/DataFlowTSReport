@@ -1,0 +1,58 @@
+\item[\runa{Let-rec}] Here $e^{p'}=\left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'}$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{Let-rec}\\[0.2cm]
+			\inference[]
+			{env\vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
+			env\left[f\mapsto\left\langle x,f,e_1^{p_1},env'\right\rangle\right]\vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p_2 \right\rangle}
+			{env\vdash \left\langle \left[\mbox{let rec}\;f\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[0.3cm]
+	\end{tabular}
+\end{figure}
+Where $v=\left\langle x,e_1^{p'},env'\right\rangle$, and $w_2=w_1[f^{p_2}\mapsto(L_1,V_1)]$.
+From our assumption, we know that 
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash \left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'}:T$,
+	\item $\Gamma,\Pi\vdash env$
+	\item $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$,
+\end{itemize}
+To type $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$ we need to use the \runa{T-Let-2} type rule:
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{T-Let-rec}\\[0.2cm]
+			\inference[]
+			{\Gamma,\Pi\vdash e_1^{p}:T_1\rightarrow T_2 &\\
+			\Gamma[f^p:T_1\rightarrow T_2],\Pi\vdash e_2^{p}:T}
+			{\Gamma,\Pi\vdash [\mbox{let rec}\; f \; e_1^{p} \; e_2^{p'}]^{p''}:T}\\[1cm]
+	\end{tabular}
+\end{figure}
+Where going to denote $env'=[f\mapsto\left\langle x,f,e_1^{p_1},env'\rangle\right]$ and $\Gamma'=\Gamma[f^p:T_1\rightarrow T_2]$.
+From our assumptions we have $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$ and $\Gamma,\Pi\models env$, and due to the first premises of \runa{Let-rec} and \runa{T-Let-rec}, we can from our induction hypothesis get:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash v_1:T_1$,
+	\item $(env,sto_1,(w_1,\sqsubseteq_w^1))\models(\Gamma,\Pi)$,
+	\item $(env,(w_1,\sqsubseteq_w^1),(L_1,V_1))\models(\Gamma,T_1)$
+\end{itemize}
+In the second premise, we first need to show that \cat{a)} $\Gamma',\Pi\vdash env'$\\
+	\cat{b)} $(env',sto_1,(w_2,\sqsubseteq_w^1))\models(\Gamma',\Pi)$.
+	\begin{description}
+		\item[a)] Since we know from the first premise that $\Gamma,\Pi\vdash v_1:T_1$, and we know that\\
+			$\Gamma_1=\Gamma[x^{p_1}:T_1]$ and $env[x\mapsto v_1]$.
+			Due to \cref{def:TEnv} we then know that:
+			$$\Gamma_1,\Pi\vdash env[x\mapsto v_1]$$
+		\item[b)] Since we bind $x$ in $env$, $x^{p_1}$ in $w$ and $\Gamma$, and due to \cat{a)} we then know that $(env[x\mapsto v_1],sto_1,(w_2,\sqsubseteq_w^1))\models(\Gamma_1,\Pi)$.
+	\end{description}
+	From \cat{a)} \cat{b)} we can then use the induction hypothesis
+	\begin{itemize}
+		\item $\Gamma_1,\Pi\vdash v:T$,
+		\item $(env[x\mapsto v_1],sto',(w',\sqsubseteq_w'))\models(\Gamma_1,\Pi)$,
+		\item $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma_1,T)$
+	\end{itemize}
+	From \cref{lemma:Strength}, we know that $x^{p_1}\notin fv(v)$ and by \cref{lemma:His} we know that: if $y^{p''}\in dom(w')\backslash dom(w)$ then $y^{p''}\notin fv(e^{p'})$.
+	We can the conclude, for this case:
+	\begin{itemize}
+		\item $\Gamma,\Pi\vdash v:T$,
+		\item $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$,
+		\item $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$
+	\end{itemize}
