@@ -6,40 +6,43 @@
 	\begin{tabular}{l}
 		\runa{Const}\\[0.2cm]
 			\inference[]{}
-				{env\vdash \left\langle c^{p'},sto,w,p \right\rangle \rightarrow \left\langle c,sto,w,(\emptyset,\emptyset),p' \right\rangle}\\[1cm]
+				{env\vdash \left\langle c^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle c,sto,(w,\sqsubseteq_w),(\emptyset,\emptyset),p' \right\rangle}\\[1cm]
 			
 		\runa{Var}\\[0.2cm]
 			\inference[]{}
-				{env\vdash \left\langle x^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto,w,(L,V\cup\{x^{p'},x^{p''}\}),p' \right\rangle}\\
-				Where $env(x)=v$, $p''=\inf_{p} (x,w)$, and $w(x^{p''})=(L,V)$\\[1cm]
+				{env\vdash \left\langle x^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqsubseteq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\
+				Where $env(x)=v$, $\psi=(w,\sqsubseteq_w)$, $p''=\inf_\psi (x)$, and $w(x^{p''})=(L,V)$\\[1cm]
 
-		\runa{Abstraction}\\[0.2cm]
+		\runa{Abs}\\[0.2cm]
 			\inference[]{}
-				{env\vdash \left\langle \left[\lambda\;x.e^{p'}\right]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v,sto,w,(\emptyset,\emptyset),p'' \right\rangle}\\
+				{env\vdash \left\langle \left[\lambda\;x.e^{p'}\right]^{p''},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqsubseteq_w),(\emptyset,\emptyset),p'' \right\rangle}\\
 			Where $v=\left\langle x,e^{p'},env\right\rangle$\\[1cm]
 
+			\todo[inline]{The last premise, for $\sqsubseteq_w^3$, push this down to future work}
 		\runa{App}\\[0.2cm]
 			\inference[]
-				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
-				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle &\\
-				env'[x\mapsto v'] \vdash \left\langle e^{p_1},sto'',w_3,p'' \right\rangle \rightarrow \left\langle v'',sto_3,w_4,(L'',V''),p_1 \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p'}\;e_2^{p''}\right]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto_3,w_4,(L\cup L'',V\cup V''),p_3 \right\rangle}\\
-			Where $v=\left\langle x,e^{p_1},env'\right\rangle$ and $w_3=w''[x^{p''}\mapsto (L',V')]$\\[1cm]
+				{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
+				env \vdash \left\langle e_2^{p_2},sto',(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v',sto'',(w_2,\sqsubseteq_w^2),(L_2,V_2),p_2 \right\rangle &\\
+				env'[x\mapsto v'] \vdash \left\langle e_3^{p_3},sto'',(w_2,\sqsubseteq_w^3),p_2 \right\rangle \rightarrow \left\langle v'',sto',(w',\sqsubseteq_w'),(L_3,V'_3),p_3 \right\rangle}
+				{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v'',sto',(w',\sqsubseteq_w'),(L_1\cup L_3,V_1\cup V_3),p' \right\rangle}\\
+				Where $v=\left\langle x,e_3^{p_3},env'\right\rangle$, $w_3=w_2[x^{p_2}\mapsto (L_2,V_2)]$, $\psi_2=(w_2,\sqsubseteq_w^2)$, and\\
+				if $inf_{\sqsubseteq_w^2}(x,w_2)=p''$ (where $p''\neq\epsilon$) then $\sqsubseteq_w^3=\sqsubseteq_w^2\cup(p'',p_3)$ else $\sqsubset_w^3=\sqsubset_w^2$\\[1cm]
 
 		\runa{App const}\\[0.2cm]
 			\inference[]
-				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle c,sto',w',(L,V),p' \right\rangle &\\
-				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v,sto'',w'',(L',V'),p'' \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p'}\;e_2^{p''}\right]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L\cup L',V\cup V'),p_3 \right\rangle}\\
-			Where $apply(c,v)=v'$\\[1cm]
+				{env \vdash \left\langle e_1^{p_1},sto,\psi,p \right\rangle \rightarrow \left\langle c,sto_1,\psi_1,(L_1,V_1),p_1 \right\rangle &\\
+				env \vdash \left\langle e_2^{p_2},sto_1,\psi_1,p_1 \right\rangle \rightarrow \left\langle v',sto',\psi',(L_2,V_2),p_2 \right\rangle}
+				{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{'},sto,\psi,p \right\rangle \rightarrow \left\langle v,sto',\psi',(L_1\cup L_2,V_1\cup V_2),p' \right\rangle}\\
+			Where $apply(c,v')=v$\\[1cm]
 
 		\runa{App rec}\\[0.2cm]
 			\inference[]
-				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
-				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle &\\
-				env'[x\mapsto v', f\mapsto\left\langle x,f,e,env'\right\rangle] \vdash \left\langle e^{p_1},sto'',w_3,p'' \right\rangle \rightarrow \left\langle v'',sto_3,w_4,(L'',V''),p_1 \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p'}\;e_2^{p''}\right]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v'',sto_3,w_4,(L\cup L'',V\cup V''),p_3 \right\rangle}\\
-			Where $v=\left\langle x,f,e^{p_1},env'\right\rangle$ and $w_3=w''[x^{p''}\mapsto (L',V')]$\\
+				{env \vdash \left\langle e_1^{p_1},sto,\psi,p \right\rangle \rightarrow \left\langle v_1,sto_1,\psi_1,(L_1,V_1),p_1 \right\rangle &\\
+				env \vdash \left\langle e_2^{p_2},sto_1,\psi_1,p_1 \right\rangle \rightarrow \left\langle v_2,sto_2,\psi_2,(L_2,V_2),p_2 \right\rangle &\\
+				env'[x\mapsto v_2, f\mapsto\left\langle x,f,e,env'\right\rangle] \vdash \left\langle e_3^{p_3},sto_2,\psi_3,p_2 \right\rangle \rightarrow \left\langle v,sto',\psi',(L_3,V_3),p_3 \right\rangle}
+				{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',\psi',(L_1\cup L_3,V_1\cup V_3),p' \right\rangle}\\
+			Where $v=\left\langle x,f,e^{p_1},env'\right\rangle$, $\psi_2=(w_2,\sqsubseteq_2)$, and\\
+				if $inf_{\psi_2}(f)=p''$ (where $p''\neq\epsilon$) then $\psi_3=(w_2,\sqsubset_w^2\cup(p'',p_3))$ else $\psi_3=\psi_2$
 	\end{tabular}
 	\label{fig:InfDV}
 \end{figure}
@@ -49,50 +52,26 @@
 	\begin{tabular}{l}
 		\runa{Let}\\[0.2cm]
 			\inference[]
-			{env\vdash \left\langle e_1^{p_1},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_1 \right\rangle &\\
-			env[x\mapsto v]\vdash \left\langle e_2^{p_2},sto',w'',p_1 \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p_2 \right\rangle}
-			{env\vdash \left\langle \left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p' \right\rangle}\\
-		Where $w''=w'[x^{p_1}\mapsto(L,V)]$\\[1cm]
+			{env\vdash \left\langle e_1^{p_1},sto,\psi,p \right\rangle \rightarrow \left\langle v_1,sto_1,\psi_1,(L_1,V_1),p_1 \right\rangle &\\
+			env[x\mapsto v_1]\vdash \left\langle e_2^{p_2},sto_1,\psi_2,p_1 \right\rangle \rightarrow \left\langle v,sto',\psi',(L,V),p_2 \right\rangle}
+			{env\vdash \left\langle \left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,\psi,p \right\rangle \rightarrow \left\langle v,sto',\psi',(L,V),p' \right\rangle}\\
+		Where $\psi_1=(w_1,\sqsubseteq_w^1)$, $\psi_2=(w_1[x^{p_1}\mapsto(L,V)],\sqsubseteq_w^1)$\\[1cm]
 
 		\runa{Let rec}\\[0.2cm]
 			\inference[]
-			{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
-			env\left[f\mapsto\left\langle x,f,e_1^{p'},env'\right\rangle\right]\vdash \left\langle e_2^{p''},sto',w'',p' \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p'' \right\rangle}
-			{env\vdash \left\langle \left[\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}\right]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p_3 \right\rangle}\\
-		Where $v=\left\langle x,e_1^{p'},env'\right\rangle$, $p_2$ is fresh, and $w''=w'[f^{p_2}\mapsto(L,V)]$\\[1cm]
+			{env\vdash \left\langle e_1^{p_1},sto,\psi,p \right\rangle \rightarrow \left\langle v_1,sto_1,\psi_1,(L_1,V_1),p_1 \right\rangle &\\
+			env\left[f\mapsto\left\langle x,f,e_1^{p_1},env'\right\rangle\right]\vdash \left\langle e_2^{p_2},sto_1,\psi_2,p_1 \right\rangle \rightarrow \left\langle v,sto',\psi',(L,V),p_2 \right\rangle}
+			{env\vdash \left\langle \left[\mbox{let rec}\;f\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,\psi,p \right\rangle \rightarrow \left\langle v,sto',\psi',(L,V),p' \right\rangle}\\
+		Where $v=\left\langle x,e_1^{p'},env'\right\rangle$, $\psi_1=(w_1,\sqsubseteq_w^1)$, and $\psi_2=(w_1[f^{p_2}\mapsto(L_1,V_1)],\sqsubseteq_w^1)$\\[1cm]
 
 		\runa{Case}\\[0.2cm]
 			\inference[]
-				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
-				env \vdash \left\langle (v,(L,V),\pi^{p''}),sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle}
-				{env\vdash \left\langle \left[\mbox{case}\;e^{p'}\;\pi^{p''}\right]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L\cup L',V\cup V'),p_3 \right\rangle}\\[1cm]
+				{env \vdash \left\langle e^{p''},sto,\psi,p \right\rangle \rightarrow \left\langle v_e,sto'',\psi'',(L'',V''),p'' \right\rangle &\\
+				env[env'] \vdash \left\langle e_i^{p_i},sto',\psi_1',p'' \right\rangle \rightarrow \left\langle v,sto',\psi',(L',V'),p_i \right\rangle}
+				{env\vdash \left\langle \left[\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}\right]^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',\psi',(L,V),p' \right\rangle}\\
+			Where $match(v_e,s_i)=\perp$ for all $1\leq u<j\leq|\tilde{\pi}|$,\\
+			$match(v_e,s_j)=env'$, and $\psi_1'=\psi''[x\mapsto(L'',V'')]$ if $env'=[x\mapsto v_e]$\\[1cm]
 
-		\runa{match 1}\\[0.2cm]
-			\inference[]
-				{env\sigma \vdash \left\langle e^{p'},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p' \right\rangle}
-				{env\vdash \left\langle (v,(L,V),(s\;e^{p'})\pi^{p''}),sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p'' \right\rangle}\\
-			Where $match(v,s)=\sigma$, $\sigma\neq\perp$, $p_1$ is fresh,\\
-			$match_w(s,p_1,(L,V))=\phi$, and $w'=w\phi$\\[1cm]
-
-		\runa{match 2}\\[0.2cm]
-			\inference[]
-				{env\sigma \vdash \left\langle e^{p'},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p' \right\rangle}
-				{env\vdash \left\langle (v,(L,V),(s\;e^{p'})),sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p'' \right\rangle}\\
-			Where $match(v,s)=\sigma$, $\sigma\neq\perp$, $p_1$ is fresh,\\
-			$match_w(s,p_1,(L,V))=\phi$, and $w'=w\phi$\\[1cm]
-
-		\runa{match $\perp$}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle (v,(L,V),\pi^{p''}),sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p'' \right\rangle}
-				{env\vdash \left\langle (v,(L,V),(s\;e^{p'})\pi^{p''}),sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p'' \right\rangle}\\
-			Where $match(v,s)=\perp$\\[1cm]
-	\end{tabular}
-	\label{fig:InfDV}
-\end{figure}
-
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
 		\runa{Ref}\\[0.2cm]
 			\inference[]
 				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle}
@@ -118,22 +97,19 @@
 \end{figure}
 
 \subsection{Pattern matching}
+\todo[inline]{Rewrite this section}
 ReScript pattern matching matches the first expression, $e_1$, with each case in the order they are defined in.
 Here, we define the function $match:Val \times Pat \rightarrow (\Var \rightharpoonup \Exp)$, where $Pat$ is the set of patterns.
 
-Note that the $match$ rules also holds if $\pi$ is empty, i.e., it does not contain more cases.
-
-The $match(v,s)=\sigma$ function, where $\sigma:\Var \rightharpoonup \Exp$ is a substition.
+The $match(v,s)=env$ function, where $\sigma:\Var \rightharpoonup \Exp$ is a substition.
 We defined the function inductively as follows:
 
 \begin{align*}
 	match(n,n) &= id\\
 	match(b,b) &= id\\
+	match(v,\_) &=id\\
 	match(e,x) &= [x \mapsto e]\\
-	%match((k,v), k) &= [k \mapsto v]\\
-	match(\{l_i=e_i\}^n_{i \in I},\{l_i\}^n_{i \in I}) &= [l_i \mapsto e_i, \sigma_{i+1}]_{i \in I}\\
-	match(e,\_) &=\epsilon\\
-	match(\_,p) &= F
+	match(\_,p) &= \perp
 \end{align*}
 
 \paragraph{number and boolean}
@@ -154,7 +130,7 @@ The wildcard accepts any input $e$ and gives an emtpy sybstitution, the fail cas
 
 \subsection{Extending $w$}
 Similarly to the pattern matching function, we define a function that extends the dependency function for binding pattern bindings to it liveness information.
-This is similarly defined, where $match_w(s,p,(L,V))=\phi$ is a function that returns an extension $\phi$.
+This is similarly defined, where $match_w(s,p,(L,V))=\psi$ is a function that returns an extension $\psi$.
 The $match_w$ function can thus be defined by:
 \begin{align}
 	match_w(s,p,(L,V))) =

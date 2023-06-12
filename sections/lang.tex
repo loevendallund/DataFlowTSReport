@@ -7,11 +7,12 @@ As the purpose of the dependency analysis is to analyse each subexpression of a 
 For the sake of the rest of the paper, we call the label a program point.
 When labelling a syntactical element or semantical element, we call it an occurrence, such that the syntactical occurrences makes up the program, an is thus labelled expressions, while semantical occurrences are then variables and locations.
 
-In the rest of the paper, we make a distinction between labelled and unlabelled expressions, such that a term is a labelled expression, and unlabelled expressions are just called expressions.
+The language we present here, we assume that all local bindings, including recursive bindings, are unique.
+This can also be ensured by using $\alpha$-conversion.
+We also make a distinction between labelled and unlabelled expressions, such that an occurrence is a labelled expression, and unlabelled expressions are just called expressions.
 
-The rest of this section will first formally introduce the abstract syntax for the language, and then the semantics.
+In this section will first formally introduce the abstract syntax for the language, and then the semantics.
 The semantics introduced here is an operational big-step semantics where we add the notion of program points and a mechanism for collecting dependencies.
-%The main purpose of adding these two notions is to compare it with the dependency system, introduced later, and can thus be safely removed to obtain a 
 
 \subsection{Syntax}
 This section introduces the abstract syntax of the language, based on the one presented in \cite{DVNicky}.
@@ -20,7 +21,7 @@ The syntactic categories for the language is defined as:
 \begin{align*}
 	p\in &\;\cat{P} &-\;&\mbox{The category for program points} \\
 	e\in &\;\cat{Exp} &-\;&\mbox{The category for expressions, or unlabelled terms} \\
-	t\in &\;\cat{Term} &-\;&\mbox{The category for terms, or labelled expressions} \\
+	o\in &\;\cat{Occ} &-\;&\mbox{The category for occurrences, or labelled expressions} \\
 	c\in &\;\cat{Con} &-\;&\mbox{The category for constants} \\
 	x,\;f\in &\;\cat{Var} &-\;&\mbox{The category for variables} \\
 	\loc\in &\;\cat{Loc} &-\;&\mbox{The category for constants}
@@ -28,24 +29,27 @@ The syntactic categories for the language is defined as:
 
 We also introduce a notation for occurrences of categories where, for a category $cat$, we write $cat^\cat{P}$ denoting the pair $cat\times\cat{P}$, i.e., for expression occurrences we then have $\cat{Exp}^\cat{P}=\cat{Exp}\times\cat{P}$.
 
-Since the category for terms are labelled expressions, it can further be defined as:
-$$\cat{Term}=\cat{Exp}^\cat{P}$$
+Since the category for occurrences are labelled expressions, it can further be defined as:
+$$\cat{Occ}=\cat{Exp}^\cat{P}$$
 
 The formation rules is presented in \cref{fig:coresyntax}.
+
+\todo[inline]{Rename terms to occurrences}
 
 \begin{figure}[H]
 	\begin{minipage}[t]{0.45\textwidth}
 		\setlength\tabcolsep{4pt}
 		\begin{tabular}{>{$}l<{$}>{$}r<{$}>{$}l<{$}}
-			term \; t &::= &e^p \\\\
+			Occurrence \; o &::= &e^p \\\\
 
-			expression \; e &::= &x \mid c \mid t_1\;t_2 \mid \lambda x.t\\
-			&| &\mbox{let} \; x \; t_1 \; t_2 \\
-			&| &\mbox{let rec} \; x \; t_1 \; t_2 \\
-			&| &\mbox{case} \; t_1 \; \{\pi\} \\
-			&| &\mbox{ref} \; t \mid t_1 := t_2 \mid \; !t\\\\
+			expression \; e &::= &x \mid c \mid o_1\;o_2 \mid \lambda x.o\\
+			&| &\mbox{let} \; x \; o_1 \; o_2 \\
+			&| &\mbox{let rec} \; x \; o_1 \; o_2 \\
+			&| &\mbox{case} \; o_1 \; \tilde{\pi} \; \tilde{o}\\
+			&| &\mbox{ref} \; o \mid o_1 := o_2 \mid \; !o\\\\
 
-			Patterns \; \pi &::= &(s\;t)\mid(s\;t)\;\pi\\\\
+			Patterns		\; \tilde{\pi} &::= &(s_1,\cdots,s_n)\\
+			Occurrences \; \tilde{o} &::= &(e_1^{p_1},\cdots,e_n^{p_n})\\\\
 
 			Pattern \; s &::= &n \mid b \mid x \mid \_ \\
 		\end{tabular}
@@ -70,24 +74,24 @@ The formation rules is presented in \cref{fig:coresyntax}.
 
 Some notable constructs is further explained below.
 \begin{description}
-	\item[Abstractions] denotes functions with a parameter $x$ and body $t$.
+	\item[Abstractions] $\lambda\;x.o$ denotes functions with a parameter $x$ and body $o$.
 		Applications uses juxtaposition, where abstractions have exactly one argument.
 
-	\item[Constants] are either natural numbers $n$, boolean values $b$, or functional constants.
+	\item[Constants] $c$ are either natural numbers $n$, boolean values $b$, or functional constants.
 		We introduce a function $apply$, that for each functional constant returns the result of applying a constant $c$ to its arguments.
 		Since we use juxtaposition, we will do the same for $apply$, such that if a functional constant takes more than one argument, we then need to use apply twice, such that for $PLUS$ we have:
 		$$apply(apply(PLUS,2),2)=2+2$$
 
-	\item[Bindings] or local declarations, are immutable bindings, i.e., binds variables to values.
+	\item[Bindings] $\mbox{let} \; x \; o_1 \; o_2$ and $\mbox{let rec} \; x \; o_1 \; o_2$, also called local declarations, are immutable bindings that binds variables to values.
 		We introduce two constructs for bindings which are recursive or non-recursive bindings.
 
 	\item[Mutability] is a construct that allows for mutable constructs through referencing.
 		The referencing uses locations and introduces constructs for creating, writing, and reading references.
 		This, however, does not make bindings mutable, since a bindings will always be bound to the same value, where the referencing constructs are wrappers for the locations.
 
-	\item[Pattern matching] The pattern matching construct matches a term $t$ with the patterns in $\pi$ in the order defined by the syntax.
-		Patterns are of the form $(s\;t)$, and will contain at least one.
-		We denote the patterns by $(s_1\;t_1),(s_2\;t_2),\cdots,(s_n\;t_n)$ where $n$ is the number of patterns and denote $|\pi|$ as the number of patterns in $\pi$, such that $|\pi|=n$.
+	\item[Pattern matching] $\mbox{case} \; o_1 \; \tilde{\pi} \; \tilde{o}$, matches an occurrence with the ordered set, $\tilde{\pi}$, of patterns.
+		For each pattern in $\tilde{\pi}$ there is also an occurrence in $\tilde{o}$, as such both the set of patterns and the set of occurrences must be the same size.
+		We also denote the size of patterns as $|\tilde{\pi}|$ and the size of occurrences as $|\tilde{o}|$.
 \end{description}
 
 \begin{example}[]
@@ -108,16 +112,14 @@ Later on, in (insert ref), we make use of the notion of free variables, which ar
 	\begin{align*}
 		fv(x^p)&=\{x\}\\
 		fv(c^p)&=\emptyset\\
-		fv([\lambda\;y.e_1^{p'}]^p)&=fv(e_1^{p''})\backslash\{y\}\\
-		fv([e_1^{p'}\;e_2^{p''}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\\
-		fv([\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\backslash\{y\}\\
-		fv([\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\backslash\{f\}\\
-		fv([\mbox{case}\;e^{p'}\;\pi^{p''}]^p)&=fv(e_1^{p'})\cup fv(\pi)\\
-		fv([(s\;e^{p'})\;\pi])&=fv(e^{p'})\cup fv(\pi)\backslash\tau(s)\\
-		fv([(s\;e^{p'})])&=fv(e^{p'})\backslash\tau(s)\\
+		fv([\lambda\;y.e^{p'}]^p)&=fv(e^{p'})\backslash\{y\}\\
+		fv([e_1^{p_1}\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\\
+		fv([\mbox{let}\;y\;e_1^{p_1}\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\backslash\{y\}\\
+		fv([\mbox{let rec}\;f\;e_1^{p_1}\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\backslash\{f\}\\
+		fv([\mbox{case}\;e^{p'}\;(s_1,\cdots,s_n)\;(e_1^{p_1},\cdots,e_n^{p_n})]^p)&=fv(e^{p'})\cup fv(e_1^{p_1})\cup\cdots\cup fv(e_n^{p_n})\\
 		fv([\mbox{ref}\;e^{p'}]^p)&=fv(e^{p'})\\
 		fv([!e^{p'}]^p)&=fv(e^{p'})\\
-		fv([e_1^{p'}\;:=\;e_2^{p''}]^p)&=fv(e_1^{p'})\cup fv(e_2^{p''})\\
+		fv([e_1^{p_1}\;:=\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\\
 	\end{align*}
 	where $\tau(s)$, for a pattern $s$, is denoted as:
 	$$
@@ -151,10 +153,10 @@ Later on, in (insert ref), we make use of the notion of free variables, which ar
 
 \subsection{Environments and stores}\label{sec:EnvSto}
 We will now introduce the environments and stores used by the semantics, introduced in \cref{sec:sem}.
-Parts of this section is based on the environment-store model but modified to fit a functional language.
+Since the language we focus on introduces mutability, through the referencing wrappers, this needs to be reflecting in our bindings model.
+Here, the referencing wrappers can also be seen as how locations, or pointers, are created and handled, where we introduce stores to describe how they are bound.
 
-Since this language is derived from the \emph{OCaml} dialect \emph{ReScript}, the environment is a binding from variables to values.
-Since the language introduces notion of referencing, locations are then considered as part of the values.
+Since this language is a functional language, the environment keeps the bindings we currently know, as such the environment is a function from variables to values.
 The set of values, \cat{Values}, is comprised by:
 \begin{itemize}
 	\item All constants are values.
@@ -164,23 +166,16 @@ The set of values, \cat{Values}, is comprised by:
 	\item Unit values, $()$, are values.
 \end{itemize}
 
-The category of values can be expressed as:
-\begin{align*}
-	&\cat{Values}=\cat{Con}\cup\cat{Loc}\cup(\cat{Var}\cup\cat{IVar})\times\cat{Exp}\times\cat{Val}\cup\\
-	&(\cat{Var}\cup\cat{IVar})\times(\cat{Var}\cup\cat{IVar})\times\cat{Exp}\times\cat{Val}\cup()
-\end{align*}
-
-Where a value $v\in\cat{Values}$ is an expression given by the following formation rules:
+A value $v\in\cat{Values}$ is an expression given by the following formation rules:
 $$v::=c\mid\loc\mid\left\langle x^{p},e^{p'},env\right\rangle\mid\left\langle x^{p},f^{p'},e^{p''},env\right\rangle\mid ()$$
 
-The environment is a function, that keeps the bindings currently known, such that:
 \begin{definition}[]
 	The set of all Environments, \cat{Env}, is the set of partial functions from variables to values, given as:
 	$$\cat{Env}=\cat{Var}\rightharpoonup\cat{Values}$$
 \end{definition}
 Where $env\in\cat{Env}$ denotes an arbitrary environment in \cat{Env}.
 
-\begin{definition}[Extension of environments]
+\begin{definition}[Update of environments]
 	Let $env$ be an environment, we write $env[x\mapsto v]$ to denote the environment $env'$ where:
 	\begin{align*}
 		env'(y)=
@@ -191,11 +186,10 @@ Where $env\in\cat{Env}$ denotes an arbitrary environment in \cat{Env}.
 	\end{align*}
 \end{definition}
 
-\todo[inline]{Insert ref to section where inverse env is used}
-Later on, in (ref to section), we use a function that, for a given value $v$, returns the set of variables bound to $v$.
+We also introduce a function which, for a given value $v$, returns all variables that is bound to $v$.
 \begin{definition}[inverse env]
-	Let $v$ be a value and $env\in\cat{Env}$ be an environment, the inverse function $env{-1}$ is then given as:
-	$$env^{-1}(v)=\{x\in dom(env)\mid env(x)=v\}$$
+	Let $v$ be a value and $env\in\cat{Env}$ be an environment, the inverse function $env^{-1}$ is then given as:
+$$env^{-1}:\cat{Values}\rightarrow\Pow{Var}$$
 \end{definition}
 
 The store is a function, that keeps the location bindings currently known.
@@ -208,7 +202,7 @@ The store function is then given by:
 \end{definition}
 Where $sto\in\cat{Sto}$ denotes an arbitrary store in \cat{Sto}.
 
-\begin{definition}[Extension of stores]
+\begin{definition}[Update of stores]
 	Let $sto$ be a store, we write $sto[\loc\mapsto v]$ to denote the store $sto'$ where:
 	\begin{align*}
 		sto'(\loc_1)=
@@ -225,91 +219,111 @@ This function is primarily used on the placeholder pointer $next$ to find a new 
 
 
 \subsection{Dependencies}\label{sec:DepFunc}
-Next, we will present the dependency function, used to collect the variable and location occurrences a semantic occurrence is dependent on.
-This function is also used to model the semantic data-flow in an evaluation, where we also present the binary relation on the dependency function.
-The binary relation is used to define an ordering of program points, which we use when doing a lookup in the dependency function.
+\todo[inline]{Look at this intro text again}
+The goal of the collection semantics is to collect the semantic dependencies as they appear in a computation. To this end, we use a dependency function that will tell us for each variable and location occurrence what other, previous occurrences they depend upon.
 
 \begin{definition}[Dependency function]\label{def:DepFunc}
-	The set of dependency functions, $\cat{W}$, is a partial function from location and variable occurrences to a pair of location and variable occurrences:
+	The set of dependency functions, $\cat{W}$, is a set of partial functions from location and variable occurrences to a dependency pair, such that:
 	$$\cat{W}=\cat{Loc}^P\cup\cat{Var}^P\rightharpoonup\Pow{\cat{Loc}^P}\times\Pow{\cat{Var}^P}$$
 \end{definition}
-Where $w\in\cat{W}$ denotes an arbitrary dependency function in \cat{W}.
-
 A lookup in a dependency function $w$ is, for a $u^p\in\cat{Loc}^P\cup\cat{Var}^P$, such that:
-$$w(u^p)=(\{\loc^{p_1},\cdots,\loc^{p_n}\},\{x_1^{p'_1},\cdots,x_y^{p'_y}\})$$
-We also denote the pair retrieved from $w$ as $(L,V)$, where $L\subseteq\cat{Loc}^P$ is a set of location occurrences and $V\subseteq\cat{Var}^P$ is a set of variable occurrences.
+$$w(u^p)=(\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\},\{x_1^{p'_1},\cdots,x_m^{p'_m}\})$$
+This should be read as: a lookup of an occurrence $u^p$, that is for a variable or location occurrence, returns a pair of location occurrences and a set of variable occurrences.
+We also denote the pair, retrieved from the dependency function, as a dependency pair where $(L,V)$ where $L=\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\}$ is the set of location occurrences and $V=\{x_1^{p'_1},\cdots,x_m^{p'_m}\}$ is the set of variable occurrences.
 
-\begin{definition}[Extension of $w$]\label{def:DepExt}
-	Let $w\in\cat{W}$ be a dependency function, we then write $w[u^p\mapsto(L,V)]$ to denote the dependency function $w'$ where:
+\begin{definition}[Update of $w$]\label{def:DepExt}
+	Let $w\in\cat{W}$ be a dependency function, we write $w[u^p\mapsto(L,V)]$ to denote the dependency function $w'$ where:
 	\begin{align*}
-		w'(q^p)=
+		w'(v^q)=
 		\left\{\begin{matrix}
-			w(q^p) & \mbox{if}\;q^p\neq u^p\\\	 
-			(L,V) & \mbox{if}\;q^p=u^p
+			w(v^q) & \mbox{if}\;v^q\neq u^p\\\	 
+			(L,V) & \mbox{if}\;v^q=u^p
 		\end{matrix}\right.
 	\end{align*}
 \end{definition}
 
-We further define a binary relation between program points that can be derived from the dependency function.
+To denote an ordering of program points, we introduce a binary relation of program points:
 
-\begin{definition}[Relation on $w$]\label{def:popular}
+\begin{definition}[Occurring program points]\label{def:RelPoint}
+	Let $O$ be a set of occurrences, then $points(O)$ is given by:
+	$$points(O)=\{p\in\cat{P}\mid\exists e^p\in O\}$$
+\end{definition}
+We assume that, in the following, that there exists a partial order, $\sqsubseteq$, of program points.
+
+\begin{definition}[]\label{def:RelPoint}
 	Let $w\in\cat{W}$ be a dependency function.
-	Then the binary relation $\sqsubseteq_w\subseteq\cat{P}\times\cat{P}$, is given by:
-	$$p_2\sqsubseteq p_1$$
-	iff
-	\begin{itemize}
-		\item $u_1^{p_1}\in dom(w)\Rightarrow\exists u_2^{p_2}\;\dot{\in}\; w(u_1^{p_1})$, or
-		\item $p_1=p_2$
-	\end{itemize}
-	Where $u^{p}\;\dot{\in}\;w(v^{p'})$, for $u^p,v^{p'}\in\cat{Loc}^P\cup\cat{Var}^P$, is given by:
-	if $w(v^{p'})=(L,V)$ then $u^{p}\in L\vee u^{p}\in V$
+	Then $\sqsubseteq_w$ is given by:
+	$$\sqsubseteq_w\subseteq\{(p,p')\mid p,p'\in(points(dom(w))\cup points(ran(w)))\}$$
+\end{definition}
+We say that $w$ is a partial order, with right to, $\sqsubseteq$ if $\sqsubseteq_w$ is a partial order.
+We also denote the pair of a dependency function $w\in\cat{W}$ and the order on $\sqsubseteq_w$ as $\psi=(w,\sqsubseteq_w)$.
+
+\iffalse
+\begin{definition}[Relation of program points]\label{def:RelPoint}
+	Let \cat{P} be a set of program points, we say that:
+	$$\sqsubseteq\subseteq\cat{P}\times\cat{P}$$
+	is a binary relation over program points.
+\end{definition}
+We denote $(p',p'')\in\sqsubseteq$ as $p'\sqsubseteq p''$ and we also denote that $\sqsubseteq_w$ is a relation of program points over a dependency function $w\in\cat{W}$, i.e., the relation $\sqsubseteq_w$ only contains program points that exists either in the domain or co-domain of $w$. 
+
+We also define $\psi\in\Psi$ that that contains a dependency function $w$ and an ordering of program points over $w$, as $(w,\sqsubseteq_w)$.
+
+\begin{definition}[Partial order]
+	Let $\psi\in\Psi$ be a pair of a dependency function $w$ and a relation of program points $\sqsubseteq_w$.
+	We say that $\psi$ is partial order if $\sqsubseteq_w$ is a partial order.
+\end{definition}
+\fi
+
+\begin{definition}[Greatest binding]\label{def:GBind}
+	Let $u$ be an element, either a variable or location, and $S$ be a set of occurrences, then $uf(u,S)$ is given by:
+	$$uf(u,S)=\inf\{u^p\in S\mid u^q\in S.q\sqsubseteq p\}$$
 \end{definition}
 
-Since the binary relation $\sqsubseteq_w$ defines an order derived from a $w\in\cat{W}$, we can then say that $w$ models the data-flow of a program, if $w$ is a partial order.
+Based on \cref{def:GBind}, we can present an instantiation of the function for the order $\sqsubseteq_w$:
 
-\begin{definition}[Partial order of $w$]
-	Let $w\in\cat{W}$ be a dependency function.
-	We say that $w$ is partial order if $\sqsubseteq_w$ is a partial order.
+\begin{definition}[]
+	Let $w$ be a dependency function, $\sqsubseteq_w$ be an order for $w$, $u$ be an element, either a variable or location, and $S$ be a set of occurrences, then $uf_{\sqsubseteq_w}$ is given by:
+	$$uf_{\sqsubseteq_w}(u,w)=\inf\{u^p\in dom(w)\mid u^q\in dom(w.q\sqsubseteq_w p\}$$
 \end{definition}
 
 
-In the semantics that follows, we use a function to get the greatest lower-bound of a variable in a dependency function.
-Since all variables in a program are, where there a no name clashes, the function only really gets into play for abstractions and reading from references.
+\iffalse
+In the semantics, which we present in \cref{sec:sem}, we need to lookup the dependencies of variables and locations.
+This lookup is always for the greatest lower-bound of a variable or location, i.e., the newest bound variable, which is defined as:
 
 \begin{definition}[$inf$ function]
-	Let $w\in\cat{W}$ be a dependency function that is a partial order and $u^p\in dom(w)$ be an occurrence.
-	Then the greatest lower-bound function is as follows:
-	$$inf(u,w)=p$$
+	Let $\psi\in\Psi$ be a partial order, where $\psi=(w,\sqsubseteq_w)$, then the greatest lower-bound function for an element, $u\in\cat{Loc}\cup\cat{Var}$, is as follows:
+	$$inf_\psi(u)=p$$
 	iff
-	$$p=\inf\{p'\in dom(w)\mid x^{q'}\in dom(w). q'\sqsubseteq p'\}$$
+	$$p=\inf\{p'\in dom(w)\mid x^{q'}\in dom(w). q'\sqsubseteq_w p'\}$$
 \end{definition}
+\fi
 
 \subsection{Collection semantics}\label{sec:sem}
 We will now introduce the big-step semantics for our language and highlight some interesting transition rules.
 In the big-step semantics, the transitions are of the from:
 \begin{align*}
-env\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle
+env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle
 \end{align*}
-Where $env\in\cat{Env}$, $sto\in\cat{Sto}$, and $w,\;w'\in\cat{W}$.
-This should be read as, given the store $sto$, dependency function $w$, and the previous program point $p$, the occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, the dependency pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
+Where $env\in\cat{Env}$, $sto\in\cat{Sto}$, and $\psi,\;\psi'\in\Psi$.
+This should be read as, given the store $sto$, the pair $\psi$, and the previous program point $p$, the occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated pair $\psi'$, the dependency pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
 
 The transition system is given by:
-$$((\cat{Term}\cup\cat{Values})\times\cat{Store}\times\cat{W}\times\cat{P},\rightarrow,\cat{Values}\cat{Store}\times\cat{W}\times\Pow{\cat{Loc}^P\times\cat{Var}^P}\times\cat{P})$$
+$$((\cat{Term}\cup\cat{Values})\times\cat{Store}\times\cat{W}\times\cat{P},\rightarrow,\cat{Values}\cat{Store}\times\Psi\times\Pow{\cat{Loc}^P\times\cat{Var}^P}\times\cat{P})$$
 A highlight of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}, the rest can be found in \cref{App:ColSem}.
 
-%In the semantics, we sometimes need to get a fresh program point, where we use \emph{fresh} to denote that a program point is not used in the program.
-
+\todo[inline]{Need to fix/rewrite for locations, since the description (and rule shown above) is old}
 \begin{description}
 	\item[\runa{Const}] is the simplest rule, as it has no premises and does not have any side effects.
 		As constants are evaluated to the constant value, no dependencies are used, i.e., no variable or location occurrences are used to evaluate a constant.
 
 	\item[\runa{Var}] This rule uses the environment and dependency function to get the value for a variable $x$ and its dependencies.
 		Here, the $inf$ function is used, to get the greatest lower-bound of a variable in respect to the ordering $\sqsubseteq_w$ relation.
-		To make sure that we get a proper ordering of program points, we add both the current occurrence, and the occurrence we used to lookup in $w$.
+		Since we used to variable, we add it to the set of variable occurrences in the dependency pair, we got from the lookup in $w$.
 
 	\item[\runa{Let}] creates a local binding that can be used later on.
-		This rule extends both the environment and the dependency function by the value of evaluating $e_1^{p_1}$ and its dependencies.
-		Here, the binding in the environment is a local binding, i.e., the binding is only known in $e_2^{p_2}$, while the extension to $w$ is global.
+		This rule extends both the environment and the pair $\psi$ by the value of evaluating $e_1^{p_1}$ and its dependencies.
+		Here, we make a local binding for the variable in $e_2^{p_2}$, while the extension of $\psi$ is thus known for the rest of the program, since $\psi$ is a global collection of dependencies.
 
 	\item[\runa{Loc-new}] creates a new reference, binds it to the value of $e^{p'}$, in the store, and extends the dependency function $w$.
 		As references are considered global, and has no alias when created, the value of \runa{Loc-new} is a location.
@@ -327,30 +341,30 @@ A highlight of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}, th
 	\begin{tabular}{l}
 		\runa{Const}\\[0.2cm]
 			\inference[]{}
-				{env\vdash \left\langle c^{p'},sto,w,p \right\rangle \rightarrow \left\langle c,sto,w,(\emptyset,\emptyset),p' \right\rangle}\\[1cm]
+				{env\vdash \left\langle c^{p'},sto,\psi,p \right\rangle \rightarrow \left\langle c,sto,\psi,(\emptyset,\emptyset),p' \right\rangle}\\[1cm]
 			
 		\runa{Var}\\[0.2cm]
 			\inference[]{}
-				{env\vdash \left\langle x^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto,w,(L,V\cup\{x^{p'},x^{p''}\}),p' \right\rangle}\\
-				Where $env(x)=v$, $p''=\inf (x,w)$, and $w(x^{p''})=(L,V)$\\[1cm]
+			{env\vdash \left\langle x^{p'},sto,\psi,p \right\rangle \rightarrow \left\langle v,sto,\psi,(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[0.4cm]
+				Where $env(x)=v$, $\psi=(w,\sqsubseteq_w)$, $p''=\inf_\psi (x)$, and $w(x^{p''})=(L,V)$\\[1cm]
 
 		\runa{Let}\\[0.2cm]
 			\inference[]
-			{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
-			env[x\mapsto v]\vdash \left\langle e_2^{p''},sto',w'',p' \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p'' \right\rangle}
-			{env\vdash \left\langle [\mbox{let}\;x\;e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p_3 \right\rangle}\\
-		Where $w''=w'[x^{p'}\mapsto(L,V)]$\\[1cm]
+			{env\vdash \left\langle e_1^{p_1},sto,\phi,p \right\rangle \rightarrow \left\langle v_1,sto_1,\phi_1,(L_1,V_1),p_1 \right\rangle &\\
+			env[x\mapsto v_1]\vdash \left\langle e_2^{p_2},sto_1,\phi_2,p_1 \right\rangle \rightarrow \left\langle v,sto',\phi',(L,V),p_2 \right\rangle}
+			{env\vdash \left\langle \left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,\phi,p \right\rangle \rightarrow \left\langle v,sto',\phi',(L,V),p' \right\rangle}\\[0.4cm]
+		Where $\phi_1=(w_1,\sqsubseteq_w^1)$, $\phi_2=(w_1[x^{p_1}\mapsto(L,V)],\sqsubseteq_w^1)$\\[1cm]
 
 		\runa{Ref}\\[0.2cm]
 			\inference[]
 				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle}
-				{env\vdash \left\langle [\mbox{ref}\;e^{p'}]^{p''},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto''[\loc\mapsto v],w'',(\emptyset,\emptyset),p'' \right\rangle}\\
+				{env\vdash \left\langle [\mbox{ref}\;e^{p'}]^{p''},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto''[\loc\mapsto v],w'',(\emptyset,\emptyset),p'' \right\rangle}\\[0.4cm]
 			Where $\loc = next$, $sto''=sto'[next\mapsto new\;\loc]$ and $w''=w'[\loc^{p''}\mapsto (L,V)]$\\[1cm]
 
 		\runa{Ref-read}\\[0.2cm]
 			\inference[]
 				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto',w',(L,V),p' \right\rangle}
-				{env\vdash \left\langle \left[!e^{p'}\right]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L\cup\{\loc^{p''}\},V),p'' \right\rangle}\\
+				{env\vdash \left\langle \left[!e^{p'}\right]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L\cup\{\loc^{p''}\},V),p'' \right\rangle}\\[0.4cm]
 			Where $sto'(\loc)=v$\\[1cm]
 
 
@@ -358,7 +372,7 @@ A highlight of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}, th
 			\inference[]
 				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto',w',(L,V),p' \right\rangle &\\
 				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v,sto'',w'',(L',V'),p'' \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p'}:=e_2^{p''}\right]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle (),sto_3,w_3,(L,V),p_3 \right\rangle}\\
+				{env\vdash \left\langle \left[e_1^{p'}:=e_2^{p''}\right]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle (),sto_3,w_3,(L,V),p_3 \right\rangle}\\[0.4cm]
 				Where $sto_3=sto''[\loc\mapsto v]$, $p_2$ is fresh, $p_4=inf_{p''}(\loc,w')$\\
 				$w_3=w''[\loc^{p_2}\mapsto(L'\cup\{\loc^{p_4}\},V')]$
 	\end{tabular}
@@ -370,214 +384,24 @@ Next, we will present some examples that illustrates how the dependency function
 
 \begin{example}[Data-flow for abstractions]\label{ex:DFAbs}
 The following program creates a local binding to the identity function and applies it twice.
+
 \begin{lstlisting}[language=Caml, mathescape=true]
-(let x ($\lambda$ y.(y$^1$))$^2$ (x$^3$ (x$^4$ 1$^5$)$^{6}$)$^{7}$)$^{8}$
+(let x ($\lambda$ y.(y$^1$))$^2$ (let z (x$^3$ 1$^4$)$^5$ (x$^6$ 2$^7$)$^{8}$)$^{9}$)$^{10}$
 \end{lstlisting}
 The transition tree can be found in \cref{FigEx.Abs}.
-In the transition tree, we see that the dependency function is extended a couple of times, first for the binding of x, then one for each application.
-In the innermost application, when evaluating the body of the abstraction we have the following bindings in our dependency function:
-$$w_2=[x^{2}\mapsto(\emptyset,\emptyset), y^{5}\mapsto(\emptyset,\emptyset)]$$
-Here, the lookup of the parameter $y$ is simple, as there are only one where we then know that $inf(y,w_2)=5$, since we have $5\sqsubseteq_{w_2} 5$ per \cref{def:popular}.
+In the transition tree, we see that $\psi$ is extended a couple of times, where we will take a look at a couple of interesting extensions to $\psi$
+The first time we evaluate the abstraction body, $\psi$ is on the following form:
 
-In the second (and outermost) application, when evaluating the body of the abstraction a second time, we have the following bindings in our dependency function:
-$$w_3=[x^{2}\mapsto(\emptyset,\emptyset), y^{5}\mapsto(\emptyset,\emptyset), y^{6}\mapsto(\emptyset,\{y^1,y^5,x^4,x^{2}\})]$$
-Now, we have two bindings for the parameter $y$.
-We can then use the binary relation for our dependency function, found in \cref{def:popular}, where we get the following order:
-$$1\sqsubseteq_w 6,\;5\sqsubseteq_w 6$$
-From this order, it is easy to see that $6$ is the greatest program point where $y$ is bound in $w_3$.
-And since the $inf$ function finds the greatest lower bound, for a given variable and dependency function, we then know that $inf(y,w_3)=6$.
+$$\psi_2=(w_2=[x^{2}\mapsto(\emptyset,\emptyset), y^{4}\mapsto(\emptyset,\emptyset)],\sqsubseteq_w^2=\emptyset)$$
+Here, the lookup of the parameter $y$ is simple, as there are only one occurrence, where we then know that $inf_{\psi_2}(y)=4$.
+
+The second time we evaluate the body of the abstraction, $\psi$ is on the following form:
+
+$$\psi_3=(w_3=[x^{2}\mapsto(\emptyset,\emptyset), y^{4}\mapsto(\emptyset,\emptyset), y^{7}\mapsto(\emptyset,\emptyset)],\sqsubseteq_w^2=\{4,7\})$$
+Here, we now have two bindings for the parameter $y$, but since we also know that there are an ordering for the two occurrences of $y$, we then know that the program point $7$ is evaluated after $4$, as such we know that $inf_{\psi_3}(y)=7$.
 \end{example}
 
 \begin{landscape}
 \subfile{../examples/DFAbs.tex}
 \end{landscape}
-
-\iffalse
-Since the semantics requires $w$ to be a partial order, we need to ensure that $w$ is still a partial order after an evaluation.
-First we need to define the notion of $w$ to respect the transition system.
-
-\begin{definition}[]
-	Let $w\in\cat{W}$ be a dependency function and $\rightarrow$ be the transition system.
-	We say that $w$ respects $\rightarrow$ if $\;\forall u^{p},v^{p'}\in dom(w).u^{p}\neq v^{p'}\Rightarrow w(u^{p})=(L,V).v^{p'}\notin L\wedge v^{p'}\notin V$.
-\end{definition}
-For a dependency function $w$ to respect the transition system, then if the exists an occurrence, $u^{p}$ in the domain of $w$, then another occurrence cannot be dependent on $u^{p}$.
-This restriction is based on the notion that the program points where semantic occurrences gets bound to a dependency pair is different from where they are used.
-
-Consider the following example:
-$$\mbox{let}\;x\;(5^1)\;(x^2)^3$$
-Following the semantics of the \runa{let} rule, we know that we extends our dependency function $w$ with $w[x^4\mapsto(\emptyset,\emptyset)]$, while in the lookup for $x$, by using the \runa{Var} rule, returns $(\emptyset,\{x^2\})$.
-
-
-\begin{lemma}[]
-	If $env\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle$ and $w$ is a partial order that respects $e^{p'}$, 
-	then $w'$ is also a partial order and $\not\exists u^{p''}\in L\cup V.u^{p''}\in dom(w)$.
-\end{lemma}
-\begin{proof}
-	The proof follows by induction on the height of the tree for $env\vdash\left\langle e^{p'},sto,w,p\right\rangle\rightarrow\left\langle v,sto',w',(L,V),p''\right\rangle$.
-
-	In the base case, we have \runa{Cons} and \runa{Var}:
-	\begin{description}
-		\item[\runa{Cons}] Here $e^{p'}=c^{p'}$, where
-			\begin{figure}[H]
-				\setlength\tabcolsep{8pt}
-				\begin{tabular}{l}
-					\inference[]{}
-					{env\vdash\left\langle c^{p'},w,sto,p\right\rangle\rightarrow\left\langle c,w,sto,(\emptyset,\emptyset),p'\right\rangle}
-				\end{tabular}
-			\end{figure}
-			And $w$ is a partial order that respects $\rightarrow$.
-			Since there are no extension to $w$, this case follows.
-
-		\item[\runa{Var}] Here $e^{p'}=x^{p'}$, where
-			\begin{figure}[H]
-				\setlength\tabcolsep{8pt}
-				\begin{tabular}{l}
-					\inference[]{}
-					{env\vdash\left\langle x^{p'},w,sto,p'\right\rangle\rightarrow\left\langle v,w,sto,(L,V),p'\right\rangle}
-				\end{tabular}
-			\end{figure}
-			Where $env(x)=v$, $p_1=\inf_{p'} (x,w)$, $w(x^{p_1})=(L,V)$, and $w$ is a partial order that respects $\rightarrow$.
-			Since there are no extension to $w$, and $x^{p_1}\notin dom(w)$.
-	\end{description}
-
-	Next, follows the induction step:
-	\begin{description}
-		\item[\runa{Abs}] Here $e^{p'}=[\lambda y.e_1^{p''}]^{p'}$, where
-			\begin{figure}[H]
-				\setlength\tabcolsep{8pt}
-				\begin{tabular}{l}
-					\inference[]{}
-					{env\vdash \left\langle \left[\lambda\;x.e^{p'}\right]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v,sto,w,(\emptyset,\emptyset),p'' \right\rangle}
-				\end{tabular}
-			\end{figure}
-			Where $v=\left\langle y,e_1^{p''},env\right\rangle$ and $w$ is a partial order.
-			Since there are no extension to $w$, this case follows.
-		
-		\item[\runa{App}] Here $e^{p'}=[e_1^{p_1}\;e_2^{p_2}]^{p'}$, where
-		\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-					\inference[]
-					{env \vdash \left\langle e_1^{p_1},sto,w,p \right\rangle \rightarrow \left\langle v_1,sto_1,w_1,(L_1,V_1),p_1 \right\rangle &\\
-					env \vdash \left\langle e_2^{p_2},sto_1,w_1,p' \right\rangle \rightarrow \left\langle v_2,sto_2,w_2,(L_2,V_2),p_2 \right\rangle &\\
-					env'[x\mapsto v_2] \vdash \left\langle e_3^{p_3},sto_2,w_2',p_2 \right\rangle \rightarrow \left\langle v,sto',w',(L_3,V_3),p_3 \right\rangle}
-					{env\vdash \left\langle [e_1^{p_1}\;e_2^{p_2}]^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L_1\cup L_3,V_1\cup V_3),p' \right\rangle}
-			\end{tabular}
-		\end{figure}
-		Where $v_1=\left\langle x,e_3^{p_3},env'\right\rangle$, $w_2'=w_2[x^{p_2}\mapsto(L_2,V_2)]$, and $w$ is a partial order.
-		We need to show that $w'$ is a partial order that respects $e^{p'}$.
-		To do this, we need to conclude for the premises, where from our induction hypothesis we get:
-		\begin{itemize}
-			\item $w_1$ is a partial order that respects $\rightarrow$
-			\item $w_2$ is a partial order that respects $\rightarrow$
-		\end{itemize}
-		If we can show that $w_2'$ is a partial order that respects $\rightarrow$, we can then get, from our induction hypothesis, that $w'$ is a partial order that respects $\rightarrow$.
-		Since we know that $w_2'=w_2[x^{p_2}\mapsto(L_2,V_2)]$, $w_2$ is a partial order that respects $\rightarrow$, 
-		and that $(L_2,V_2)$ is due to the evaluation $e_2^{p_2}$, we then know that $\not\exists u^{p''}\in L_2\cup V_2.u^{p''}\in dom(w_2)$.
-		If there were a $u^{p''}\in L_2\cup V_2.u^{p''}\in dom(w_2)$, then either $w_2$ would not respect $\rightarrow$, or there were either 
-
-	\item[\runa{Let}] Here $e^{p'}=[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, where
-		\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-			\inference[]
-				{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
-				env[y\mapsto v]\vdash \left\langle e_2^{p''},sto',w'',p' \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p'' \right\rangle}
-				{env\vdash \left\langle [\mbox{let}\;y\;e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w_3,(L',V'),p_3 \right\rangle}
-			\end{tabular}
-		\end{figure}
-		Where $w''=w'[y^{p'}\mapsto(L,V)]$.
-
-	\item[\runa{Let rec}] Here $e^{p'}=[\mbox{let rec}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, where
-		\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-			\inference[]
-				{env\vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle &\\
-				env[f\mapsto\left\langle x,f,e_1^{p'},env''\right\rangle]\vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p'' \right\rangle}
-				{env\vdash \left\langle [\mbox{let rec}\;f\;e_1^{p'}\;e_2^{p''}]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v',sto,w_3,(L',V'),p_3 \right\rangle}
-			\end{tabular}
-		\end{figure}
-		Where $v=\left\langle y,e_1^{p'},env''\right\rangle$ and $w_3=w''[f^{p''}\mapsto(L',V')]$.
-
-	\item[\runa{Case}] Here $e^{p'}=[\mbox{case}\;e_1^{p_1}\;\pi^{p_2}]^{p'}$, where
-		\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-			\inference[]
-				{env \vdash \left\langle e_1^{p_1},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_1 \right\rangle &\\
-				env \vdash \left\langle (v,(L,V),\pi^{p_2}),sto',w',p_1 \right\rangle \rightarrow \left\langle v',sto'',w'',(L',V'),p_2 \right\rangle}
-				{env\vdash \left\langle [\mbox{case}\;e_1^{p_1}\;\pi^{p_2}]^{p'},sto,w,p \right\rangle \rightarrow \left\langle v',sto'',w'',(L\cup L',V\cup V'),p' \right\rangle}
-			\end{tabular}
-		\end{figure}
-
-	\item[\runa{Match 1}] Here $e^{p'}=[(v,(L,V),(s\;e_1^{p_1})\;\pi^{p_2}]^{p'}$, where
-		\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-			\inference[]
-				{env\sigma \vdash \left\langle e_1^{p_1},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p_1 \right\rangle}
-				{env\vdash \left\langle [(v,(L,V),(s\;e_1^{p_1})\;\pi^{p_2})]^{p'},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p' \right\rangle}
-			\end{tabular}
-		\end{figure}
-		Where $match(v,s)=\sigma$, $\phi=match_w(s,(L,V))$ and $w'=w\phi$.
-
-	\item[\runa{Match 2}] Here $e^{p'}=[(v,(L,V),(s\;e_1^{p_1}))]^{p'}$, where
-		\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-			\inference[]
-				{env\sigma \vdash \left\langle e_1^{p_1},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p' \right\rangle}
-				{env\vdash \left\langle [(v,(L,V),(s\;e_1^{p_1}))]^{p_3},sto,w',p \right\rangle \rightarrow \left\langle v,sto',w'',(L,V),p_3 \right\rangle}
-			\end{tabular}
-		\end{figure}
-		Where $match(v,s)=\sigma$, $\phi=match_w(s,(L,V))$ and $w'=w\phi$.
-
-	\item[\runa{Match $\perp$}] Here $e^{p'}=[(v,(L,V),(s\;e_1^{p_1})\;\pi^{p_2}]^{p'}$, where
-		\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-			\inference[]
-				{env \vdash \left\langle (v,(L,V),\pi^{p''}),sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p'' \right\rangle}
-				{env\vdash \left\langle [(v,(L,V),(s\;e^{p'})\pi^{p''})]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_3 \right\rangle}
-			\end{tabular}
-		\end{figure}
-		Where $match(v,s)=\perp$
-
-	\item[\runa{Ref}] Here $e^{p'}=[\mbox{ref}\;e_1^{p_1}]^{p'}$, where
-		\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-			\inference[]
-				{env \vdash \left\langle e^{p_1},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p_1 \right\rangle}
-				{env\vdash \left\langle [\mbox{ref}\;e^{p_1}]^{p'},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto''[\loc\mapsto v],w'',(\emptyset,\emptyset),p' \right\rangle}
-			\end{tabular}
-		\end{figure}
-		Where $sto''=sto'[next\mapsto new\;\loc]$ and $w''=w'[\loc^{p'}\mapsto (L,V)]$.
-
-	\item[\runa{Ref read}] Here $e^{p'}=[!e_1^{p_1}]^{p'}$, where
-		\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-			\inference[]
-				{env \vdash \left\langle e^{p_1},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto',w',(L,V),p_1 \right\rangle}
-				{env\vdash \left\langle [!e^{p_1}]^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L\cup\{\loc^{p'}\},V),p' \right\rangle}
-			\end{tabular}
-		\end{figure}
-		Where $sto'(\loc)=v$.
-
-	\item[\runa{Ref write}] Here $e^{p'}=[e_1^{p_1}:=e_2^{p_2}]^{p'}$, where
-		\begin{figure}[H]
-			\setlength\tabcolsep{8pt}
-			\begin{tabular}{l}
-			\inference[]
-				{env \vdash \left\langle e_1^{p_1},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto',w',(L,V),p_1 \right\rangle &\\
-				env \vdash \left\langle e_2^{p_2},sto',w',p_1 \right\rangle \rightarrow \left\langle v,sto'',w'',(L',V'),p_2 \right\rangle}
-				{env\vdash \left\langle [e_1^{p_1}:=e_2^{p_2}]^{p'},sto,w,p \right\rangle \rightarrow \left\langle (),sto_3,w_3,(L,V),p' \right\rangle}
-			\end{tabular}
-		\end{figure}
-		Where $sto_3=sto''[\loc\mapsto v]$ and $w_3=w''[\loc^{p_3}\mapsto(L',V')]$.
-	\end{description}
-\end{proof}
-\fi
 \end{document}

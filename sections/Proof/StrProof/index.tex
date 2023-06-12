@@ -1,0 +1,36 @@
+\documentclass[../../../master.tex]{subfiles}
+\begin{document}
+\begin{proof}
+	The proof proceeds by induction on the height of the derivation tree for 
+	$$\Gamma,\Pi\vdash e^{p}:T$$
+	\begin{description}
+		\item[\runa{T-Const}]
+
+		\item[\runa{T-Var}]
+	\end{description}
+
+	Next, follows the induction step:
+	\begin{description}
+		\item[\runa{T-Abs}]
+		
+		\item[\runa{T-App}]
+
+		\item[\runa{T-App-const}]
+
+		\item[\runa{T-App-rec}]
+
+		\item[\runa{T-Let}]
+
+		\item[\runa{T-Let rec}]
+
+		\item[\runa{T-Case}]
+
+		\item[\runa{T-Ref}]
+
+		\item[\runa{T-Ref-read}]
+
+		\item[\runa{T-Ref-write}]
+	\end{description}
+\end{proof}
+
+\end{document}

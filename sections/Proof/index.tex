@@ -1,183 +1,54 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \section{Soundness}
-In this section we present the soundness of the liveness system with respect to the collection semantics, shown in \cref{App:ColSem}.
-The liveness system is sound, if the liveness type contains at least all live occurrences at a given program point.
-The liveness system is sound in respect to the collection semantics, that is, the liveness type is an overapproximation of the occurrences in the collection semantics.
+We will now show the soundness of the type system, i.e., the type of an occurrence correspond to the dependencies and the alias information from the semantics.
+To show that the type system is sound, we will first introduce the type rules for values and the relation between between the collection semantics and the type system, i.e, how the relation between binding models and the relation between the semantics and the type of occurrences.
+After that, we will present some properties in the semantics and type system that are used in the soundness proof.
+And lastly, we will show the soundness of the type system.
 
-The liveness system depends on three global bases, one for variable occurrences, for abstract locations, and for an approximation of program points.
-To show that these bases are good, we need to define when they agree with the semantics, i.e., to show that the bases overapproximate the dependency function, and that the approximated order of program points is a good approximation.
+\subfile{valueTRules.tex}
+\subfile{agreement.tex}
 
-\subsection{Agreement}
-\todo[inline]{This section talks about the relation between the semantics and type system}
-\todo[inline]{$env,sto,w$ is a model of $\Gamma$}
-The first agreement we present here is the agreement for the type environment $\Gamma$ and dependency function $w$.
-The $\Gamma$ contains both local dependencies for variable occurrences and global dependencies for internal variable occurrences, while $w$ contains global dependencies for variable and location occurrences.
+\subsection{Properties}
+Before we show the soundness proof, we will first present some properties about the semantics and type system.
+These properties presents some areas about local information, and as such uses \cref{def:fv}.
 
-As such. it is clear that $\Gamma$ is not a direct model of $w$, but models the current state that is evaluated, thus it models both the environment, store, and dependency function.
-This is clear, as both the environment and type environment both only contains local information for variables.
+The first property we present is a property of the dependency function.
+Since the dependency function is global, and as such they can contain side effects after evaluation, 
+any new variable bindings introduced to the dependency function by evaluating an occurrence $e^p$, those variables are then not free in $e^p$.
 
-On the other hand, locations are treated as global information in the type system, which are represented as internal variables, as such if a location exists in the store it would thus the equivalent would exists in the type environment.
-Since the type environment contains only occurrences, locations and internal variables can thus be compared by program points, as locations and internal variables are created and updated at the same program points.
-This relation is done by comparing between between the store, dependency function and type environment.
-
-Lastly, since the dependency function and type environment collects information about dependencies, the dependencies ar then compared.
-Since there a both local and global information, and the dependency function collects all information globally, the dependency comparison is done only on the the information  for occurrences that exists in the domain of both $w$ and $\Gamma$.
-
-\begin{definition}[Environment agreement]\label{def:EnvAgree}
-	Let $w$ be a dependency function, $env$ be an environment, $sto$ be the a store, $\Gamma$ be a type environment, and $\Pi$ be an approximated program point order.
-	We say that:
-	$$(env,sto,w)\models(\Gamma,\Pi)$$
-	if 
-	\todo[inline]{Combine 1 and 2, and combine the 4 and 5}
-	\begin{itemize}
-		\item $\forall x\in dom(env).(\exists x^p\in dom(w))\wedge(x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma))$
-		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow w(x^p)=(L,V)\wedge\Gamma(x^p)=T.(w,env,(L,V))\models T$
-		\item $\forall \loc\in dom(sto).(\exists \loc^p\in dom(w))\wedge(\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}\Rightarrow\nu x^p\in dom(\Gamma))$
-		\item $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(w,env,(L,V))\models T$
-		\item if $p_1\sqsubseteq_w p_2$ then $p_1\sqsubseteq_\Pi p_2$
-	\end{itemize}
-\end{definition}
-
-\begin{definition}[Environment agreement]\label{def:EnvAgree}
-	Let $w$ be a dependency function, $env$ be an environment, $sto$ be the a store, and $\Gamma$ be a type environment.
-	We say that:
-	$$(env,sto,w)\models\Gamma$$
-	if 
-	\todo[inline]{Combine 1 and 2, and combine the 4 and 5}
-	\begin{itemize}
-		\item $\forall x\in dom(env)\Rightarrow\exists x^p\in dom(w)$
-		\item $\forall x\in dom(env).x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma)$
-		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow w(x^p)=(L,V)\wedge\Gamma(x^p)=T.(w,env,(L,V))\models T$
-		\item $\forall \loc\in dom(sto)\Rightarrow\exists \loc^p\in dom(w)$
-		\item $\forall \loc\in dom(sto)\Rightarrow\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}$ then $\nu x^p\in dom(\Gamma)$
-		\item $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(w,env,(L,V))\models T$
-	\end{itemize}
-\end{definition}
-In \cref{def:EnvAgree}, the agreement contains a lot of conditions, but in essence it states:
-\begin{description}
-	\item[variables] If a variable exists in $env$, then there exists an occurrence of that variable in both $w$ and $\Gamma$.
-		And for all variable occurrences, $x^p$, that both $w$ and $\Gamma$ knows about, the dependency and type for $x^p$ agrees.
-	\item[locations] The agreement is similar for locations, but there is an extra step as the type system represents locations as internal variables.
-		The comparison is thus done by comparing program points and since this is global, the comparison is done for all program points that exists for a a location $\loc$ in $w$.
-\end{description}
-
-\begin{definition}[Type agreement]\label{def:TAgree}
-	Let $w$ be a dependency function, $env$ be an environment, $(L,V)$ be a dependency pair, and $T$ be a type.
-	We say that:
-	$$(w,env,v,(L,V))\models(\Gamma,T)$$
-	iff
-	\begin{itemize}
-		\item $v\neq\loc$ and $T=T_1\rightarrow T_2$:
-		\begin{itemize}
-			\item $(w,env,v,(L,V))\models(\Gamma,T_2)$
-		\end{itemize}
-
-		\item $v\neq\loc$ and $T=(\delta,\kappa)$:
-		\begin{itemize}
-			\item $(env,(L,V))\models\delta$
-		\end{itemize}
-
-		\item $v=\loc$ then $T=(\delta,\kappa)$ where:
-		\begin{itemize}
-			\item $(env,(L,V))\models\delta$
-			\item $(w,env,v)\models(\Gamma,\kappa)$
-		\end{itemize}
-	\end{itemize}
-\end{definition}
-
-\begin{definition}[Dependency agreement]\label{def:DepAgree}
-	Let $env$ be an environment, $(L,V)$ be a dependency pair, and $\delta$ be a set of variables.
-	We say that:
-	$$(env,(L,V))\models\delta$$
-	if
-	\begin{itemize}
-		\item $V\subseteq\delta$,
-		\item For all $\loc^p\in L$ where $\exists x\in dom(env).env(x)=\loc$, we then have $\{x\in dom(env)\mid env(x)=\loc\}\subseteq \kappa_i^0$ for a $\kappa_i^0\in\delta$
-		\item For all $\loc^p\in L$ where $\not\exists x \in dom(env).env(x)=\loc$ then there exists a $\kappa_i^0\in\delta$ such that $\kappa_i^0\subseteq\cat{IVar}$
-	\end{itemize}
-\end{definition}
-
-\begin{definition}[Alias agreement]\label{def:AliasAgree}
-	Let $env$ be an environment, $\loc$ be a location, and $\kappa$ be an alias set.
-	We say that:
-	$$(env,w,\loc)\models(\Gamma,\kappa)$$
-	if
-	\begin{itemize}
-		\item $\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i$
-		\item $env^{-1}(\loc)\neq\emptyset$ then $\exists \kappa^0_i\in\kappa.(env^{-1}(\loc)\subseteq\kappa^0_1)\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i)$
-		\item $env^{-1}(\loc)=\emptyset$ then $\exists \kappa^0_i\in\kappa.(\kappa^0_i\subseteq\cat{IVar})\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i)$
-		%\item $\forall\loc^p\in dom(w).(env^{-1}(\loc)\cap\cat{Var}\neq\emptyset)\Rightarrow(\exists \kappa^0_i\in\kappa.\exists\nu x^p\in dom(\Gamma).\nu x\in\kappa^0_i\wedge env^{-1}(\loc)\subseteq\kappa^0_i)$
-		%\item $\forall\loc^p\in dom(w).(env^{-1}(\loc)\subseteq\cat{IVar})\Rightarrow(\exists \kappa^0_i\in\kappa.\exists\nu x^p\in dom(\Gamma).\nu x\in env^{-1}(\loc)\subseteq\kappa^0_i)$
-	\end{itemize}
-\end{definition}
-
-\begin{definition}[Environment judgement]
-	Let $v_1,\cdots,v_n$ be values such that $\Gamma';\Pi\vdash v_i:T_i$, for $1\leq i\leq n$.
-	Let $env$ be an environment where $env=[x_1\mapsto v_1,\cdots,x_n\mapsto v_n]$, $\Gamma$ be a type environment, and $\Pi$ be the approximated order of program points.
-	We say that:
-	$$\Gamma;\Pi\vdash env$$
-	iff 
-	\begin{itemize}
-		\item For all $x_i\in dom(env)$ then $\exists x_i^p\in dom(\Gamma)$ where $\Gamma(x_i^p)=T_i$ then 
-			$$\Gamma,\Pi\vdash env(x_i):T_i$$
-	\end{itemize}
-\end{definition}
-
-\subsection{Type rules for values}
-For the sake of proving the type system, we present type rules for values.
-The formation rules for values can be given by:
-$$v::=c\mid\loc\mid\left\langle x^{p},e^{p'},env\right\rangle\mid\left\langle x^{p},f^{p'},e^{p''},env\right\rangle\mid ()$$
-Where the type rules is given in \cref{fig:ValTypeRules}.
-\begin{figure}[H]
-	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
-		\hline\\
-		\runa{Constant}\\[0.4cm]
-			\inference[]{}
-				{\Gamma;\Pi\vdash  c:(\emptyset, \emptyset)}\\[1cm]
-
-		\runa{Location}\\[0.4cm]
-			\inference[]{}
-				{\Gamma;\Pi\vdash  \loc:(\delta, \kappa)}\\[1cm]
-
-		\runa{Closure}\\[0.4cm]
-			\inference[]
-				{
-					\Gamma;\Pi\vdash env \\
-					\Gamma,x^{p}:T_1;\Pi\vdash e^{p'}:T_2
-				}
-				{\Gamma;\Pi\vdash \left\langle x^{p}, e^{p'}, env \right\rangle^{p''}:T_1\rightarrow T_2}\\[1cm]
-
-		\runa{Recursive closure}\\[0.4cm]
-			\inference[]
-				{
-					\Gamma;\Pi\vdash env \\
-					\Gamma,x^{p}:T_1,f^{p'}:T_1\rightarrow T_2;\Pi\vdash e^{p''}:T_2
-				}
-				{\Gamma;\Pi\vdash \left\langle x^{p}, f^{p'}, e^{p''}, env \right\rangle^{p_3}:T_1\rightarrow T_2}\\[1cm]
-
-		\runa{Unit}\\[0.4cm]
-			\inference[]{}
-			{\Gamma;\Pi\vdash  ():(\delta,\kappa)}\\[0.5cm]
-		\hline
-	\end{tabular}
-	\caption{Type rules for values}
-	\label{fig:ValTypeRules}
-\end{figure}
-
-\subsection{Lemma}
 \begin{lemma}[History]\label{lemma:His}
-	If 
-	$$env\vdash\left\langle e^{p'},w,sto,p\right\rangle\rightarrow\left\langle v,w',sto',(L,V),p''\right\rangle$$
-		and $x^{p_1}\in dom(w')\backslash dom(w)$ then $x^{p_1}\notin fv(e)$
+	Suppose $e^p$ is an occurrence, that
+	$$env\vdash\left\langle e^{p},sto,\psi,p'\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
+		and $x^{p_1}\in dom(w')\backslash dom(w)$.
+		Then $x\notin fv(e^{p})$
 \end{lemma}
+\subfile{HisProof/index.tex}
+
+The second property is the strengthening of the type environment.
+This strengthening lemma states that if there is a binding the type environment, used to type an occurrence $e^p$, and the variables is not free in $e^p$ then the binding can be removed.
 
 \begin{lemma}[Strengthening]\label{lemma:Strength}
-	If $\Gamma,x^{p'}:T';\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma;\Pi\vdash e^{p}:T$
+	If $\Gamma[x^{p'}:T'],\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma,\Pi\vdash e^{p}:T$
 \end{lemma}
+\subfile{StrProof/index.tex}
 
-%\subfile{agreement.tex}
-%\subfile{valueTRules.tex}
-\subfile{proof.tex}
+We will now present the soundness of the type system.
+
+\begin{theorem}[Soundness of type system]
+	Suppose $e^{p'}$ is an occurrence where
+	\begin{itemize}
+		\item $env\vdash\left\langle e^{p'},sto,(w,\sqsubseteq_w),p\right\rangle\rightarrow\left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p''\right\rangle$,
+		\item $\Gamma,\Pi\vdash e^{p'} : T$
+		\item $\Gamma,\Pi\vdash env$
+		\item $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$
+	\end{itemize}
+	Then we have that:
+	\begin{itemize}
+		\item $\Gamma,\Pi\vdash v:T$
+		\item $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$
+		\item $(env,(w',\sqsubseteq_w'),v,(L,V))\models(\Gamma,T)$
+	\end{itemize}
+\end{theorem}
+\subfile{SoundProof/index.tex}
 \end{document}

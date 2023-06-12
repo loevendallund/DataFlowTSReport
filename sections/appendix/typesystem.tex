@@ -6,49 +6,43 @@
 	\begin{tabular}{l}
 		\runa{T-Const}\\[0.2cm]
 			\inference[]{}
-				{\Gamma;\Pi\vdash  c^{p}:(\emptyset,\emptyset)}\\[1cm]
+				{\Gamma,\Pi\vdash  c^{p}:(\emptyset,\emptyset)}\\[1cm]
 
 		\runa{T-Var}\\[0.2cm]
 			\inference[]{}
-			{\Gamma;\Pi \vdash x^p:T \sqcup (\{x^p, x^{p'}\},\emptyset)}\\[0.3cm]
-				Where $p'=\Lambda(x,p)$, $\Gamma(x^{p'})=T$\\[1cm]
+			{\Gamma,\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}\\[0.3cm]
+			Where $p'=\Lambda_\Pi(x,p,\Gamma)$, $\Gamma(x^{p'})=T$\\[1cm]
 
 		\runa{T-Abs}\\[0.2cm]
 			\inference[]
-				{\Gamma,x^{p_0}:T_1;\Pi\vdash  e^{p}:T_2}
-				{\Gamma;\Pi\vdash  [\lambda\;x.e^{p}]^{p'}:T_1\rightarrow T_2}\\[0.3cm]
+				{\Gamma[x^{p_0}:T_1],\Pi\vdash  e^{p}:T_2}
+				{\Gamma,\Pi\vdash  [\lambda\;x.e^{p}]^{p'}:T_1\rightarrow T_2}\\[0.3cm]
 				Where $p'\sqsubseteq_\Pi p_0\wedge p_0\sqsubseteq_\Pi p$\\[1cm]
 
 		\runa{T-App}\\[0.2cm]
 			\inference[]
-				{\Gamma;\Pi\vdash e_1^{p}:T_1\rightarrow T_2 &\\
-				\Gamma;\Pi\vdash e_2^{p'}:T_1}
-{\Gamma;\Pi\vdash [e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[1cm]
-
-		%\runa{T-Let}\\[0.2cm]
-		%	\inference[]
-		%		{\Gamma;\Pi\vdash e_1^{p}:T_1 &\\
-		%		\Gamma,x^p:T_1;\Pi\vdash e_2^{p}:T_2}
-		%		{\Gamma;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[1cm]
+				{\Gamma,\Pi\vdash e_1^{p}:T_1\rightarrow T_2 &\\
+				\Gamma,\Pi\vdash e_2^{p'}:T_1}
+				{\Gamma,\Pi\vdash [e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[1cm]
 
 		\runa{T-Let-1}\\[0.2cm]
 			\inference[]
-				{\Gamma;\Pi\vdash e_1^{p}:(\delta,\kappa) &\\
-				\Gamma,x^p:(\delta,\kappa\cup\{x\});\Pi\vdash e_2^{p}:T_2}
-				{\Gamma;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[0.3cm]
+				{\Gamma,\Pi\vdash e_1^{p}:(\delta,\kappa) &\\
+				\Gamma[x^p:(\delta,\kappa\cup\{x\})],\Pi\vdash e_2^{p}:T_2}
+				{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[0.3cm]
 				Where $\kappa\neq\emptyset$\\[1cm]
 
 		\runa{T-Let-2}\\[0.2cm]
 			\inference[]
-				{\Gamma;\Pi\vdash e_1^{p}:T_1 &\\
-				\Gamma,x^p:T_1;\Pi\vdash e_2^{p}:T_2}
-				{\Gamma;\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[1cm]
+				{\Gamma,\Pi\vdash e_1^{p}:T_1 &\\
+				\Gamma[x^p:T_1],\Pi\vdash e_2^{p}:T_2}
+				{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[1cm]
 
 		\runa{T-Let-rec}\\[0.2cm]
 			\inference[]
-				{\Gamma;\Pi\vdash e_1^{p}:T_1\rightarrow T_2 &\\
-				\Gamma,f^p:T_1\rightarrow T_2;\Pi\vdash e_2^{p}:T}
-				{\Gamma;\Pi\vdash [\mbox{let rec}\; f \; e_1^{p} \; e_2^{p'}]^{p''}:T}\\[1cm]
+				{\Gamma,\Pi\vdash e_1^{p}:T_1\rightarrow T_2 &\\
+				\Gamma[f^p:T_1\rightarrow T_2],\Pi\vdash e_2^{p}:T}
+				{\Gamma,\Pi\vdash [\mbox{let rec}\; f \; e_1^{p} \; e_2^{p'}]^{p''}:T}\\[1cm]
 	\end{tabular}
 	\label{fig:TypeSys1}
 \end{figure}
@@ -58,33 +52,31 @@
 	\begin{tabular}{l}
 		\runa{T-Case}\\[0.2cm]
 			\inference[]
-				{\Gamma;\Pi\vdash e^{p}:T' &\\
-				\sigma(\Gamma,s_i,p,T');\Pi\vdash (s_i \; e^{p_i}):T_i\;\;\;(1\leq i\leq|\vec{\pi}|)}
-				{\Gamma;\Pi\vdash [\mbox{case}\;e^{p} \vec{\pi}]^{p'}:T\sqcup(\delta,\kappa)}\\[0.3cm]
-			Where $T=\bigcup_{i}T_i$\\[1cm]
-
-		\runa{T-Match}\\[0.2cm]
-			\inference[]
-				{\Gamma;\Pi\vdash e^{p}:T}
-				{\Gamma;\Pi\vdash (s \; e^{p}):T}\\[1cm]
+				{\Gamma,\Pi\vdash e^{p}:(\delta,\kappa) &\\
+				\Gamma',\Pi\vdash e_i^{p_i}:T_i\;\;\;(1\leq i\leq|\tilde{\pi}|)}
+				{\Gamma,\Pi\vdash [\mbox{case}\;e^{p}\;\tilde{\pi}\;\tilde{o}]^{p'}:T\sqcup(\delta,\kappa)}\\[0.3cm]
+				Where $e_i^{p_i}\in\tilde{o}$ and $s_i\in\tilde{\pi}$, and\\
+				$\Gamma'=\Gamma[x^p:(\delta,\kappa)]$ if $s_i=x$\\[1cm]
 
 		\runa{T-Ref}\\[0.2cm]
 			\inference[]
-				{\Gamma;\Pi\vdash  e^{p}:(\delta',\kappa')}
-				{\Gamma,\nu x^{p'}:(\delta',\kappa');\Pi\vdash [\mbox{ref}\;e^{p}]^{p'}:(\emptyset,\kappa)}\\
+				{\Gamma,\Pi\vdash  e^{p}:(\delta',\kappa')}
+				{\Gamma[\nu x^{p'}:(\delta',\kappa')],\Pi\vdash [\mbox{ref}\;e^{p}]^{p'}:(\emptyset,\kappa)}\\
 				Where $\kappa=\{\nu x\}$\\[1cm]
 
-		\runa{T-Ref read}\\[0.2cm]
+		\runa{T-Ref-read}\\[0.2cm]
 			\inference[]
-				{\Gamma;\Pi\vdash  e^{p}:(\delta,\kappa)}
-{\Gamma;\Pi\vdash [!e^{p}]^{p'}:T\sqcup(\delta\cup\delta',\emptyset)}\\
-			Where $\delta'=\{\nu x^{p'}\mid\nu x\in\kappa\}$,\\ $T=\bigcup_{\nu x\in\kappa}(\Gamma(\nu x^{p''}))$ and $p''=\Lambda(x,p')$\\[1cm]
+				{\Gamma,\Pi\vdash  e^{p}:(\delta,\kappa)}
+				{\Gamma,\Pi\vdash [!e^{p}]^{p'}:T\sqcup(\delta\cup\delta',\emptyset)}\\
+			Where $\kappa\neq\emptyset$, $\delta'=\{\nu x^{p'}\mid\nu x\in\kappa\}$, $\nu x_1,\cdots,\nu x_n\in\kappa$.\\ 
+			$\{\nu x_1^{p_1},\cdots,\nu x_1^{p_m}\}=uf_{\Upsilon_{p'}}(\nu x_1,\Gamma),\cdots,\{\nu x_n^{p_1'},\cdots,\nu x_n^{p_s'}\}=uf_{\Upsilon_{p'}}(\nu x_n,\Gamma)$, and\\
+			$T=\Gamma(\nu x_1^{p_1})\cup\cdots\cup\Gamma(\nu x_1^{p_m})\cup\cdots\cup\Gamma(\nu x_n^{p_1'})\cup\cdots\cup\Gamma(\nu x_n^{p_s'})$\\[1cm]
 
-		\runa{T-Ref write}\\[0.2cm]
+		\runa{T-Ref-write}\\[0.2cm]
 			\inference[]
-				{\Gamma;\Pi\vdash  e_1^{p_1}:(\delta,\kappa)&\\
-				\Gamma;\Pi\vdash  e_2^{p_2}:(\delta_2,\kappa_2)}
-				{\Gamma';\Pi\vdash [e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}:(\delta,\kappa)}\\
+				{\Gamma,\Pi\vdash  e_1^{p_1}:(\delta,\kappa)&\\
+				\Gamma,\Pi\vdash  e_2^{p_2}:(\delta_2,\kappa_2)}
+				{\Gamma',\Pi\vdash [e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}:(\delta,\kappa)}\\
 			Where $\Gamma'=\Gamma,\nu x_1:(\delta_2,\kappa_2),\cdots,\nu x_n:(\delta_2,\kappa_2)$\\
 			and $\nu x_1,\cdots,\nu x_n\in\{\nu x\mid\nu x\in\kappa\}$
 	\end{tabular}
@@ -95,10 +87,10 @@
 The $\sigma$ function is used to extend $\Gamma$ in case of a variable pattern, which takes as input $\Gamma$, a pattern $s$, a program point $p$, and a type $T$.
 $\sigma$ can then inductively be defined as:
 \begin{align*}
-	\sigma(\Gamma,n,p,T) &= \Gamma\\
-	\sigma(\Gamma,b,p,T) &= \Gamma\\
-	\sigma(\Gamma,x,p,T) &= \Gamma,x^p:T\\
-	\sigma(\Gamma,\_,p,T) &= \Gamma
+	\sigma(n,T) &= id\\
+	\sigma(b,T) &= id\\
+	\sigma(\_,T) &= id\\
+	\sigma(x,T) &= [x^p:T]
 \end{align*}
 
 \end{document}

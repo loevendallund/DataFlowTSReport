@@ -1,0 +1,35 @@
+\documentclass[../../../master.tex]{subfiles}
+\begin{document}
+\begin{proof}
+	The proof proceeds by induction on the height of the derivation tree for 
+	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
+	In the base case we have the \runa{Const} and \runa{Var} rule:
+	\begin{description}
+		\input{sections/Proof/SoundProof/const.tex}
+		\input{sections/Proof/SoundProof/var.tex}
+\end{description}
+
+	Next, follows the induction step:
+	\begin{description}
+		\input{sections/Proof/SoundProof/abs.tex}
+		\input{sections/Proof/SoundProof/app.tex}
+
+		\item[\runa{App-const}]
+
+		\item[\runa{App-rec}]
+
+		\input{sections/Proof/SoundProof/let.tex}
+
+		\item[\runa{Let rec}]
+
+		\item[\runa{Case}]
+
+		\item[\runa{Ref}]
+
+		\item[\runa{Ref read}]
+
+		\item[\runa{Ref write}]
+	\end{description}
+\end{proof}
+
+\end{document}

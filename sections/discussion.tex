@@ -1,0 +1,27 @@
+\documentclass[../../master.tex]{subfiles}
+\begin{document}
+\section{Discussion and conclussion}\label{sec:Conc}
+In this paper, we have presented a type system for data-flow and alias analysis, that collects the variables and internal variables used to evaluate an occurrence.
+\section{Future work}\label{sec:FW}
+In this section we will present some areas which could be worked on.
+
+\paragraph{Polymorphism}
+One area to look at, is to introduce polymorphism to the type system which can reduce the slack of the type system.
+One way is to introduce polymorphism to the base types, which would allow the typing of abstraction used at multiple places.
+
+\paragraph{Extending locations}
+Right now, locations are restricted upon, since it does not allow bindings to abstractions.
+This would be a good place to extend, where there is two directions this could be handled.
+The extension would follow Polymorphism, as either it should only allows for bindings to similar functions, or allows for free bindings.
+
+\paragraph{Type inference}
+Another area is to make a type inference algorithm, which can find the type information.
+To make type inference for the type system would need to find an approximated order of program points, find a proper $\kappa_0$ and typing for abstractions, that is, find all the places where the parameter should be bound.
+
+\paragraph{Extending with more language constructs}
+As this is a small $\lambda$ calculus with a couple of interesting constructs, such as mutability, pattern matching, and local bindings.
+An area to look at is to introduce more constructs to the language, such as lazy evaluation, constructors, and modules.
+The lazy evaluation could either be through a wrapping construct or as a core part of the language.
+Constructors could introduce user specified constructs, which also would extend upon the pattern matching.
+Modules would wrap part of a program which could then be reused multiple places.
+\end{document}

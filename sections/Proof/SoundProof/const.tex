@@ -1,0 +1,43 @@
+\item[\runa{Const}] Here $e^{p'}=c^{p'}$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{Const}\\[0.2cm]
+			\inference[]{}
+			{env\vdash \left\langle c^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle c,sto,(w,\sqsubseteq_w),(\emptyset,\emptyset),p' \right\rangle}
+	\end{tabular}
+\end{figure}
+And from our assumptions, we have:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash c^{p'} : T$
+	\item $\Gamma,\Pi\vdash env$
+	\item $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$
+\end{itemize}
+To type the occurrence $c^{p'}$ we use the rule \runa{T-Const}:
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{T-Const}\\[0.2cm]
+			\inference[]{}
+			{\Gamma,\Pi\vdash c^{p'}:(\emptyset,\emptyset)}
+	\end{tabular}
+\end{figure}
+We need to show that \cat{1)} $\Gamma,\Pi\vdash c:T$, \cat{2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$, and \cat{3)} $(env,(w',\sqsubseteq_w'),v,(L,V))\models(\Gamma,T)$.
+\begin{description}
+	\item[1)] Since we know that the value is a constant, we need to use the \runa{Constant} rule:
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\runa{Constant}\\[0.2cm]
+					\inference[]{}
+					{\Gamma,\Pi\vdash c:(\delta,\emptyset)}
+			\end{tabular}
+		\end{figure}
+		Since both the dependency pair and type for constants are $(\emptyset,\emptyset)$, we can then conclude that $\delta=\emptyset$.
+
+	\item[2)] Since there are no updates to $sto$, $(w,\sqsubseteq_w)$, we then know from our assumptions that $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$ holds after an evaluation.
+
+	\item[3)] Since there are no updates to $sto$, $(w,\sqsubseteq_w)$, and that the dependency pair and type are $(\emptyset,\emptyset)$, we then know from \cref{def:TAgree} that $(env,(w',\sqsubseteq_w'),v,(\emptyset,\emptyset))\models(\Gamma,(\emptyset,\emptyset))$ holds.
+\end{description}
+
+

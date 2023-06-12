@@ -1,0 +1,36 @@
+\item[\runa{Var}] Here $e^{p'}=x^{p'}$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{Var}\\[0.2cm]
+			\inference[]{}
+			{env\vdash \left\langle x^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqsubseteq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}
+	\end{tabular}
+\end{figure}
+Where $env(x)=v$, $x^{p''}=uf_{\sqsubseteq_w}(x,w)$, and $w(x^{p''})=(L,V)$\\[1cm]
+And from our assumptions, we have:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash x^{p'} : T$
+	\item $\Gamma,\Pi\vdash env$
+	\item $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$
+\end{itemize}
+To type the occurrence $x^{p'}$ we use the rule \runa{T-Var}:
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{T-Var}\\[0.2cm]
+			\inference[]{}
+			{\Gamma,\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}
+	\end{tabular}
+\end{figure}
+Where $x^{p''}=uf_{\sqsubseteq_\Pi}(x,\Gamma)$, $\Gamma(x^{p''})=T$.
+
+We need to show that \cat{1)} $\Gamma,\Pi\vdash c:T$, \cat{2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$, and \cat{3)} $(env,(w',\sqsubseteq_w'),v,(L,V))\models(\Gamma,T)$.
+\begin{description}
+	\item[1)] Since, from our assumption, we know that $\Gamma,\Pi\vdash env$, we can then conclude that $\Gamma,\Pi\vdash v:T$
+
+	\item[2)] Since there are no updates to $sto$, $(w,\sqsubseteq_w)$, we then know from our assumptions that $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$ holds after an evaluation.
+
+	\item[3)] Since there are no updates to $sto'$, $(w',\sqsubseteq_w')$, that $(L,V)$ is a result for looking up $x^{p''}$ in $(w,\sqsubseteq_w)$, and the type $T$ is due to looking up $x^{p''}$ in $\Gamma$, we then know that $(env,(w',\sqsubseteq_w'),v,(L,V))\models(\Gamma,T)$.
+		We then need to show for $(env,(w',\sqsubseteq_w'),v,(L,V\cup\{x^{p''}\}))\models(\Gamma,T\sqcup \{x^{p''}\})$ which holds due to \cref{def:TAgree}.
+\end{description}

@@ -1,98 +1,95 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \subsection{Agreement}
-The tracking of dependencies is handled differently between the liveness system and the semantics.
-In the collection semantics, the dependencies of variable and location occurrences are tracked using the $w$ function.
-The liveness system need to keep track of dependencies differently, as the notion of locations are purely semantical, throught the global basis for variable occurrences.
-To handle locations, the notion of abstract locations is introduced, which is stored in the equivalence basis.
-The agreement for occurrence dependencies between the collection semantic and liveness system are as follows:
+\todo[inline]{This section talks about the relation between the semantics and type system}
+\todo[inline]{$env,sto,w$ is a model of $\Gamma$}
+The first agreement we present here is the agreement for the type environment $\Gamma$ and dependency function $w$.
+The $\Gamma$ contains both local dependencies for variable occurrences and global dependencies for internal variable occurrences, while $w$ contains global dependencies for variable and location occurrences.
 
-\todo[inline]{I am not sure if $env$ is still needed here, and if the way we compare $\loc$ with the possible $\nu x$'s is enough}
-\begin{definition}[Agreement of the dependency of occurrences]
-	Let $w$ be the dependency function, $env$ be the environment, and $\Gamma$ be the basis occurrence dependencies.
-	We say that
-	$$(w,env)\models\Gamma$$
-	Iff
-	\begin{enumerate}
-		\item $\forall x^p\in dom(w).w(x^p)=(L^P,V^P)\wedge\Gamma(x^p)=T\Rightarrow(L^P,V^P)\models T$
-		\item $\forall \loc^p\in dom(w).\exists\nu x^p\in dom(\Gamma).w(\loc^p)=(L^P,V^P)\wedge\Gamma(\nu x^p)=T\Rightarrow(L^P,V^P)\models T$
-	\end{enumerate}
-\end{definition}
-The agreement for the occurrence dependencies follows that the dependencies in $w$ should also be defined by $\Gamma$.
-This agreement holds, if there exists a variable occurrence, $x^p$, in the domain of $w$, the dependencies also exists in the basis $\Gamma$, i.e. the liveness pair agrees with the type.
-The same follows for locations, where there need to exists an internal variable in $\Gamma$, for the same program point, such that the liveness pair of a location agrees with the type of the corresponding internal variable.
+As such. it is clear that $\Gamma$ is not a direct model of $w$, but models the current state that is evaluated, thus it models both the environment, store, and dependency function.
+This is clear, as both the environment and type environment both only contains local information for variables.
 
-The agreement of type is defined as follows:
+On the other hand, locations are treated as global information in the type system, which are represented as internal variables, as such if a location exists in the store it would thus the equivalent would exists in the type environment.
+Since the type environment contains only occurrences, locations and internal variables can thus be compared by program points, as locations and internal variables are created and updated at the same program points.
+This relation is done by comparing between between the store, dependency function and type environment.
 
-\begin{definition}[Agreement of type]
-	Let $(L^P,V^P)$ be the liveness pair contain a set of location occurrence and a set of variable occurremces, and $T$ be a type.
-	We say that
-	$$(L^P,V^P)\models T$$
-	Iff
-	\begin{enumerate}
-		\item $T=T_1\rightarrow T_2$ then $(L^P,V^P)\models T_2$
-		\item $T=(\delta,\kappa)$ then $L^P\subseteq\kappa\wedge V^P\subseteq\delta$
-	\end{enumerate}
-\end{definition}
-The agreement of a type and liveness pair follows that the liveness pair of the \runa{Abs} rule $(\emptyset,\emptyset)$, however, from the \runa{Var} rule, the variable occurrence is added to the liveness pair.
-In the type system, we doe something similar, but since there exists an abstraction type, the variable occurrence is added to the $T_2$ part of the type.
-As an example, if a variable, $x$, is bound to $\left\langle x,e^p,env\right\rangle$ in $env$ and has the type $(\delta_1,\kappa_1)\rightarrow(\delta_2,\kappa_2)$, then using the \runa{Var} rule on $x$, at program point $p$, we get the liveness pair $(\{x^p\},\emptyset)$ and the type $(\delta_1,\kappa_1)\rightarrow(\delta_2\cup\{x^p\},\kappa_2)$.
-Here, the agreement of a type would check that $\emptyset\subseteq\kappa\wedge\{x^p\}\subseteq(\delta\cup\{x^p\})$, which clearly holds.
+Lastly, since the dependency function and type environment collects information about dependencies, the dependencies ar then compared.
+Since there a both local and global information, and the dependency function collects all information globally, the dependency comparison is done only on the the information  for occurrences that exists in the domain of both $w$ and $\Gamma$.
 
-\todo[inline]{I am not sure the agreement of program order still holds, because of abstractions (mostly when using the \runa{App} rule on an abstraction)}
-Next follows the agreement between the approximated order of program points, $\Pi$, and the dependency function, $w$.
-Here, it is assumed that the order between occurrences can be derived from $w$, since occurrences are only bound to occurrences at earlier program points.
-
-\begin{definition}[Agreement of program order]
-	Let $w$ be the dependency function and $\Pi$ be an approximation of the order of program points, then we say that
-	$$w\models\Pi$$
-	Iff $\forall u^p\in dom(w).w(u^p)=(L^p,V^p)$, where $u\in(\Var\cup\Loc)$, then
-	\begin{enumerate}
-		\item if $\loc^q\in L^p$ then $q\sqsubseteq p\in\Pi$
-		\item if $y^q\in V^p$ then $q\sqsubseteq p\in\Pi$
-	\end{enumerate}
-\end{definition}
-
-The agreement of program order defines that, for the order of program points that can be derived from $w$, the global basis must also agree on this order.
-Thus, the only program points they agree on are those the dependency function knows about.
-For $w$ and $\Pi$ to agree, it is important that all dependencies for an occurrence, in the domain of $w$, is at an earlier program point, and that $\Pi$ agrees with it.
-\bigskip
-
-\todo[inline]{Missing notation for what it means for $(w,env)$ and $\kappa$ to agree, as the definition for $\kappa$ has changed quite a bit}
-The last agreement can now be defined, that is, for the liveness type.
-\begin{definition}[Agreement of liveness type and the dependency function]
-	Let $w$ be the dependency function, $env$ be the environment, and $T$ be the liveness type.
-	%$\delta$ be a set of possible live variables, $\kappa$ be the abstract locations.
+\begin{definition}[Environment agreement]\label{def:EnvAgree}
+	Let $(w,\sqsubseteq_w)$ be a pair containing the dependency function and a relation over it, $env$ be an environment, $sto$ be the a store, $\Gamma$ be a type environment, and $\Pi$ be an approximated program point order.
 	We say that:
-	$$(w,env)\models T$$
-	Iff
+	$$(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$$
+	if 
+	\todo[inline]{Hans made a comment about the first part of 1 and 3, need to investigate this further}
+	\todo[inline]{Simplify/rewrite the last agreement}
 	\begin{itemize}
-		\item $T=T_1\rightarrow T_2$ then $(w,env)\models T_1 \Rightarrow (w,env)\models T_2$
-		\item $T=(\delta,\kappa)$ then:
-		\begin{enumerate}
-			\item $\forall x^p\in (dom(w)\cap\delta). w(x^p)=(L^p,V^p)\wedge V^p\subseteq\delta$, and
-			%\item $\forall$
-			%\item $\forall x\in\kappa.\exists \loc^p.env(x)=\loc \Rightarrow  w(\loc^p)=(L^p,V^p)$ and $\forall\loc^q\in L^p.\exists y.env(y)=\loc\wedge y\in\kappa$
-		\end{enumerate}
+		\item $\forall x\in dom(env).(\exists x^p\in dom(w))\wedge(x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma))$
+		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow w(x^p)=(L,V)\wedge\Gamma(x^p)=T.(w,env,(L,V))\models T$
+		\item $\forall \loc\in dom(sto).(\exists \loc^p\in dom(w))\wedge(\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}\Rightarrow\nu x^p\in dom(\Gamma))$
+		\item $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(w,env,(L,V))\models T$
+		\item if $p_1\sqsubseteq_w p_2$ then $p_1\sqsubseteq_\Pi p_2$
+		\item $\forall \loc^p\in dom(w).\exists\nu x^p dom(\Gamma)\Rightarrow \exists p'\in\cat{P}.uf_{\sqsubseteq_w}(\loc,w)\in uf_{\Upsilon_p'}(\nu x,\Gamma)$
 	\end{itemize}
 \end{definition}
 
-The agreement between the liveness type and $w$ makes sure that if $w$ has bound an occurrence to a possible live occurrence, that the liveness type defines to be live, then the liveness type must also contain this occurrence.
-For the liveness type, $(\delta,\kappa)$, and $w$ to be in agreement, it follows that:
+In \cref{def:EnvAgree}, the agreement contains a lot of conditions, but in essence it states:
 \begin{description}
-	\item[(1)] For all the variable occurrences that both are in the domain of $w$ and in $\delta$, then this variable occurrences variable dependency must also be contained in $\delta$.
-	%\item[(2)] For all variables, $x$, in $\kappa$, there must exist a location occurrence, $\loc^p$, where $x$ is bound to this location in $env$ where the location occurrence dependencies of $\loc^p$, in $w$, must agree with $\kappa$.
-	%For a set of location occurrences to agree with $\kappa$, each location occurrence must be bound to a variable, in accordance to $env$, that exists in $\kappa$.
+	\item[variables] If a variable exists in $env$, then there exists an occurrence of that variable in both $w$ and $\Gamma$.
+		And for all variable occurrences, $x^p$, that both $w$ and $\Gamma$ knows about, the dependency and type for $x^p$ agrees.
+	\item[locations] The agreement is similar for locations, but there is an extra step as the type system represents locations as internal variables.
+		The comparison is thus done by comparing program points and since this is global, the comparison is done for all program points that exists for a a location $\loc$ in $w$.
 \end{description}
 
-\begin{definition}[Restriction of dependency function]
-	Let $w$ and $w'$ be two dependency functions where $dom(w)\subseteq dom(w')$.
-	We write:
-	$$w=w'\mid_p$$
-	If we get $w$ from restricting $w'$ on $p$, i.e., removing all occurrences, $x^{p'}$ or $\loc^{p'}$, in $dom(w')$ if $p\sqsubseteq p'$.
+\begin{definition}[Type agreement]\label{def:TAgree}
+	Let $env$ be an environment, $\psi$ be a pair, $(L,V)$ be a dependency pair, and $T$ be a type.
+	We say that:
+	$$(env,(w,\sqsubseteq_w),v,(L,V))\models(\Gamma,T)$$
+	iff
+	\begin{itemize}
+		\item $v\neq\loc$ and $T=T_1\rightarrow T_2$:
+		\begin{itemize}
+			\item $(env,(w,\sqsubseteq_w),v,(L,V))\models(\Gamma,T_2)$
+		\end{itemize}
+
+		\item $v\neq\loc$ and $T=(\delta,\kappa)$:
+		\begin{itemize}
+			\item $(env,(L,V))\models\delta$
+		\end{itemize}
+
+		\item $v=\loc$ then $T=(\delta,\kappa)$ where:
+		\begin{itemize}
+			\item $(env,(L,V))\models\delta$
+			\item $(env,(w,\sqsubseteq_w),v)\models(\Gamma,\kappa)$
+		\end{itemize}
+	\end{itemize}
 \end{definition}
 
-%For the liveness system to be sound, it is important to make sure that the three basis agrees with the collection system.
-%This agreement is done in the following manner, given a sound agreement before an evaluation, we can show that the agreement is still sound after an evaluation.
-%Other than the agreement for the three basis, the soundness type must also agree with the semantics, this is done in a similar way.
+\begin{definition}[Dependency agreement]\label{def:DepAgree}
+	Let $env$ be an environment, $(L,V)$ be a dependency pair, and $\delta$ be a set of variables.
+	We say that:
+	$$(env,(L,V))\models\delta$$
+	if
+	\begin{itemize}
+		\item $V\subseteq\delta$,
+		\item For all $\loc^p\in L$ where $\exists x\in dom(env).env(x)=\loc$, we then have $\{x\in dom(env)\mid env(x)=\loc\}\subseteq \kappa_i^0$ for a $\kappa_i^0\in\delta$
+		\item For all $\loc^p\in L$ where $\not\exists x \in dom(env).env(x)=\loc$ then there exists a $\kappa_i^0\in\delta$ such that $\kappa_i^0\subseteq\cat{IVar}$
+	\end{itemize}
+\end{definition}
+
+\begin{definition}[Alias agreement]\label{def:AliasAgree}
+	Let $env$ be an environment, $(w,\sqsubseteq_w)$ be a pair of a dependency function and a relation over $w$, $\loc$ be a location, and $\kappa$ be an alias set.
+	We say that:
+	$$(env,(w,\sqsubseteq_w),\loc)\models(\Gamma,\kappa)$$
+	if
+	\begin{itemize}
+		\item $\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa$
+		\item $env^{-1}(\loc)\neq\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
+			(env^{-1}(\loc)\subseteq\kappa^0_i)\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i)$
+		\item $env^{-1}(\loc)=\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
+			(\kappa^0_i\subseteq\cat{IVar})\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i)$
+		%\item $\forall\loc^p\in dom(w).(env^{-1}(\loc)\cap\cat{Var}\neq\emptyset)\Rightarrow(\exists \kappa^0_i\in\kappa.\exists\nu x^p\in dom(\Gamma).\nu x\in\kappa^0_i\wedge env^{-1}(\loc)\subseteq\kappa^0_i)$
+		%\item $\forall\loc^p\in dom(w).(env^{-1}(\loc)\subseteq\cat{IVar})\Rightarrow(\exists \kappa^0_i\in\kappa.\exists\nu x^p\in dom(\Gamma).\nu x\in env^{-1}(\loc)\subseteq\kappa^0_i)$
+	\end{itemize}
+\end{definition}
 \end{document}

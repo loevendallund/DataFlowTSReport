@@ -1,0 +1,312 @@
+\documentclass[../../master.tex]{subfiles}
+\begin{document}
+\section{Notes}
+\begin{definition}[Environment agreement]\label{def:TEnvAgree}
+	Let $\psi=(w,\sqsubseteq_w)$ be a pair, $env$ be an environment, $sto$ be the a store, $\Gamma$ be a type environment, and $\Pi$ be an approximated program point order.
+	We say that:
+	$$(env,sto,\psi)\models(\Gamma,\Pi)$$
+	if 
+	\begin{itemize}
+		\item $\forall x\in dom(env).(\exists x^p\in dom(w))\wedge(x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma))$
+		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow w(x^p)=(L,V)\wedge\Gamma(x^p)=T.(w,env,(L,V))\models T$
+		\item $\forall \loc\in dom(sto).(\exists \loc^p\in dom(w))\wedge(\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}\Rightarrow\nu x^p\in dom(\Gamma))$
+		\item $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(w,env,(L,V))\models T$
+		\item if $p_1\sqsubseteq_w p_2$ then $p_1\sqsubseteq_\Pi p_2$
+	\end{itemize}
+\end{definition}
+
+\begin{definition}[Type agreement]\label{def:TTAgree}
+	Let $\psi=(w,\sqsubseteq_w)$ be a pair, $env$ be an environment, $(L,V)$ be a dependency pair, and $T$ be a type.
+	We say that:
+	$$(env,\psi,v,(L,V))\models(\Gamma,T)$$
+	iff
+	\begin{itemize}
+		\item $v\neq\loc$ and $T=T_1\rightarrow T_2$:
+		\begin{itemize}
+			\item $(env,\psi,v,(L,V))\models(\Gamma,T_2)$
+		\end{itemize}
+
+		\item $v\neq\loc$ and $T=(\delta,\kappa)$:
+		\begin{itemize}
+			\item $(env,(L,V))\models\delta$
+		\end{itemize}
+
+		\item $v=\loc$ then $T=(\delta,\kappa)$ where:
+		\begin{itemize}
+			\item $(env,(L,V))\models\delta$
+			\item $(env,\psi,v)\models(\Gamma,\kappa)$
+		\end{itemize}
+	\end{itemize}
+\end{definition}
+
+\begin{definition}[Dependency agreement]\label{def:TDepAgree}
+	Let $env$ be an environment, $(L,V)$ be a dependency pair, and $\delta$ be a set of variables.
+	We say that:
+	$$(env,(L,V))\models\delta$$
+	if
+	\begin{itemize}
+		\item $V\subseteq\delta$,
+		\item For all $\loc^p\in L$ where $\exists x\in dom(env).env(x)=\loc$, we then have $\{x\in dom(env)\mid env(x)=\loc\}\subseteq \kappa_i^0$ for a $\kappa_i^0\in\delta$
+		\item For all $\loc^p\in L$ where $\not\exists x \in dom(env).env(x)=\loc$ then there exists a $\kappa_i^0\in\delta$ such that $\kappa_i^0\subseteq\cat{IVar}$
+	\end{itemize}
+\end{definition}
+
+\begin{definition}[Alias agreement]\label{def:TAliasAgree}
+	Let $\psi=(w,\sqsubseteq_w)$ be a pair, $env$ be an environment, $\loc$ be a location, and $\kappa$ be an alias set.
+	We say that:
+	$$(env,\psi,\loc)\models(\Gamma,\kappa)$$
+	if
+	\begin{itemize}
+		\item $\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i$
+		\item $env^{-1}(\loc)\neq\emptyset$ then $\exists \kappa^0_i\in\kappa.(env^{-1}(\loc)\subseteq\kappa^0_1)\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i)$
+		\item $env^{-1}(\loc)=\emptyset$ then $\exists \kappa^0_i\in\kappa.(\kappa^0_i\subseteq\cat{IVar})\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i)$
+		%\item $\forall\loc^p\in dom(w).(env^{-1}(\loc)\cap\cat{Var}\neq\emptyset)\Rightarrow(\exists \kappa^0_i\in\kappa.\exists\nu x^p\in dom(\Gamma).\nu x\in\kappa^0_i\wedge env^{-1}(\loc)\subseteq\kappa^0_i)$
+		%\item $\forall\loc^p\in dom(w).(env^{-1}(\loc)\subseteq\cat{IVar})\Rightarrow(\exists \kappa^0_i\in\kappa.\exists\nu x^p\in dom(\Gamma).\nu x\in env^{-1}(\loc)\subseteq\kappa^0_i)$
+	\end{itemize}
+\end{definition}
+
+
+
+\begin{theorem}[Soundness of type system]
+	Suppose $e^{p'}$ is an occurrence where
+	\begin{itemize}
+		\item $env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$,
+		\item $\Gamma;\Pi\vdash e^{p'} : T$
+		\item $(env,sto,\psi)\models(\Gamma,\Pi)$
+		\item $\Gamma;\Pi\vdash env$
+	\end{itemize}
+	Then we have that:
+	\begin{itemize}
+		\item $\Gamma;\Pi\vdash v:T$
+		\item $(env,sto',\psi')\models(\Gamma,\Pi)$
+	\end{itemize}
+\end{theorem}
+\begin{proof}
+	The proof proceeds by induction on the height for the derivation tree for:
+	$$env\vdash\left\langle e^{p'},sto,\psi,p'\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
+	In the base case we have the \runa{Cons} and \runa{Var} rule:
+	\begin{description}
+		\item[\runa{Cons}] Here $e^{p'}=c^{p'}$, where
+			\begin{itemize}
+				\item $env\vdash\left\langle c^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle c,sto,\psi,(\emptyset,\emptyset),p'\right\rangle$
+				\item $\Gamma,\Pi\vdash c^{p'}:(\emptyset,\emptyset)$, and
+				\item $(env,sto,\psi)\models(\Gamma,\Pi)$
+				\item $\Gamma;\Pi\vdash env$
+			\end{itemize}
+			Since $env$, $sto$, $\psi$, and $\Gamma$ remains unchanged when evaluating $c^{p'}$, the value is then a constant $c$, and both the dependency pair and type are $(\emptyset,\emptyset)$, we can thus conclude that:
+			\begin{itemize}
+				\item $\Gamma,\Pi\vdash c : (\emptyset,\emptyset)$
+				\item $(env,sto,\psi)\models(\Gamma,\Pi)$
+				\item $(env,\psi,(\emptyset,\emptyset))\models(\emptyset,\emptyset)$
+			\end{itemize}
+
+		\item[\runa{Var}] Here $e^{p'}=x^{p'}$, where
+			\begin{itemize}
+				\item $env\vdash\left\langle x^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto,\psi,(\emptyset,\emptyset),p'\right\rangle$
+				\item $\Gamma,\Pi\vdash x^{p'}:T\sqcup (\{x^p\},\emptyset)$, and 
+				\item $(env,sto,\psi)\models(\Gamma,\Pi)$
+				\item $\Gamma;\Pi\vdash env$
+			\end{itemize}
+			Since $env$, $sto$, $\psi$, and $\Gamma$ remains unchanged when evaluating $x^{p'}$.
+			Since we know $(env,sto,\psi)\models(\Gamma,\Pi)$ and that both $inf$ and $\Lambda$ finds the greatest lower bound program point for and a variable $x$.
+			We can thus get:
+			\begin{itemize}
+				\item $\Gamma,\Pi\vdash v:T$
+				\item $(env,sto,\psi)\models(\Gamma,\Pi)$
+				\item $(env,\psi,(L,V))\models T$
+			\end{itemize}
+	\end{description}
+
+	Next, follows the induction step:
+	\begin{description}
+		\item[\runa{Abs}] Here $e^{p'}=\left[\lambda\;x.e_1^{p_1}\right]^{p'}$, where
+			\begin{figure}[H]
+				\setlength\tabcolsep{8pt}
+				\begin{tabular}{l}
+					\InfName{Abs}\\[0.2cm]
+						\inference[]{}
+						{env\vdash\left\langle \left[\lambda\;x.e_1^{p_1}\right]^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto,\psi,(\emptyset,\emptyset),p'\right\rangle}
+				\end{tabular}
+			\end{figure}
+			Where $v=\left\langle x,e_1^{p_1},env\right\rangle$.
+			And from our assumptions, we have that:
+			\begin{itemize}
+				\item $\Gamma,\Pi\vdash \left[\lambda\;x.e_1^{p_1}\right]^{p'}:T$, and 
+				\item $(env,sto,\psi)\models(\Gamma,\Pi)$
+				\item $\Gamma;\Pi\vdash env$
+			\end{itemize}
+			Where we know that, to type $e^{p'}$ we need to use the \runa{T-Abs} rule, we then have:
+			\begin{figure}[H]
+				\setlength\tabcolsep{8pt}
+				\begin{tabular}{l}
+					\runa{T-Abs}\\[0.2cm]
+						\inference[]
+						{\Gamma,x^{p_0}:T_1;\Pi\vdash  e^{p}:T_2}
+						{\Gamma;\Pi\vdash  [\lambda\;x.e^{p}]^{p'}:T_1\rightarrow T_2}
+				\end{tabular}
+			\end{figure}
+			Where $p'\sqsubseteq_\Pi p_0\wedge p_0\sqsubseteq_\Pi p_1$.
+			We must show that \cat{(1)} $\Gamma,\Pi\vdash v:T$, \cat{(2)} $(env,sto',\psi')\models(\Gamma,\Pi)$, and \cat{(3)} $(env,\psi',(L,V))\models(\Gamma,T)$.
+			\begin{description}
+				\item[(1)] Since the value is a closure, we must type it with the \runa{Closure} rule:
+					\begin{figure}[H]
+						\setlength\tabcolsep{8pt}
+						\begin{tabular}{l}
+							\runa{Closure}\\[0.4cm]
+								\inference[]
+								{
+									\Gamma;\Pi\vdash env \\
+									\Gamma,x^{p_0}:T_1;\Pi\vdash e_1^{p_1}:T_2
+								}
+								{\Gamma;\Pi\vdash \left\langle x^{p_0}, e_1^{p_1}, env \right\rangle^{p'}:T_1\rightarrow T_2}
+						\end{tabular}
+					\end{figure}
+					Where we know $\Gamma;\Pi\vdash env$ from our assumption and $\Gamma,x^{p_0}:T_1;\Pi\vdash e_1^{p_1}:T_2$ from the premise of \runa{T-Abs} rule.
+				\item[(2)] Is immediate since $sto'=sto$ and $w'=w$.
+				\item[(3)] Is immediate by \cref{def:TTAgree}, since we know that the value $v$ is a closure and the dependency pair is $(\emptyset,\emptyset)$.
+			\end{description}
+
+		\item[\runa{App}] Here $e^{p'}=\left[e_1^{p'}\;e_2^{p''}\right]^{p'}$, where
+			\begin{figure}[H]
+				\setlength\tabcolsep{8pt}
+				\begin{tabular}{l}
+					\InfName{App}\\[0.2cm]
+					\inference[]
+						{env \vdash \left\langle e_1^{p_1},sto,\psi,p \right\rangle \rightarrow \left\langle v,sto',\psi_1,(L_1,V_1),p_1 \right\rangle &\\
+						env \vdash \left\langle e_2^{p_2},sto',\psi_1,p_1 \right\rangle \rightarrow \left\langle v',sto'',\psi_2,(L_2,V_2),p_2 \right\rangle &\\
+						env'[x\mapsto v'] \vdash \left\langle e_3^{p_3},sto'',\psi_3,p_2 \right\rangle \rightarrow \left\langle v'',sto',\psi',(L_3,V'_3),p_3 \right\rangle}
+						{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,\psi,p \right\rangle \rightarrow \left\langle v'',sto',\psi',(L_1\cup L_3,V_1\cup V_3),p' \right\rangle}\\
+				\end{tabular}
+			\end{figure}
+			Where $v=\left\langle x,e_3^{p_3},env'\right\rangle$, $w_3=w_2[x^{p_2}\mapsto (L_2,V_2)]$, $\psi_2=(w_2,\sqsubseteq_w^2)$,
+			and if $inf_{\psi_2}(x)=p''$ (where $p''\neq\epsilon$) then $\psi_3=(w_3,\sqsubset_w^2\cup(p'',p_3))$ else $\psi_3=(w_3,\sqsubset_w^2)$.
+
+			And from our assumptions, we have that:
+			\begin{itemize}
+				\item $\Gamma;\Pi\vdash \left[e_1^{p_1}\;e_2^{p_2}\right]^{p'}:T$,
+				\item $(env,sto,\psi)\models(\Gamma,\Pi)$,
+				\item $\Gamma;\Pi\vdash env$
+			\end{itemize}
+			Where we know that, to type $e^{p'}$ we need to use the \runa{App} type rule, where we have:
+			\begin{figure}[H]
+				\setlength\tabcolsep{8pt}
+				\begin{tabular}{l}
+					\runa{T-App}\\[0.2cm]
+						\inference[]
+						{\Gamma;\Pi\vdash e_1^{p_1}:T_1\rightarrow T_2 &\\
+						\Gamma;\Pi\vdash e_2^{p_2}:T_1}
+						{\Gamma;\Pi\vdash [e_1^{p_1} \; e_2^{p_2}]^{p'}:T_2}\\[1cm]
+				\end{tabular}
+			\end{figure}
+			We must show that \cat{(1)} $\Gamma,\Pi\vdash v:T$, \cat{(2)} $(env,sto',\psi')\models(\Gamma,\Pi)$, and \cat{(4)} $(env,\psi',(L,V))\models(\Gamma,T)$.
+
+			Due to the first premise: since $w\models\Pi$, $(env,sto,w)\models\Gamma$, $\Gamma;\Pi\models env$, and due to the first premise from the type rule \runa{App}, we get from our induction hypothesis:
+			\begin{itemize}
+				\item $\Gamma;\Pi\vdash e_1^{p_1}:T_1\rightarrow T$,
+				\item $(env,sto_1,\psi_1)\models(\Gamma,\Pi)$,
+				\item $(env,\psi_1,(L_1,V_1))\models(\Gamma,T_1\rightarrow T)$
+			\end{itemize}
+			And due to the second premise, from the first premise, and the second premise of the type rule for \runa{App} we get from our induction hypothesis:
+			\begin{itemize}
+				\item $\Gamma;\Pi\vdash e_2^{p_2}:T_1$,
+				\item $(env,sto_2,\psi_2)\models(\Gamma,\Pi)$,
+				\item $(env,\psi_2,(L_2,V_2))\models(\Gamma,T_1)$
+			\end{itemize}
+
+			For the third premise, we need to show that there is a $\Gamma_1$ such that: \cat{a)} $\Gamma_1;\Pi\vdash e_3^{p_3}:T$, and \cat{b)} $(env'[x\mapsto v_2],sto_2,\psi_2')\models\Gamma_1$.
+			\begin{description}
+				\item[a)] Since $v_1$ is a closure where $\left\langle x^{p_0},e_3^{p_3},env'\right\rangle$ we must have concluded this with the \runa{Closure} rule, such that:
+					\begin{figure}[H]
+						\setlength\tabcolsep{8pt}
+						\begin{tabular}{l}
+							\runa{Closure}\\[0.4cm]
+								\inference[]
+								{
+									\Gamma;\Pi\vdash env' \\
+									\Gamma,x^{p_0}:T_1;\Pi\vdash e_3^{p_3}:T
+								}
+								{\Gamma;\Pi\vdash \left\langle x^{p_0}, e_3^{p_3}, env' \right\rangle:T_1\rightarrow T}
+						\end{tabular}
+					\end{figure}
+					From our assumption, we know that $\Gamma;\Pi\vdash env$, and $env=env'[env'']$, we then know that $\Gamma;\Pi\vdash env'$.
+					We then need to show for the second premise.
+					Here, we can see that $\Gamma_1$ must be $\Gamma,x^{p_0}:T_1$, as such we need to show that there is a $x^{p_0}:T_1$.
+					From the second premise of \runa{T-App} we know that $\Gamma;\Pi\vdash v_2:T_1$, and we know that $\psi_2'=(w_2[x^{p_2}\mapsto(L_2,V_2)],\sqsubseteq_w^2)$ 
+					we then know that $p_0=p_2$, and as such we then get a $\Gamma_1$ such that $\Gamma,x^{p_2}:T_1$.
+				\item[b)] We know that $(env,sto_2,\psi_2)\models\Gamma$ from the second premise.
+					We then need to show that we can get $env'$, $\psi_2'$, and $\Gamma_1$.
+					From \cat{a)} we know that $env=env'[env'']$ as such we know that $(env',sto_2,\psi_2)\models(\Gamma,\Pi$ holds.
+					We also know that $env'[x\mapsto v_2]$, $\psi_2'=(w_2[x^{p_2}\mapsto(L_2,V_2)],\sqsubseteq_w^2)$ and $\Gamma_1=\Gamma,x^{p_2}:T_1$.
+					Since we have $\Gamma;\Pi\vdash v_2:T_1$ we then know, from \cref{def:EnvAgree}, that $(env'[x\mapsto v_2],sto_2,\psi_2')\models(\Gamma_1,\Pi)$ also holds.
+				%\item[c)] Since we know that $w_2\models\Pi$, we only need to show for the extension $x^{p_2}\mapsto(L_2,V_2)$.
+				%	From \cref{def:popular}, $w_2\models\Pi$, and that all program points in $e_2^{p_2}$ must be earlier program points, based on the semantics.
+				%	We then know that $w_2'\models\Pi$ must hold.
+			\end{description}
+			From \cat{a)}, \cat{b)}, \cat{c)}, and the third premise of \runa{App} rule, we can get from our induction hypothesis:
+			\begin{itemize}
+				\item $\Gamma_1;\Pi\vdash v:T$,
+				\item $(env'[x\mapsto v_2],sto',\psi')\models(\Gamma,\Pi)$,
+				\item $(env'[x\mapsto v_2],\psi_3,(L_3,V_3))\models(\Gamma,T_2)$
+			\end{itemize}
+			We can thus conclude the following:
+			\begin{description}
+				\item[(1)] $\Gamma,\Pi\vdash v:T$
+			\end{description}
+
+			We then need to show that we can get \cat{(2)} and \cat{(3)}.
+			From \cref{lemma:His} we know the following:
+			\begin{itemize}
+				\item if $x^{p''}\in dom{w_1}\backslash dom(w) then x^{p''}\notin fv{e_1^{p_1}}$
+				\item if $x^{p''}\in dom{w_2}\backslash dom(w_1) then x^{p''}\notin fv{e_2^{p_2}}$
+				\item if $x^{p''}\in dom{w'}\backslash dom(w_2') then x^{p''}\notin fv{e_3^{p_3}}$
+			\end{itemize}
+			\todo[inline]{I still need the rest to conclude the two following parts}
+			\begin{description}
+				\item[(2)] $(env,sto',\psi')\models(\Gamma,\Pi)$
+				\item[(3)] $(env,\psi_3,(L_3,V_3))\models(\Gamma,T_2)$
+			\end{description}
+
+		\item[\runa{Ref read}] Here $e^{p'}=[!e^{p}]^{p'}$, where
+			\begin{figure}[H]
+				\setlength\tabcolsep{8pt}
+				\begin{tabular}{l}
+					\runa{Ref-read}\\[0.2cm]
+						\inference[]
+							{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto',w',(L,V),p' \right\rangle}
+							{env\vdash \left\langle \left[!e^{p'}\right]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L\cup\{\loc^{p''}\},V),p'' \right\rangle}\\
+				\end{tabular}
+			\end{figure}
+			Where $sto'(\loc)=v$\\[1cm]
+
+			And from our assumptions, we have that:
+			\begin{itemize}
+				\item $\Gamma;\Pi\vdash [!e^{p}]^{p'}:T$,
+				\item $(env,sto,\psi)\models(\Gamma,\Pi)$,
+				\item $\Gamma;\Pi\vdash env$
+			\end{itemize}
+			Where we know that, to type $e^{p'}$ we need to use the \runa{T-Ref-read} type rule, where we have:
+			\begin{figure}[H]
+				\setlength\tabcolsep{8pt}
+				\begin{tabular}{l}
+					\runa{T-Ref-read}\\[0.2cm]
+						\inference[]
+						{\Gamma;\Pi\vdash  e^{p}:(\delta,\kappa)}
+						{\Gamma;\Pi\vdash [!e^{p}]^{p'}:T\sqcup(\delta\cup\delta',\emptyset)}\\
+				\end{tabular}
+			\end{figure}
+			Where $\kappa\neq\emptyset$, $\delta'=\{\nu x^{p'}\mid\nu x\in\kappa\}$, $\nu x_1,\cdots,\nu x_n\in\kappa$.
+			$\{p_1,\cdots,p_m\},\cdots,\{p_1',\cdots,p_s'\}=\Lambda_\Upsilon(\nu x_1,p',\Gamma),\cdots,\Lambda_\Upsilon(\nu x_n,p',\Gamma)$, 
+			and $T=\Gamma(\nu x_1^{p_1})\cup\cdots\cup\Gamma(\nu x_1^{p_m})\cup\cdots\cup\Gamma(\nu x_n^{p_1'})\cup\cdots\cup\Gamma(\nu x_n^{p_s'})$.
+
+			We must show that \cat{(1)} $\Gamma,\Pi\vdash v:T$, \cat{(2)} $(env,sto',\psi')\models(\Gamma,\Pi)$, and \cat{(3)} $(env,\psi',(L,V))\models(\Gamma,T)$.
+
+			\begin{description}
+				\item[(1)] Since we get the greatest lower-bound program points for each $\nu x\in\kappa$, for each evaluation path, and that we have already concluded the type for each occurrence, we then know that $\Gamma,\Pi\vdash v:T$.
+
+				\item[(2)] By the induction hypothesis we get from the premise $(env,sto',\psi')\models(\Gamma,\Pi)$.
+
+				\item[(3)] By the induction hypothesis we get from the premise $(env,\psi',(L,V))\models(\Gamma,T)$, we just need to show that $(env,\psi',(L\cup\{\loc^{p''}\},V))\models(\Gamma,T\sqcup(\delta\cup\delta',\emptyset))$.
+			\end{description}
+	\end{description}
+\end{proof}
+\end{document}

@@ -1,0 +1,105 @@
+\item[\runa{Let}] Here $e^{p'}=\left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'}$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{Let}\\[0.2cm]
+			\inference[]
+			{env\vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
+			env[x\mapsto v_1]\vdash \left\langle e_2^{p_2},sto_1,(w_2,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p_2 \right\rangle}
+			{env\vdash \left\langle \left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
+	\end{tabular}
+\end{figure}
+Where $w_2=w_1[x^{p_1}\mapsto(L,V)]$.
+From our assumption, we know that 
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash \left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'}:T$,
+	\item $\Gamma,\Pi\vdash env$
+	\item $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$,
+\end{itemize}
+To type $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$ we have two choices, depending on what $e_1^{p_1}$ evaluates to, i.e., if $v_1=\loc$ or $v_1\neq\loc$.
+\begin{description}
+	\item[I)] If $e_1^{p_1}$ evaluates to a location, $v_1=\loc$, we need to use the \runa{T-Let-1} rule, since the binding is an alias to $\loc$, where we have:
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\runa{T-Let-1}\\[0.2cm]
+					\inference[]
+					{\Gamma,\Pi\vdash e_1^{p_1}:(\delta,\kappa) &\\
+					\Gamma_1,\Pi\vdash e_2^{p_2}:T}
+					{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p_1} \; e_2^{p_2}]^{p'}:T}
+			\end{tabular}
+		\end{figure}
+		Where $\kappa\neq\emptyset$, and $\Gamma_1=\Gamma[x^{p_1}:(\delta,\kappa\cup\{x\})]$.
+		From our assumptions we have $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$ and $\Gamma,\Pi\models env$, and due to the first premises of \runa{Let} and \runa{T-Let-1}, we can then get from our induction hypothesis:
+	\begin{itemize}
+		\item $\Gamma,\Pi\vdash v_1:(\delta,\kappa)$, where $\kappa\neq\emptyset$,
+		\item $(env,sto_1,(w_1,\sqsubseteq_w^1))\models(\Gamma,\Pi)$,
+		\item $(env,(w_1,\sqsubseteq_w^1),(L_1,V_1))\models(\Gamma,(\delta,\kappa))$
+	\end{itemize}
+	Since the first premise evaluates to a location, we then also know that $\kappa\neq\emptyset$, and as such, the value is concluded by \runa{Location}.
+
+	In the second premise, we first need to show that \cat{a)} $\Gamma[x^{p_1}:(\delta,\kappa\cup\{x\})],\Pi\vdash env[x\mapsto v_1]$ and \cat{b)} $(env[x\mapsto v_1],sto_1,(w_2,\sqsubseteq_w^1))\models(\Gamma_1,\Pi)$.
+	\begin{description}
+		\item[a)] Since we know from the first premise that $\Gamma,\Pi\vdash v_1:(\delta,\kappa)$, $\Gamma[x^{p_1}:(\delta,\kappa\cup\{x\})]$, and $env[x\mapsto v_1]$, we then also know from \cref{def:TEnv} that 
+			$$\Gamma_1,\Pi\vdash env[x\mapsto v_1]$$
+		\item[b)] Due to \runa{a)} , $(env,sto_1,(w_1,\sqsubseteq_w^1))\models(\Gamma,\Pi)$, and \cref{def:TAgree} we only need to show that $(env[x\mapsto v_1],(w_2,\sqsubseteq_w^1),\loc)\models(\Gamma_1,\kappa\cup\{x\})$.
+
+		Since, due to the first premise, we know that $(env,(w_2,\sqsubseteq_w^1),\loc)\models(\Gamma,\kappa)$ must hold.
+		We also know that if $\kappa^0$ is a good partition, then there must exists a $\kappa_i^0\in\kappa^0$, such that $x\in\kappa_i^0$ and there must also be a $\nu x\in\kappa$ such that $\nu x\in\kappa_i^0$.
+		Based on this we know that $(env[x\mapsto v_1],(w_2,\sqsubseteq_w^1),\loc)\models(\Gamma[x^{p_1}:(\delta,\kappa\cup\{x\})],\kappa)$ must also hold.
+	\end{description}
+	From this, we can then use our induction hypothesis on the second premise, where we then get:
+	\begin{itemize}
+		\item $\Gamma_1,\Pi\vdash v:T$,
+		\item $(env[x\mapsto v_1],sto',(w',\sqsubseteq_w'))\models(\Gamma_1,\Pi)$,
+		\item $(env[x\mapsto v_1],(w',\sqsubseteq_w'),(L,V))\models(\Gamma_1,T)$
+	\end{itemize}
+	From \cref{lemma:Strength}, we know that $x^{p_1}\notin fv(v)$ and by \cref{lemma:His} we know that: if $x^{p''}\in dom(w')\backslash dom(w)$ then $x^{p''}\notin fv(e^{p'})$.
+	We can the conclude, for this case:
+	\begin{itemize}
+		\item $\Gamma,\Pi\vdash v:T$,
+		\item $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$,
+		\item $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$
+	\end{itemize}
+
+
+	\item[II)]	If $e_1^{p_1}$ does not evaluate to a location, we need to use the \runa{T-Let-2} type rule, where we have:
+		\begin{figure}[H]
+			\setlength\tabcolsep{8pt}
+			\begin{tabular}{l}
+				\runa{T-Let-2}\\[0.2cm]
+					\inference[]
+					{\Gamma,\Pi\vdash e_1^{p_1}:T_1 &\\
+					\Gamma_1,\Pi\vdash e_2^{p_2}:T}
+					{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p_1} \; e_2^{p_2}]^{p'}:T}
+				\end{tabular}
+			\end{figure}
+			Where $\Gamma_1=\Gamma[x^{p_1}:T_1]$.
+			From our assumptions we have $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$ and $\Gamma,\Pi\models env$, and due to the first premises of \runa{Let} and \runa{T-Let-1}, from our induction hypothesis we can get:
+		\begin{itemize}
+			\item $\Gamma,\Pi\vdash v_1:T_1$,
+			\item $(env,sto_1,(w_1,\sqsubseteq_w^1))\models(\Gamma,\Pi)$,
+			\item $(env,(w_1,\sqsubseteq_w^1),(L_1,V_1))\models(\Gamma,T_1)$
+		\end{itemize}
+		We also know that the type of $v_1$ is not a location, because then it would be concluded by \cat{I)}.
+		In the second premise, we first need to show that \cat{a)} $\Gamma_1,\Pi\vdash env[x\mapsto v_1]$ and \\
+		\cat{b)} $(env[x\mapsto v_1],sto_1,(w_2,\sqsubseteq_w^1))\models(\Gamma_1,\Pi)$.
+		\begin{description}
+			\item[a)] Since we know from the first premise that $\Gamma,\Pi\vdash v_1:T_1$, $\Gamma_1=\Gamma[x^{p_1}:T_1]$ and $env[x\mapsto v_1]$, due to \cref{def:TEnv} we then know that:
+				$$\Gamma_1,\Pi\vdash env[x\mapsto v_1]$$
+			\item[b)] Due to \cat{a)}, we know know that since we bind $x$ in $env$, $x^{p_1}$ in $w$ and $\Gamma$, we then know that $(env[x\mapsto v_1],sto_1,(w_2,\sqsubseteq_w^1))\models(\Gamma_1,\Pi)$.
+		\end{description}
+		From \cat{a)} \cat{b)} we can then use the induction hypothesis
+		\begin{itemize}
+			\item $\Gamma_1,\Pi\vdash v:T$,
+			\item $(env[x\mapsto v_1],sto',(w',\sqsubseteq_w'))\models(\Gamma_1,\Pi)$,
+			\item $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma_1,T)$
+		\end{itemize}
+		From \cref{lemma:Strength}, we know that $x^{p_1}\notin fv(v)$ and by \cref{lemma:His} we know that: if $x^{p''}\in dom(w')\backslash dom(w)$ then $x^{p''}\notin fv(e^{p'})$.
+		We can the conclude, for this case:
+		\begin{itemize}
+			\item $\Gamma,\Pi\vdash v:T$,
+			\item $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$,
+			\item $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$
+		\end{itemize}
+\end{description}

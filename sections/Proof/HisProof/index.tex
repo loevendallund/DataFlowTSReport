@@ -1,0 +1,36 @@
+\documentclass[../../../master.tex]{subfiles}
+\begin{document}
+\begin{proof}
+	The proof proceeds by induction on the height of the derivation tree for 
+	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
+	\begin{description}
+		\item[\runa{Const}]
+
+		\item[\runa{Var}]
+	\end{description}
+
+	Next, follows the induction step:
+	\begin{description}
+		\item[\runa{Abs}]
+		
+		\item[\runa{App}]
+
+		\item[\runa{App-const}]
+
+		\item[\runa{App-rec}]
+
+		\item[\runa{Let}]
+
+		\item[\runa{Let rec}]
+
+		\item[\runa{Case}]
+
+		\item[\runa{Ref}]
+
+		\item[\runa{Ref read}]
+
+		\item[\runa{Ref write}]
+	\end{description}
+\end{proof}
+
+\end{document}
