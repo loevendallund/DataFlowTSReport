@@ -1,0 +1,25 @@
+\item[\runa{T-Let-1}] Here $e^p=[\mbox{let}\; y \; e_1^{p_1} \; e_2^{p_2}]^p$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{T-Let-1}\\[0.2cm]
+			\inference[]
+				{\Gamma',\Pi\vdash e_1^{p_1}:(\delta,\kappa) &\\
+				\Gamma_1,\Pi\vdash e_2^{p_2}:T}
+				{\Gamma',\Pi\vdash [\mbox{let}\; y \; e_1^{p_1} \; e_2^{p_2}]^{p}:T}
+	\end{tabular}
+\end{figure}
+Where $\Gamma'=\Gamma[x^{p'}]$, $\Gamma_1=\Gamma'[y^{p_1}:(\delta,\kappa\cup \{y\})]$ and $\kappa\neq\emptyset$.
+From our assumption, we know that $x\notin fv(x^p)$.
+By \cref{def:fv} we know:
+\begin{itemize}
+	\item $x\notin fv(e_1^{p_1})$,
+	\item $x\notin fv(e_2^{p_2})$
+\end{itemize}
+By our induction hypothesis we can get:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash e_1^{p_1}:(\delta,\kappa)$,
+	\item $\Gamma[y^{p_1}:(\delta,\kappa\cup \{y\})],\Pi\vdash e_2^{p_2}:T$
+\end{itemize}
+Where we can then conclude that:
+$$\Gamma,\Pi\vdash [\mbox{let}\; y \; e_1^{p_1} \; e_2^{p_2}]^{p}:T$$

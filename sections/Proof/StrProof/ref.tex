@@ -1,0 +1,22 @@
+\item[\runa{T-Ref}] Here $e^p=[\mbox{ref}\;e_1^{p_1}]^p$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{T-Ref}\\[0.2cm]
+			\inference[]
+				{\Gamma',\Pi\vdash  e_1^{p_1}:(\delta',\kappa')}
+				{\Gamma'[\nu x^{p}:(\delta',\kappa')],\Pi\vdash [\mbox{ref}\;e_1^{p_1}]^{p}:(\emptyset,\kappa)}
+	\end{tabular}
+\end{figure}
+Where $\Gamma'=\Gamma[x^{p'}:T_1]$, $\kappa=\{\nu x\}$.
+From our assumption, we know that $x\notin fv(x^p)$.
+By \cref{def:fv} we know:
+\begin{itemize}
+	\item $x\notin fv(e_1^{p_1})$,
+\end{itemize}
+By our induction hypothesis we can get:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash e_1^{p_1}:(\delta',\kappa')$,
+\end{itemize}
+Where we can then conclude that:
+$$\Gamma,\Pi\vdash [\mbox{ref}\;e_1^{p_1}]^{p}:T$$

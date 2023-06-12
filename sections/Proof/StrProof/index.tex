@@ -1,35 +1,25 @@
 \documentclass[../../../master.tex]{subfiles}
 \begin{document}
 \begin{proof}
-	The proof proceeds by induction on the height of the derivation tree for 
+	The proof proceeds by induction on the structure of the derivation tree for the type judgment:
 	$$\Gamma,\Pi\vdash e^{p}:T$$
+	In the base case, we have \runa{T-Const} and \runa{T-Var}:
 	\begin{description}
-		\item[\runa{T-Const}]
-
-		\item[\runa{T-Var}]
+		\input{sections/Proof/StrProof/const.tex}
+		\input{sections/Proof/StrProof/var.tex}
 	\end{description}
 
 	Next, follows the induction step:
 	\begin{description}
-		\item[\runa{T-Abs}]
-		
-		\item[\runa{T-App}]
-
-		\item[\runa{T-App-const}]
-
-		\item[\runa{T-App-rec}]
-
-		\item[\runa{T-Let}]
-
-		\item[\runa{T-Let rec}]
-
-		\item[\runa{T-Case}]
-
-		\item[\runa{T-Ref}]
-
-		\item[\runa{T-Ref-read}]
-
-		\item[\runa{T-Ref-write}]
+		\input{sections/Proof/StrProof/abs.tex}
+		\input{sections/Proof/StrProof/app.tex}
+		\input{sections/Proof/StrProof/let1.tex}
+		\input{sections/Proof/StrProof/let2.tex}
+		\input{sections/Proof/StrProof/letrec.tex}
+		\input{sections/Proof/StrProof/case.tex}
+		\input{sections/Proof/StrProof/ref.tex}
+		\input{sections/Proof/StrProof/refread.tex}
+		\input{sections/Proof/StrProof/refwrite.tex}
 	\end{description}
 \end{proof}
 

@@ -1,0 +1,25 @@
+\item[\runa{T-Case}] Here $e^p=[\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}]^p$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{T-Case}\\[0.2cm]
+			\inference[]
+				{\Gamma',\Pi\vdash e^{p''}:(\delta,\kappa) &\\
+				\Gamma_1,\Pi\vdash e_i^{p_i}:T_i\;\;\;(1\leq i\leq|\tilde{\pi}|)}
+				{\Gamma',\Pi\vdash [\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}]^{p}:T\sqcup(\delta,\kappa)}\\[0.3cm]
+	\end{tabular}
+\end{figure}
+Where $\Gamma'=\Gamma[x^{p'}:T_1]$, $e_i^{p_i}\in\tilde{o}$ and $s_i\in\tilde{\pi}$, and $\Gamma_1=\Gamma'[y^{p''}:(\delta,\kappa)]$ if $s_i=y$.
+From our assumption, we know that $x\notin fv(x^p)$.
+By \cref{def:fv} we know:
+\begin{itemize}
+	\item $x\notin fv(e^{p''})$,
+	\item $x\notin fv(e_i^{p_i})$ for all $1\leq i\leq|\tilde{\pi}|$
+\end{itemize}
+By our induction hypothesis we can get:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash e^{p''}:(\delta,\kappa)$,
+	\item $\Gamma[y^{p''}:(\delta,\kappa)],\Pi\vdash e_2^{p_2}:T$
+\end{itemize}
+Where we can then conclude that:
+$$\Gamma,\Pi\vdash [\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}]^{p}:T$$

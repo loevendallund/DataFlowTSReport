@@ -1,0 +1,25 @@
+\item[\runa{T-App}] Here $e^p=[e_1^{p_1} \; e_2^{p_2}]^p$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{T-App}\\[0.2cm]
+			\inference[]
+				{\Gamma',\Pi\vdash e_1^{p_1}:T_1\rightarrow T &\\
+				\Gamma',\Pi\vdash e_2^{p_2}:T_1}
+				{\Gamma',\Pi\vdash [e_1^{p_1} \; e_2^{p_2}]^{p}:T}\\[1cm]
+	\end{tabular}
+\end{figure}
+Where $\Gamma'=\Gamma[x^{p'}:T_1]$.
+From our assumption, we know that $x\notin fv(x^p)$.
+By \cref{def:fv}, we then know:
+\begin{itemize}
+	\item $x\notin fv(e_1^{p_1})$,
+	\item $x\notin fv(e_2^{p_2})$
+\end{itemize}
+Then from our induction hypothesis we can get:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash e_1^{p_1}:T_1\rightarrow T$,
+	\item $\Gamma,\Pi\vdash e_2^{p_2}:T_1$
+\end{itemize}
+Where we can then conclude that:
+$$\Gamma,\Pi\vdash [e_1^{p_1} \; e_2^{p_2}]^{p}:T_2$$
