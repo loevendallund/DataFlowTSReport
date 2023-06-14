@@ -1,18 +1,35 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \section{Introduction}
-Data-flow analysis is a technique of collecting information about what values various part of the program can evaluate to.
-This technique is usually done by using control-flow graphs (ref), to determine the parts of a program which a set of values could propegate to.
-The information gathered from the data-flow analysis is usually used by compilers for code optimization, such as live variable analysis and constant propagation analysis.
+Data-flow analysis has been studied for decades to better to provide flow information of programs.
+This flow information has been used for different tasks for compiler optimization, debugging and understanding programs, testing and maintenance.
+In the context of compiler optimization, where the flow information provides data that may be used at given parts of the program at runtime.
 
-Many techniques uses data-flow equations and resolve the those equation by repeated calculations until it reaches a fix-point (Ref to Kildalls method).
-While many data-flow analysis systems are path-insensitive, i.e., context insensitive, there have been developed analysis systems that are path-sensitive which can analyse alias information.
+One of the classical way of doing data-flow analysis has been iterative algorithm using graph representation of programs.
+The purpose of those graphs is to provide the control flow of a program by providing the control flow as edges and the nodes as basic blocks.
+By using the information of control-flow graphs, many algorithms have been developed to use those by annotating the graphs and solving the maximal fix-point\cite{KildallGaryA1973Auat}. (Ref to algorithms, such as kilders)
+Other techniques have also been presented, such as a graph-free approach \cite{HorspoolR.Niegel2002AGAt} or through type systems with refinement types \cite{PavlinovicZvonimir2021Dfrt}.
+
+When analysing languages, such as C/C++ or other languages that explicitly handles pointers, it is important to take into account aliasing, i.e., multiple variables referring to the same location.
+Many data-flow analysis uses alias algorithms to compute this information.
+Two overall types of alias algorithm has been used, flow-sensitive which give precise information but are expensive, and flow-insensitive which are less precise but are inexpensive \cite{LiangDonglin1999Eaag}(ref to alias techniques).
 \bigskip
 
-This paper will present a type system for data-flow and alias analysis for a functional language with mutability.
-The system is a generalization of the work presented in (Insert reference to my old paper), for liveness analysis.
+This paper will focus on presenting a type system based approach for data-flow analysis for functional languages.
+Functional languages have seen a rise in popularity, as they take a different approach to programming languages as they take an expression based approach.
+In essence, functional languages that are based on $\lambda$-calculus are in essence a series function declarations and applications of those functions.
 
-This paper will focus on a $\lambda$ calculus with local bindings, mutability, pattern matching, and constants.
-This language is based on the ReScript language, based on OCaml for compiling to JavaScript and is part of the ML family of functional languages.
+Many different functional languages are being used and adopted, as many of those languages often have a strong type systems.
+Functional languages are also beginning to rise for web application, where ReScript is an alternative to TypeScript.
+The ReScript programming language is based on OCaml, with a JavaScript inspired syntax \cite{rescript_rebrand}, and compared to languages such as JavaScript and TypeScript, ReScript is a strongly typed language.
+\todo[inline]{Add something more about rescript, analysis, etc.}
+
+We will then present a type system for data-flow analysis for a ReScript inspired $\lambda$-calculus language with mutability, bindings, and pattern matching.
+The type system we proposes provides the data information used at each program point and the alias information used.
+\bigskip
+
+We will first present the language, its syntax and semantics, in \cref{sec:lang} and the type system for data-flow analysis in \cref{sec:TypeSys}.
+Then we will present the soundness of the type system in \cref{sec:Soundness}, and lastly we will conclude in \cref{sec:Conc}.
+
 
 \end{document}

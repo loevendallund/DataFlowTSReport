@@ -1,6 +1,15 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
-\section{Type system for data-flow analysis}
+\section{Type system for data-flow analysis}\label{sec:TypeSys}
+\begin{itemize}
+	\item Introduction to type system
+	\item Typechecker
+	\item Slack
+	\begin{itemize}
+		\item No polymorphic types
+		\item No abstraction bindings to locations
+	\end{itemize}
+\end{itemize}
 This section will introduce the type system for the data-flow analysis on the language presented in \cref{sec:lang}.
 The purpose of the type system presented here captures the notion of data-flow in in a program.
 Here, we assign terms with the data used to evaluate the term.
@@ -157,8 +166,7 @@ We then define the set of all $p$-chains of $\Pi$ as:
 
 \begin{definition}[$\Upsilon$]
 	Let $\Pi$ be an approximated order of program points and $p$ be a program point.
-	We say that $\Upsilon_p$ is the set of all $p$-chains of $\Pi$, such that:
-	$$\exists \Pi_p^{*}\in\Pi.\Pi_p^{*}\in\Upsilon_p$$
+	We say that $\Upsilon_p$ is the set of all $p$-chains of $\Pi$.
 \end{definition}
 
 We can then define the function that gets all greatest bindings for global information, as follows:
@@ -266,6 +274,7 @@ With the set of total orders defined, we can then define a function to retrieve 
 	\label{fig:TypeSys}
 \end{figure}
 
+\iffalse
 \begin{example}[Data-flow for abstractions]
 This example is for the same example program, shown in \cref{ex:DFAbs}, where we have:
 \begin{lstlisting}[language=Caml, mathescape=true]
@@ -276,7 +285,6 @@ $$\kappa^0=\{\{x\},\{y\},\{z\}\}$$
 $$\Pi=\{(2,1),(2,3),(3,4),(1,5)(4,5),(5,6),(6,7),(7,8),(9,10)\}$$
 and the type tree can be found in \cref{FigEx.TAbs}.
 
-\todo[inline]{Something to discuss here, program point polymorphy, in discussion}
 When typing the first abstraction, we first lookup the binding of $x^2$, which are an abstraction type where we add the occurrence $x^3$ to the type, and then typing the constant.
 Where we then type the application with $T_2\sqcup(\{x^2\},\emptyset)$.
 
@@ -286,5 +294,5 @@ The second application is done similarly, but instead of having the type $T_2\sq
 \begin{landscape}
 \subfile{../examples/DFAbsT.tex}
 \end{landscape}
-
+\fi
 \end{document}

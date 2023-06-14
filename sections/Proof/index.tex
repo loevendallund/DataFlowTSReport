@@ -1,6 +1,6 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
-\section{Soundness}
+\section{Soundness}\label{sec:Soundness}
 We will now show the soundness of the type system, i.e., the type of an occurrence correspond to the dependencies and the alias information from the semantics.
 To show that the type system is sound, we will first introduce the type rules for values and the relation between between the collection semantics and the type system, i.e, how the relation between binding models and the relation between the semantics and the type of occurrences.
 After that, we will present some properties in the semantics and type system that are used in the soundness proof.
@@ -23,7 +23,9 @@ any new variable bindings introduced to the dependency function by evaluating an
 		and $x^{p_1}\in dom(w')\backslash dom(w)$.
 		Then $x\notin fv(e^{p})$
 \end{lemma}
-\subfile{HisProof/index.tex}
+The proof for \cref{lemma:His} can be found in \cref{app:HisProof}.
+
+%\subfile{HisProof/index.tex}
 
 The second property is the strengthening of the type environment.
 This strengthening lemma states that if there is a binding the type environment, used to type an occurrence $e^p$, and the variables is not free in $e^p$ then the binding can be removed.
@@ -31,7 +33,8 @@ This strengthening lemma states that if there is a binding the type environment,
 \begin{lemma}[Strengthening]\label{lemma:Strength}
 	If $\Gamma[x^{p'}:T'],\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma,\Pi\vdash e^{p}:T$
 \end{lemma}
-\subfile{StrProof/index.tex}
+The proof for \cref{lemma:Strength} can be found in \cref{app:StrProof}.
+%\subfile{StrProof/index.tex}
 
 We will now present the soundness of the type system.
 
@@ -50,5 +53,20 @@ We will now present the soundness of the type system.
 		\item $(env,(w',\sqsubseteq_w'),v,(L,V))\models(\Gamma,T)$
 	\end{itemize}
 \end{theorem}
-\subfile{SoundProof/index.tex}
+\begin{proof}
+	The proof proceeds by induction on the height of the derivation tree for 
+	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
+	We will only show the proof of four rules here, for \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref-write}, the full proof can be found in \cref{app:SoundnessProof}.
+
+	\begin{description}
+		\input{sections/Proof/SoundProof/var.tex}
+		\input{sections/Proof/SoundProof/case.tex}
+		\input{sections/Proof/SoundProof/ref.tex}
+		\input{sections/Proof/SoundProof/refread.tex}
+	\end{description}
+\end{proof}
+
+
+\todo[inline]{Select some interesting proof examples}
+%\subfile{SoundProof/index.tex}
 \end{document}

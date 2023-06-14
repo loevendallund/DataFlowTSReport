@@ -3,14 +3,15 @@
 \begin{proof}
 	The proof proceeds by induction on the height of the derivation tree for 
 	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
+	In the base case, we have \runa{Const}, \runa{Var}, and \runa{Abs}:
 	\begin{description}
 		\input{sections/Proof/HisProof/const.tex}
 		\input{sections/Proof/HisProof/var.tex}
+		\input{sections/Proof/HisProof/abs.tex}
 	\end{description}
 
 	Next, follows the induction step:
 	\begin{description}
-		\input{sections/Proof/HisProof/abs.tex}
 		\input{sections/Proof/HisProof/app.tex}
 		\input{sections/Proof/HisProof/appconst.tex}
 		\input{sections/Proof/HisProof/apprec.tex}

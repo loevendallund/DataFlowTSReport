@@ -3,15 +3,15 @@
 \begin{proof}
 	The proof proceeds by induction on the height of the derivation tree for 
 	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
-	In the base case we have the \runa{Const} and \runa{Var} rule:
+	In the base case we have the \runa{Const}, \runa{Var}, \runa{Abs} rules:
 	\begin{description}
 		\input{sections/Proof/SoundProof/const.tex}
 		\input{sections/Proof/SoundProof/var.tex}
-\end{description}
+		\input{sections/Proof/SoundProof/abs.tex}
+	\end{description}
 
 	Next, follows the induction step:
 	\begin{description}
-		\input{sections/Proof/SoundProof/abs.tex}
 		\input{sections/Proof/SoundProof/app.tex}
 		\input{sections/Proof/SoundProof/appconst.tex}
 		\input{sections/Proof/SoundProof/apprec.tex}

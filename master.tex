@@ -6,6 +6,7 @@
 
 \begin{document}
    \input{frontmatter/titlepage.tex}
+	\tableofcontents
 	
 	\subfile{sections/intro.tex}
 	\subfile{sections/lang.tex}
@@ -13,14 +14,15 @@
 	\subfile{sections/Proof/index.tex}
 	\subfile{sections/discussion.tex}
 	%\subfile{sections/Notes/notes-new.tex}
-	\subfile{sections/Notes/notes.tex}
+	%\subfile{sections/Notes/notes.tex}
 
 	\balance
-	%\bibliographystyle{ACM-Reference-Format}
-	%\bibliography{bib.bib}
+	\bibliographystyle{ACM-Reference-Format}
+	\bibliography{bib.bib}
 	\appendix
 
 	\subfile{sections/appendix/collection.tex}
 	\subfile{sections/appendix/typesystem.tex}
+	\subfile{sections/appendix/proof.tex}
 
 \end{document}

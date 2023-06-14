@@ -1,0 +1,42 @@
+\documentclass[../../master.tex]{subfiles}
+\begin{document}
+\section{Proof}
+\subsection{History}\label{app:HisProof}
+Here, we present the proof for the history, that is, all variables introduced in an evaluation of an occurrence, and bound to the dependency function, is not free.
+
+\begin{lemma}[History]\label{lemma:His}
+	Suppose $e^p$ is an occurrence, that
+	$$env\vdash\left\langle e^{p},sto,(w,\sqsubseteq_w),p'\right\rangle\rightarrow\left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p''\right\rangle$$
+		and $x^{p_1}\in dom(w')\backslash dom(w)$.
+		Then $x\notin fv(e^{p})$
+\end{lemma}
+\subfile{../Proof/HisProof/index.tex}
+
+\subsection{Strengthening}\label{app:StrProof}
+Here, we present the proof for strengthening of type environments.
+
+\begin{lemma}[Strengthening]\label{lemma:Strength}
+	If $\Gamma[x^{p'}:T'],\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma,\Pi\vdash e^{p}:T$
+\end{lemma}
+\subfile{../Proof/StrProof/index.tex}
+
+\subsection{Soundness}\label{app:SoundnessProof}
+Here, we present the proof for the soundness of the type system.
+
+\begin{theorem}[Soundness of type system]
+	Suppose $e^{p'}$ is an occurrence where
+	\begin{itemize}
+		\item $env\vdash\left\langle e^{p'},sto,(w,\sqsubseteq_w),p\right\rangle\rightarrow\left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p''\right\rangle$,
+		\item $\Gamma,\Pi\vdash e^{p'} : T$
+		\item $\Gamma,\Pi\vdash env$
+		\item $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$
+	\end{itemize}
+	Then we have that:
+	\begin{itemize}
+		\item $\Gamma,\Pi\vdash v:T$
+		\item $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$
+		\item $(env,(w',\sqsubseteq_w'),v,(L,V))\models(\Gamma,T)$
+	\end{itemize}
+\end{theorem}
+\subfile{../Proof/SoundProof/index.tex}
+\end{document}
