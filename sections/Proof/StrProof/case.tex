@@ -2,14 +2,9 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{T-Case}\\[0.2cm]
-			\inference[]
-				{\Gamma',\Pi\vdash e^{p''}:(\delta,\kappa) &\\
-				\Gamma_1,\Pi\vdash e_i^{p_i}:T_i\;\;\;(1\leq i\leq|\tilde{\pi}|)}
-				{\Gamma',\Pi\vdash [\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}]^{p}:T\sqcup(\delta,\kappa)}\\[0.3cm]
+		\input{sections/appendix/TSRules/case.tex}
 	\end{tabular}
 \end{figure}
-Where $\Gamma'=\Gamma[x^{p'}:T_1]$, $e_i^{p_i}\in\tilde{o}$ and $s_i\in\tilde{\pi}$, and $\Gamma_1=\Gamma'[y^{p''}:(\delta,\kappa)]$ if $s_i=y$.
 From our assumption, we know that $x\notin fv(x^p)$.
 By \cref{def:fv} we know:
 \begin{itemize}

@@ -2,14 +2,9 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\InfName{Ref-write}\\[0.2cm]
-		\inference[]
-				{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto_1,(w_1,\sqsubseteq_w^1),(L,V),p_1 \right\rangle &\\
-				env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto_2,(w_2,\sqsubseteq_w^2),(L_2,V_2),p_2 \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p_1}:=e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle (),sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\
+		\input{sections/appendix/ColRules/refwrite.tex}
 	\end{tabular}
 \end{figure}
-Where $sto'=sto_2[\loc\mapsto v]$, $\loc^{p''}=inf_{\sqsubseteq_w^2}(\loc,w_2)$, $w'=w_2[\loc^{p_2}\mapsto(L_2\cup\{\loc^{p''}\},V_2)]$, and $\sqsubseteq_w'=\sqsubseteq_w^2\cup(p'',p_2)$.
 By virtue of our induction hypothesis, we can get the following from the premises:
 \begin{description}
 	\item[1)] if $y^{p''}\in dom(w_1)\backslash dom(w)$ then $y\notin fv(e_1^{p_1})$

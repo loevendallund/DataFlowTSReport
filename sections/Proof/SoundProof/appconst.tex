@@ -1,17 +1,11 @@
-\item[\runa{App}] Here $e^{p'}=\left[e_1^{p'}\;e_2^{p''}\right]^{p'}$, where
+\item[\runa{App-const}] Here $e^{p'}=[ c\;e_1^{p'}\;e_2^{p''}]^{p'}$, where
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\InfName{App}\\[0.2cm]
-		\inference[]
-				{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle c,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
-				env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v',sto',(w',\sqsubseteq_w'),(L_2,V_2),p_2 \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
+		\input{sections/appendix/ColRules/appconst.tex}
 	\end{tabular}
 \end{figure}
-Where $apply(c,v')=v$ and $(L,V)=(L_1\cup L_2,V_1\cup V_2)$.
 
-\todo[inline]{Problem here, since we cannot handle functional constants in the type system}
 And from our assumptions, we have that:
 \begin{itemize}
 	\item $\Gamma,\Pi\vdash \left[e_1^{p_1}\;e_2^{p_2}\right]^{p'}:T$,
@@ -19,3 +13,51 @@ And from our assumptions, we have that:
 	\item $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$,
 \end{itemize}
 
+To type $[c\;e_1^{p_1}\;e_2^{p_2}]^{p'}$ we need to use the \runa{T-App-const} rule, where we have:
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+	\inference[]
+	{
+		\Gamma,\Pi\vdash e_1^{p}:(\delta_1,\emptyset) &\\
+		\Gamma,\Pi\vdash e_2^{p'}:(\delta_2,\emptyset)
+	}
+	{\Gamma,\Pi\vdash [c\;e_1^{p} \; e_2^{p'}]^{p''}:(\delta_1\cup\delta_2,\emptyset)}
+	\end{tabular}
+\end{figure}
+Where $c$ is a functional constant.
+We must show that \cat{1)} $\Gamma,\Pi\vdash v:T$, \\
+\cat{2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$, and \cat{3)} $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
+
+\begin{description}
+	\item[1)] As we know that the application of all functional constants are constants, we know that the type of the value must be concluded by \runa{Constant}.
+	\begin{figure}[H]
+		\setlength\tabcolsep{8pt}
+		\begin{tabular}{l}
+		\runa{Constant}\\[0.2cm]
+			\inference[]{}
+				{\Gamma,\Pi\vdash  c:(\delta, \emptyset)}\\[1cm]
+		\end{tabular}
+	\end{figure}
+	Where we know that the type can contain occurrences used.
+	From the type rule \runa{T-App-const} we first need to look at the premises.
+	Due to the first premise: since from our assumptions we have $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$ and $\Gamma,\Pi\models env$, and from the first premise of \runa{T-App-const}, we can get the following our induction hypothesis:
+	\begin{itemize}
+		\item $\Gamma,\Pi\vdash v_1:T_1\rightarrow T$,
+		\item $(env,sto_1,(w_1,\sqsubseteq_w^1))\models(\Gamma,\Pi)$,
+		\item $(env,v,(w_1,\sqsubseteq_w^1),(L_1,V_1))\models(\Gamma,T_1\rightarrow T)$
+	\end{itemize}
+
+	Due to the first premise and the second premise of \runa{T-App-const} we can get the following our induction hypothesis:
+	\begin{itemize}
+		\item $\Gamma,\Pi\vdash v_2:T_1$,
+		\item $(env,sto_2,(w_2,\sqsubseteq_w^2))\models(\Gamma,\Pi)$,
+		\item $(env,v,(w_2,\sqsubseteq_w^2),(L_2,V_2))\models(\Gamma,T_1)$
+	\end{itemize}
+	As we can see from the rule \runa{T-App-const}, we take an union of $\delta_1$ and $\delta_2$, we can conclude that: $\Gamma,\Pi\vdash v:T$.
+
+\item[2)] Due to \cat{1)}, we can conclude that: $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$.
+
+\item[3)] Due to \cat{1)}, and \cat{2)}, and that the dependency pair is an union of the dependencies from the premises, and the type is an union of the set of occurrences in the premises, 
+	we then know from \cref{def:TAgree} that: $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
+\end{description}

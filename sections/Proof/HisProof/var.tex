@@ -1,11 +1,9 @@
 \item[\runa{Var}] Here $e^{p'}=x^{p'}$, where
+
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{Var}\\[0.2cm]
-			\inference[]{}
-			{env\vdash \left\langle x^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqsubseteq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}
+		\input{sections/appendix/ColRules/var.tex}
 	\end{tabular}
 \end{figure}
-Where $env(x)=v$, $x^{p''}=uf_{\sqsubseteq_w}(x,w)$, and $w(x^{p''})=(L,V)$.
 Since there are no updates to $w$, this case follows immediately.

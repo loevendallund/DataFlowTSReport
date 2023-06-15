@@ -1,11 +1,9 @@
-\todo[inline]{The last premise, for $\sqsubseteq_w^3$, push this down to future work}\\
 \runa{App}\\[0.2cm]
 	\inference[]
 	{
 		env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
 		env \vdash \left\langle e_2^{p_2},sto',(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v',sto'',(w_2,\sqsubseteq_w^2),(L_2,V_2),p_2 \right\rangle &\\
-		env'[x\mapsto v'] \vdash \left\langle e_3^{p_3},sto'',(w_2,\sqsubseteq_w^3),p_2 \right\rangle \rightarrow \left\langle v'',sto',(w',\sqsubseteq_w'),(L_3,V'_3),p_3 \right\rangle
+		env'[x\mapsto v'] \vdash \left\langle e_3^{p_3},sto'',(w_3,\sqsubseteq_w^3),p_2 \right\rangle \rightarrow \left\langle v'',sto',(w',\sqsubseteq_w'),(L_3,V'_3),p_3 \right\rangle
 	}
-	{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v'',sto',(w',\sqsubseteq_w'),(L_1\cup L_3,V_1\cup V_3),p' \right\rangle}\\[0.3cm]
-	Where $v=\left\langle x,e_3^{p_3},env'\right\rangle$, $w_3=w_2[x^{p_2}\mapsto (L_2,V_2)]$, $\psi_2=(w_2,\sqsubseteq_w^2)$, and\\
-	if $inf_{\sqsubseteq_w^2}(x,w_2)=p''$ (where $p''\neq\epsilon$) then $\sqsubseteq_w^3=\sqsubseteq_w^2\cup(p'',p_3)$ else $\sqsubset_w^3=\sqsubset_w^2$
+	{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v'',sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[0.3cm]
+	Where $(L,V)=(L_1\cup L_3,V_1\cup V_3)$, $v=\left\langle x,f,e_3^{p_3},env'\right\rangle$, $w_3=w_2[x^{p_2}\mapsto (L_2,V_2)]$\\

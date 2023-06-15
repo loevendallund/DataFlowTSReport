@@ -2,15 +2,9 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\InfName{App}\\[0.2cm]
-		\inference[]
-			{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
-			env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v_2,sto_2,(w_2,\sqsubseteq_w^2),(L_2,V_2),p_2 \right\rangle &\\
-			env'[x\mapsto v_2] \vdash \left\langle e_3^{p_3},sto_2,(w_3,\sqsubseteq_w^2),p_2 \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L_3,V'_3),p_3 \right\rangle}
-			{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
+		\input{sections/appendix/ColRules/app.tex}
 	\end{tabular}
 \end{figure}
-Where $(L,V)=(L_1\cup L_3,V_1\cup V_3)$, $v_1=\left\langle x,e_3^{p_3},env'\right\rangle$, $w_3=w_2[x^{p_2}\mapsto (L_2,V_2)]$.
 By virtue of our induction hypothesis, we can get the follow from the premises:
 \begin{description}
 	\item[1)] if $y^{p''}\in dom(w_1)\backslash dom(w)$ then $y\notin fv(e_1^{p_1})$

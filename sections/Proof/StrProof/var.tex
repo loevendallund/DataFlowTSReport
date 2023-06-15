@@ -2,12 +2,9 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{T-Var}\\[0.2cm]
-			\inference[]{}
-			{\Gamma[x^{p'}],\Pi \vdash y^p:T \sqcup (\{y^p\},\emptyset)}\\[0.3cm]
+		\input{sections/appendix/TSRules/var.tex}
 	\end{tabular}
 \end{figure}
-Where $y^{p'}=uf_{ \sqsubseteq_\Pi}(y,\Gamma)$, and $\Gamma(y^{p'})=T$.
 From our assumption, we know that $x\notin fv(x^p)$.
 We can thus conclude that:
 $$\Gamma,\Pi\vdash y^p : (\emptyset,\emptyset)$$

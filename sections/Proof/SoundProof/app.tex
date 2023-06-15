@@ -2,15 +2,9 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\InfName{App}\\[0.2cm]
-		\inference[]
-			{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
-			env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v_2,sto_2,(w_2,\sqsubseteq_w^2),(L_2,V_2),p_2 \right\rangle &\\
-			env'[x\mapsto v_2] \vdash \left\langle e_3^{p_3},sto_2,(w_3,\sqsubseteq_w^2),p_2 \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L_3,V'_3),p_3 \right\rangle}
-			{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
+		\input{sections/appendix/ColRules/app.tex}
 	\end{tabular}
 \end{figure}
-Where $(L,V)=(L_1\cup L_3,V_1\cup V_3)$, $v_1=\left\langle x,e_3^{p_3},env'\right\rangle$, $w_3=w_2[x^{p_2}\mapsto (L_2,V_2)]$.
 
 And from our assumptions, we have that:
 \begin{itemize}
@@ -30,22 +24,22 @@ To type $[e_1^{p_1}\;e_2^{p_2}]^{p'}$ we need to use the \runa{T-App} type rule,
 	\end{tabular}
 \end{figure}
 We must show that \cat{1)} $\Gamma,\Pi\vdash v:T$, \cat{2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$, and \\
-\cat{3)} $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
+\cat{3)} $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
 
 \begin{description}
 	\item[1)] To conclude, we first need to look at the premises.
-	Due to the first premise: since from our assumptions we have $(env,sto,(w,\sqsubseteq_w))\models(\Gamma\Pi)$ and $\Gamma,\Pi\models env$, and from the first premise of \runa{T-App}, we can get from our induction hypothesis:
+	Due to the first premise: since from our assumptions we have $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$ and $\Gamma,\Pi\models env$, and from the first premise of \runa{T-App}, we can get the following our induction hypothesis:
 	\begin{itemize}
 		\item $\Gamma,\Pi\vdash v_1:T_1\rightarrow T$,
 		\item $(env,sto_1,(w_1,\sqsubseteq_w^1))\models(\Gamma,\Pi)$,
-		\item $(env,(w_1,\sqsubseteq_w^1),(L_1,V_1))\models(\Gamma,T_1\rightarrow T)$
+		\item $(env,v,(w_1,\sqsubseteq_w^1),(L_1,V_1))\models(\Gamma,T_1\rightarrow T)$
 	\end{itemize}
 
-	Due to the first premise and the second premise of \runa{T-App} we can conclude the second premise by our induction hypothesis:
+	Due to the first premise and the second premise of \runa{T-App} we can get the following our induction hypothesis:
 	\begin{itemize}
 		\item $\Gamma,\Pi\vdash v_2:T_1$,
 		\item $(env,sto_2,(w_2,\sqsubseteq_w^2))\models(\Gamma,\Pi)$,
-		\item $(env,(w_2,\sqsubseteq_w^2),(L_2,V_2))\models(\Gamma,T_1)$
+		\item $(env,v,(w_2,\sqsubseteq_w^2),(L_2,V_2))\models(\Gamma,T_1)$
 	\end{itemize}
 
 	For the third premise, we first need to look at the value of the first premise, where since we know it is an abstraction, it is concluded by the \runa{Closure} rules:
@@ -77,7 +71,7 @@ We must show that \cat{1)} $\Gamma,\Pi\vdash v:T$, \cat{2)} $(env,sto',(w',\sqsu
 			We then need to show that $(env'[x\mapsto v_2],sto_2,(w_3,\sqsubseteq_w^2))\models(\Gamma_1,\Pi)$, where $w_3=w_2[x^{p_2}\mapsto(L_2,V_2)]$ and $\Gamma_1=\Gamma[x^{p_2}:T_1]$.
 		
 			We then only need to show that the updates for $x^{p_2}$ holds.
-			Since $x^{p_2}$ is bound in $w_3$, $\Gamma_1$, and $x$ is bound in $env$, that $(env,(w_2,\sqsubseteq_w^2),(L_2,V_2))\models(\Gamma,T_1)$, and that $p_2 \sqsubseteq_w^2 p_2$.
+			Since $x^{p_2}$ is bound in $w_3$, $\Gamma_1$, and $x$ is bound in $env$, that $(env,v,(w_2,\sqsubseteq_w^2),(L_2,V_2))\models(\Gamma,T_1)$, and that $p_2 \sqsubseteq_w^2 p_2$.
 			By \cref{def:EnvAgree} we then know that $(env'[x\mapsto v_2],sto_2,(w_3,\sqsubseteq_w^2))\models(\Gamma_1,\Pi)$.
 	\end{description}
 	From \cat{a)} and \cat{b)}, we can then conclude the third premise of \runa{App} by our induction hypothesis:
@@ -103,5 +97,5 @@ We must show that \cat{1)} $\Gamma,\Pi\vdash v:T$, \cat{2)} $(env,sto',(w',\sqsu
 	$$(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$$
 
 \item[3)] Due to \cat{1)} and \cat{2)} we can then immediatly conclude that:
-	$$(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$$
+	$$(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$$
 \end{description}

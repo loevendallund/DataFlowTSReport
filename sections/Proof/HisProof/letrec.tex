@@ -2,14 +2,9 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\InfName{Let-rec}\\[0.2cm]
-		\inference[]
-			{env\vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
-			env\left[f\mapsto\left\langle x,f,e_1^{p_1},env'\right\rangle\right]\vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p_2 \right\rangle}
-			{env\vdash \left\langle \left[\mbox{let rec}\;f\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
+		\input{sections/appendix/ColRules/letrec.tex}
 	\end{tabular}
 \end{figure}
-Where $v=\left\langle x,e_1^{p'},env'\right\rangle$, and $w_2=w_1[f^{p_2}\mapsto(L_1,V_1)]$.
 By virtue of our induction hypothesis, we can get the following from the premises:
 \begin{description}
 	\item[1)] if $y^{p''}\in dom(w_1)\backslash dom(w)$ then $y\notin fv(e_1^{p_1})$

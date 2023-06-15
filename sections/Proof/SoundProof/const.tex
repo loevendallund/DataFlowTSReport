@@ -22,7 +22,7 @@ To type the occurrence $c^{p'}$ we use the rule \runa{T-Const}:
 			{\Gamma,\Pi\vdash c^{p'}:(\emptyset,\emptyset)}
 	\end{tabular}
 \end{figure}
-We need to show that \cat{1)} $\Gamma,\Pi\vdash c:T$, \cat{2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$, and \cat{3)} $(env,(w',\sqsubseteq_w'),v,(L,V))\models(\Gamma,T)$.
+We need to show that \cat{1)} $\Gamma,\Pi\vdash c:T$, \cat{2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$, and \cat{3)} $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
 \begin{description}
 	\item[1)] Since we know that the value is a constant, we need to use the \runa{Constant} rule:
 		\begin{figure}[H]
@@ -37,7 +37,7 @@ We need to show that \cat{1)} $\Gamma,\Pi\vdash c:T$, \cat{2)} $(env,sto',(w',\s
 
 	\item[2)] Since there are no updates to $sto$, $(w,\sqsubseteq_w)$, we then know from our assumptions that $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$ holds after an evaluation.
 
-	\item[3)] Since there are no updates to $sto$, $(w,\sqsubseteq_w)$, and that the dependency pair and type are $(\emptyset,\emptyset)$, we then know from \cref{def:TAgree} that $(env,(w',\sqsubseteq_w'),v,(\emptyset,\emptyset))\models(\Gamma,(\emptyset,\emptyset))$ holds.
+	\item[3)] Since there are no updates to $sto$, $(w,\sqsubseteq_w)$, and that the dependency pair and type are $(\emptyset,\emptyset)$, we then know from \cref{def:TAgree} that $(env,v,(w',\sqsubseteq_w'),(\emptyset,\emptyset))\models(\Gamma,(\emptyset,\emptyset))$ holds.
 \end{description}
 
 

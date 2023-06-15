@@ -2,14 +2,9 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{Ref-write}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
-				env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto_2,(w_2,\sqsubseteq_w^2),(L_2,V_2),p_2 \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p_1}:=e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle (),sto',(w',\sqsubseteq_w'),(L_1,V_1),p' \right\rangle}
+		\input{sections/appendix/ColRules/refwrite.tex}
 	\end{tabular}
 \end{figure}
-Where $sto'=sto_2[\loc\mapsto v]$, $w'=w_2[\loc^{p_2}\mapsto(L_2,V_2)]$,  $\loc^{p''}=inf_{\sqsubseteq_w^2}(\loc,w_2)$, and $\sqsubseteq_w'=\sqsubseteq_w^2\cup(p'',p_2)$
 
 And from our assumptions, we have that:
 \begin{itemize}
@@ -30,23 +25,23 @@ To type $[e_1^{p_1}:=e_2^{p_2}]^{p'}$ we need to use the \runa{T-Ref-write} rule
 \end{figure}
 Where $\Gamma'=\Gamma[\nu x_1:(\delta_2,\kappa_2),\cdots,\nu x_n:(\delta_2,\kappa_2)]$ and $\nu x_1,\cdots,\nu x_n\in\{\nu x\mid\nu x\in\kappa\}$
 
-We must show that \cat{(1)} $\Gamma',\Pi\vdash v:T$, \cat{(2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma',\Pi)$, and \cat{(3)} $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma',T)$.
+We must show that \cat{(1)} $\Gamma',\Pi\vdash v:T$, \cat{(2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma',\Pi)$, and \cat{(3)} $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma',T)$.
 
 To conclude, we first need to show for the premise, where due to our assumption and from the first premise, we can use the induction hypothesis, where we then get:
 \begin{itemize}
 	\item $\Gamma,\Pi\vdash \loc:(\delta,\kappa)$,
 	\item $(env,sto_1,(w_1,\sqsubseteq_w^1))\models(\Gamma,\Pi)$,
-	\item $(env,(w_1,\sqsubseteq_w^1),(L,V))\models(\Gamma,(\delta,\kappa))$
+	\item $(env,v,(w_1,\sqsubseteq_w^1),(L,V))\models(\Gamma,(\delta,\kappa))$
 \end{itemize}
 And from the second premise we can get that:
 \begin{itemize}
 	\item $\Gamma,\Pi\vdash v:(\delta_2,\kappa_2)$,
 	\item $(env,sto_2,(w_2,\sqsubseteq_w^2))\models(\Gamma,\Pi)$,
-	\item $(env,(w_2,\sqsubseteq_w^2),(L,V))\models(\Gamma,(\delta',\kappa'))$
+	\item $(env,v,(w_2,\sqsubseteq_w^2),(L,V))\models(\Gamma,(\delta',\kappa'))$
 \end{itemize}
 
 Since we know that $(env,sto_1,(w_1,\sqsubseteq_w^1))\models(\Gamma,\Pi)$, $(env,sto_2,(w_2,\sqsubseteq_w^2))\models(\Gamma,\Pi)$ and we bind $\loc$ to $v$.
-We also know that from $(env,(w_1,\sqsubseteq_w^1),(L,V))\models(\Gamma,(\delta,\kappa))$, that all internal variable in $\kappa$ agrees with the location $\loc$.
+We also know that from $(env,v,(w_1,\sqsubseteq_w^1),(L,V))\models(\Gamma,(\delta,\kappa))$, that all internal variable in $\kappa$ agrees with the location $\loc$.
 We can then conclude that \cat{2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma',\Pi)$.
 
 \begin{description}
@@ -59,5 +54,5 @@ We can then conclude that \cat{2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma
 					{\Gamma',\Pi\vdash  ():(\delta,\emptyset)}\\[0.5cm]
 			\end{tabular}
 		\end{figure}
-	\item[3)] Due to \cat{1)} and \cat{2)} we can then conclude that $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma',T)$.
+	\item[3)] Due to \cat{1)} and \cat{2)} we can then conclude that $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma',T)$.
 \end{description}

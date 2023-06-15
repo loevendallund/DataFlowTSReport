@@ -2,14 +2,9 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{T-Let-1}\\[0.2cm]
-			\inference[]
-				{\Gamma',\Pi\vdash e_1^{p_1}:T_1\rightarrow T_2 &\\
-				\Gamma_1,\Pi\vdash e_2^{p_2}:T}
-				{\Gamma',\Pi\vdash [\mbox{let rec}\; f \; e_1^{p_1} \; e_2^{p_2}]^{p}:T}
+		\input{sections/appendix/TSRules/letrec.tex}
 	\end{tabular}
 \end{figure}
-Where $\Gamma'=\Gamma[x^{p'}]$, $\Gamma_1=\Gamma'[f^{p_1}:T_1\rightarrow T_2$ and $\kappa\neq\emptyset$.
 From our assumption, we know that $x\notin fv(x^p)$.
 By \cref{def:fv} we know:
 \begin{itemize}

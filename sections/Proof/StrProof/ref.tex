@@ -2,13 +2,9 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{T-Ref}\\[0.2cm]
-			\inference[]
-				{\Gamma',\Pi\vdash  e_1^{p_1}:(\delta',\kappa')}
-				{\Gamma'[\nu x^{p}:(\delta',\kappa')],\Pi\vdash [\mbox{ref}\;e_1^{p_1}]^{p}:(\emptyset,\kappa)}
+		\input{sections/appendix/TSRules/ref.tex}
 	\end{tabular}
 \end{figure}
-Where $\Gamma'=\Gamma[x^{p'}:T_1]$, $\kappa=\{\nu x\}$.
 From our assumption, we know that $x\notin fv(x^p)$.
 By \cref{def:fv} we know:
 \begin{itemize}

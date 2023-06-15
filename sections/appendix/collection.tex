@@ -28,11 +28,10 @@
 \end{figure}
 
 \subsection{Pattern matching}
-\todo[inline]{Rewrite this section}
-ReScript pattern matching matches the first expression, $e_1$, with each case in the order they are defined in.
+Pattern matching matches the first expression, $e$, with each pattern to find a match.
 Here, we define the function $match:Val \times Pat \rightarrow (\Var \rightharpoonup \Exp)$, where $Pat$ is the set of patterns.
 
-The $match(v,s)=env$ function, where $\sigma:\Var \rightharpoonup \Exp$ is a substition.
+The $match(v,s)=env$ function, where we get a substitution $env$.
 We defined the function inductively as follows:
 
 \begin{align*}

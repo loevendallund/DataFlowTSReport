@@ -2,13 +2,9 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{Ref-read}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto',(w',\sqsubseteq_w'),(L,V),p_1 \right\rangle}
-				{env\vdash \left\langle \left[!e_1^{p_1}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L\cup\{\loc^{p''}\},V),p' \right\rangle}
+		\input{sections/appendix/ColRules/refread.tex}
 	\end{tabular}
 \end{figure}
-Where $sto'(\loc)=v$.
 And from our assumptions, we have that:
 \begin{itemize}
 	\item $\Gamma,\Pi\vdash [!e_1^{p_1}]^{p'}:T$,
@@ -29,20 +25,20 @@ Where $\kappa\neq\emptyset$, $\delta'=\{\nu x^{p'}\mid\nu x\in\kappa\}$, $\nu x_
 $\{\nu x_1^{p_1},\cdots,\nu x_1^{p_m}\}=uf_{\Upsilon_{p'}}(\nu x_1,\Gamma),\cdots,\{\nu x_n^{p_1'},\cdots,\nu x_n^{p_s'}\}=uf_{\Upsilon_{p'}}(\nu x_n,\Gamma)$, and\\
 $T=\Gamma(\nu x_1^{p_1})\cup\cdots\cup\Gamma(\nu x_1^{p_m})\cup\cdots\cup\Gamma(\nu x_n^{p_1'})\cup\cdots\cup\Gamma(\nu x_n^{p_s'})$.
 
-We must show that \cat{(1)} $\Gamma,\Pi\vdash v:T$, \cat{(2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$, and \cat{(3)} $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
+We must show that \cat{(1)} $\Gamma,\Pi\vdash v:T$, \cat{(2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$, and \cat{(3)} $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
 
 To conclude, we first need to show for the premise, where due to our assumption and from the premise, we can use the induction hypothesis, where we then get:
 \begin{itemize}
 	\item $\Gamma,\Pi\vdash \loc:(\delta,\kappa)$,
 	\item $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$,
-	\item $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,(\delta',\kappa'))$
+	\item $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,(\delta',\kappa'))$
 \end{itemize}
 
-Due to $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$ and $(env,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,(\delta',\kappa'))$, and due to our assumption we can conclude that:
+Due to $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$ and $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,(\delta',\kappa'))$, and due to our assumption we can conclude that:
 \begin{description}
 	\item[(1)] $\Gamma,\Pi\vdash v:T$,
 
 	\item[(2)] $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$,
 
-	\item[(3)] $(env,(w',\sqsubseteq_w'),(L\cup\{\loc^{p''}\},V))\models(\Gamma,T\sqcup(\delta\cup\delta',\emptyset))$
+	\item[(3)] $(env,v,(w',\sqsubseteq_w'),(L\cup\{\loc^{p''}\},V))\models(\Gamma,T\sqcup(\delta\cup\delta',\emptyset))$
 \end{description}
