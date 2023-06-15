@@ -1,21 +1,6 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \section{Type system for data-flow analysis}\label{sec:TypeSys}
-\begin{itemize}
-	\item Introduction to type system
-	\begin{itemize}
-		\item Typechecker
-		\item Slack
-		\begin{itemize}
-			\item No polymorphic types
-			\item No abstraction bindings to locations
-		\end{itemize}
-	\item overapproximatiet
-	\item update all type rules.
-	\item change soundness proof, to refer to part of agreement by numbers.
-	\end{itemize}
-\item Explain how type system overapproximate
-\end{itemize}
 This section will introduce the type system for the data-flow analysis on the language presented in \cref{sec:lang}.
 The type system presented in this section is a type checker for global analysis of occurrences.
 The type checker assign types, presented in \cref{sec:types}, to occurrences given the basis, which will be presented in \cref{sec:basis}, and using the type assignment, which is presented in \cref{sec:Judge}.
@@ -215,25 +200,34 @@ A highlight of type rules can be found in \cref{fig:TypeSys}, and all type rules
 	\label{fig:TypeSys}
 \end{figure}
 
-\iffalse
 \begin{example}[Data-flow for abstractions]
-This example is for the same example program, shown in \cref{ex:DFAbs}, where we have:
-\begin{lstlisting}[language=Caml, mathescape=true]
-(let x ($\lambda$ y.(y$^1$))$^2$ (let z (x$^3$ 1$^4$)$^5$ (x$^6$ 2$^7$)$^{8}$)$^{9}$)$^{10}$
-\end{lstlisting}
-Where the basis assumptions are:
-$$\kappa^0=\{\{x\},\{y\},\{z\}\}$$
-$$\Pi=\{(2,1),(2,3),(3,4),(1,5)(4,5),(5,6),(6,7),(7,8),(9,10)\}$$
-and the type tree can be found in \cref{FigEx.TAbs}.
+	Consider the following occurrence for application:
+	\begin{lstlisting}[language=Caml, mathescape=true]
+		(($\lambda$ y.(PLUS 3$^1$ y$^2$)$^3$)$^4$ 5$^5$)$^6$
+	\end{lstlisting}
+	The derivation tree for the occurrence can be found in \cref{FigEx.TAbs}.
+	Here, we show two application \runa{T-App} and \runa{T-App-const}, where we create an abstraction for adding the constant $3$ to the argument of the abstraction, and applying the constant $5$ to the abstraction.
 
-When typing the first abstraction, we first lookup the binding of $x^2$, which are an abstraction type where we add the occurrence $x^3$ to the type, and then typing the constant.
-Where we then type the application with $T_2\sqcup(\{x^2\},\emptyset)$.
+	When typing the abstraction, we need too make an assumption about the parameter $y$.
+	As we are applying a constant to the argument, we can make an assumption that the type of the parameter should be $(\emptyset,\emptyset)$.
 
-The second application is done similarly, but instead of having the type $T_2\sqcup(\{x^2\},\emptyset)$, we have the type $T_2\sqcup(\{x^6\},\emptyset)$.
+	Based on this assumption for the type, we can type the body of the abstraction.
+	As the body is \runa{T-App-const} we take a union of the types
+\end{example}
+
+\begin{example}[Data-flow for references]
+	Consider the following occurrence for application:
+	\begin{lstlisting}[language=Caml, mathescape=true]
+		(let x (ref 1$^1$)$^2$ (let y (x$^3$) (!x$^4$)$^5$)$^6$)$^7$
+	\end{lstlisting}
+	The derivation tree for the occurrence can be found in \cref{FigEx.TRef}.
+	Here, we show the typing of references where we create a reference and create 2 aliases for it before reading from the reference.
+	
+	When typing the reference, it modifies the base type $\Gamma$ with a new internal variable.
+	From the type information, it is clear the only the variable $x$ is used and the internal variable $\nu x$ is used.
 \end{example}
 
 \begin{landscape}
 \subfile{../examples/DFAbsT.tex}
 \end{landscape}
-\fi
 \end{document}

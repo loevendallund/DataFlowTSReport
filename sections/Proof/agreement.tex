@@ -35,32 +35,31 @@ this occurrence also exists when finding all greatest binding for the set of $p$
 	if 
 	\begin{enumerate}
 		\item $\forall x\in dom(env).(\exists x^p\in dom(w))\wedge(x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma))$
-		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow w(x^p)=(L,V)\wedge\Gamma(x^p)=T.(w,env,(L,V))\models T$
+		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow env(x)=v\wedge w(x^p)=(L,V)\wedge\Gamma(x^p)=T.\\(env,v,(w,\sqsubseteq_w),(L,V))\models (\Gamma,T)$
 		\item $\forall \loc\in dom(sto).(\exists \loc^p\in dom(w))\wedge(\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}\Rightarrow\nu x^p\in dom(\Gamma))$
-		\item $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(w,env,(L,V))\models T$
+		\item $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(env,\loc,(w,\sqsubseteq_w),(L,V))\models T$
 		\item if $p_1\sqsubseteq_w p_2$ then $p_1\sqsubseteq_\Pi p_2$
-	\item $\forall \loc^p\in dom(w).\exists \nu x^p\in dom(\Gamma}\Rightarrow\exists p'\in\cat{P}.uf_{\sqsubseteq_w}(\loc,w)\in uf_{\Upsilon_{p'}}(\nu x,\Gamma)$
+	\item $\forall \loc^p\in dom(w).\exists \nu x^p\in dom(\Gamma)\Rightarrow\exists p'\in\cat{P}.uf_{\sqsubseteq_w}(\loc,w)\in uf_{\Upsilon_{p'}}(\nu x,\Gamma)$
 	\end{enumerate}
 \end{definition}
 
-In \cref{def:EnvAgree}, the agreement contains a lot of conditions, but in essence it states:
-\begin{description}
-	\item[variables] If a variable exists in $env$, then there exists an occurrence of that variable in both $w$ and $\Gamma$.
-		And for all variable occurrences, $x^p$, that both $w$ and $\Gamma$ knows about, the dependency and type for $x^p$ agrees.
-	\item[locations] The agreement is similar for locations, but there is an extra step as the type system represents locations as internal variables.
-		The comparison is thus done by comparing program points and since this is global, the comparison is done for all program points that exists for a a location $\loc$ in $w$.
-\end{description}
+With the environment agreement defined, we can present the type agreement.
+As the type can be abstractions and base types, with or without alias information, we have different requirements, depending on the value.
+Here, the idea is that if the value is a location, then we check that both the set of occurrences agrees with the dependency pair, presented in \cref{def:DepAgree}, and check if the alias information agrees with the semantic binding model, \cref{def:AliasAgree}.
+If the value is not a location, then the type can either be an abstraction type or base type.
+For the base type, we only need to check the agreement between the set of occurrences and the dependency pair.
+However, if the type is a location, the we need to check that $T_2$ agrees with binding model.
+Since we are only concerned about the return type $T_2$ for abstractions, are that, if the argument parameter is used in the body of the abstraction, then the dependencies would already be part of the return type.
 
-\todo[inline]{Explain why $T_1$ is not used in the type agreement}
 \begin{definition}[Type agreement]\label{def:TAgree}
 	Let $env$ be an environment, $\psi$ be a pair, $(L,V)$ be a dependency pair, and $T$ be a type.
 	We say that:
-	$$(env,(w,\sqsubseteq_w),v,(L,V))\models(\Gamma,T)$$
+	$$(env,v,(w,\sqsubseteq_w),(L,V))\models(\Gamma,T)$$
 	iff
 	\begin{itemize}
 		\item $v\neq\loc$ and $T=T_1\rightarrow T_2$:
 		\begin{itemize}
-			\item $(env,(w,\sqsubseteq_w),v,(L,V))\models(\Gamma,T_2)$
+			\item $(env,v,(w,\sqsubseteq_w),(L,V))\models(\Gamma,T_2)$
 		\end{itemize}
 
 		\item $v\neq\loc$ and $T=(\delta,\kappa)$:

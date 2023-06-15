@@ -5,26 +5,32 @@ Data-flow analysis has been studied for decades to better to provide flow inform
 This flow information has been used for different tasks for compiler optimization, debugging and understanding programs, testing and maintenance.
 In the context of compiler optimization, where the flow information provides data that may be used at given parts of the program at runtime.
 
-One of the classical way of doing data-flow analysis has been iterative algorithm using graph representation of programs.
-The purpose of those graphs is to provide the control flow of a program by providing the control flow as edges and the nodes as basic blocks.
-By using the information of control-flow graphs, many algorithms have been developed to use those by annotating the graphs and solving the maximal fix-point\cite{KildallGaryA1973Auat}. (Ref to algorithms, such as kilders)
+The classical way of doing data-flow analysis has been by using iterative algorithm based on representing the control-flow of programs as graphs.
+The purpose of such graphs is to give a sound over-approximation of the control flow of a program, where edges represent the flow and nodes represent basic blocks.
+By using the information of control-flow graphs, many algorithms have been developed to use those by annotating the graphs and solving the maximal fix-point\cite{KildallGaryA1973Auat, RyderBarbara1988Idaa}. (Ref to algorithms, such as kilders)
 Other techniques have also been presented, such as a graph-free approach \cite{HorspoolR.Niegel2002AGAt} or through type systems with refinement types \cite{PavlinovicZvonimir2021Dfrt}.
 
 When analysing languages, such as C/C++ or other languages that explicitly handles pointers, it is important to take into account aliasing, i.e., multiple variables referring to the same location.
 Many data-flow analysis uses alias algorithms to compute this information.
-Two overall types of alias algorithm has been used, flow-sensitive which give precise information but are expensive, and flow-insensitive which are less precise but are inexpensive \cite{LiangDonglin1999Eaag}(ref to alias techniques).
+Two overall types of alias algorithm has been used, flow-sensitive which give precise information but are expensive, and flow-insensitive which are less precise but are inexpensive \cite{LiangDonglin1999Eaag, EmamiMaryam1994Cipa}.
 \bigskip
 
 This paper will focus on data-flow analysis with focus on a subset of the functional language ReScript, a new language based on OCaml with a JavaScript inspired syntax which targets JavaScript.
 ReScript offers a robust type system based on OCaml, which provides an alternative to other gradually typed languages that targets JavaScript.\cite{rescript_rebrand}
 
-As ReScript provides integration with JavaScript, it provides its own toolchain and integrations.
+As ReScript provides integration with JavaScript, it provides its own compiler toolchain and build system for optimizing and compile to JavaScript.
 ReScript does, however, introduce an analysis tool for dead-code, exception, and termination analysis, but the tool is only experimental.\cite{reanalyze}
 As ReScript introduces mutability, through reference constructs for creation, reading, and writing,
 
-As such, we will present a type system for data-flow analysis for bindings and alias analysis.
-This work is a generalization of \cref{DVNicky}, which focused on dead-value analysis.
+We will the present a type system for data-flow analysis for bindings and alias analysis.
+As type system have been used to provide a semantic analysis of programs usually used to characterize specific type of run-time errors.
+Type systems are implemented as either static or dynamic analysis, i.e., on compile time or run-time.
+Type systems are widely used, from weakly typed languages such as JavaScript, to strongly typed languages commonly found in functional languages such as Haskell and Ocaml.
+
+This work is a generalization of \cite{DVNicky}, which focused on dead-value analysis.
+We will present the analysis for a language based on a subset of the ReScript language, for a $\lambda$-calculus with mutability, local bindings, and pattern matching.
 The type system we proposes provides the data information used at each program point and the alias information used.
+Since the analysis we present focus collecting dependencies that are used to evaluate a part of a program, we present a local analysis of programs.
 \bigskip
 
 We will first present the language, its syntax and semantics, in \cref{sec:lang} and the type system for data-flow analysis in \cref{sec:TypeSys}.

@@ -1,48 +1,57 @@
 \begin{figure}
 \begin{tabular}{l}
-TApp:\\
-\inference[\runa{T-App}]
-{
-	\inference[\runa{T-Var}]{}
-	{\Gamma';\Pi\vdash x^3:T_1\rightarrow T_2\sqcup\{\{x^3\},\emptyset\}}
-	\;\;
-	\inference[\runa{T-Const}]{}
-	{\Gamma';\Pi\vdash 1^4:T_1}
-}
-{\Gamma';\Pi\vdash[x^3\;1^4]^{5}:(\{y^1,x^3\},\emptyset)}\\[1cm]
-
-
-TLet-1:\\
-\inference[T-Let]
-{
-	\inference[\runa{TApp}]{}
-	{\Gamma';\Pi\vdash[x^3\;1^4]^{5}:(\{y^1,x^3\},\emptyset)}
-	\;\;
-	\inference[\runa{T-App}]
-	{
-		\inference[\runa{T-Var}]{}
-		{\Gamma'';\Pi\vdash x^6:T_1\rightarrow T_2\sqcup\{\{x^6\},\emptyset\}}
-		\;\;
-		\inference[\runa{T-Const}]{}
-		{\Gamma'';\Pi\vdash 2^7:T_1}
-	}
-	{\Gamma'';\Pi\vdash[x^6\;2^7]^{8}:(\{y^1,x^6\},\emptyset)}
-}
-{\Gamma';\Pi\vdash[let\;z\;(x^3\;1^4)^5\;(x^6\;2^7)^{8}]^{9}:(\{y^1,x^6\},\emptyset)}\\[0.4cm]
-Where $\Gamma''=\Gamma',z^5:T_2$\\[1cm]
-
 \inference[\runa{T-Let}]
 {
 	\inference[\runa{T-Abs}]
-	{\Gamma,y^{p_0}:T_1;\Pi\vdash y^1:T_2}
-	{\Gamma;\Pi\vdash[\lambda\;y.(y^1)]^{2}:T_1\rightarrow T_2}
+	{
+		\inference[\runa{T-App-const}]
+		{
+			\inference[\runa{T-Const}]{}
+			{\Gamma',\Pi\vdash 3^1:(\emptyset,\emptyset)}
+			\;\;
+			\inference[\runa{T-Var}]{}
+			{\Gamma',\Pi\vdash y^2:(\{y^2\},\emptyset)}
+		}
+		{\Gamma',\Pi\vdash [PLUS\;3^1\;y^2]^3:(\{y^2\},\emptyset)}
+	}
+	{\Gamma,\Pi\vdash [\lambda\;y.(PLUS\;3^1\;y^2)^3]^4:(\emptyset,\emptyset)\rightarrow(\{y^2\},\emptyset)}
 	\;\;
-	\inference[TLet-1]{}
-	{\Gamma';\Pi\vdash[let\;z\;(x^3\;1^4)^5\;(x^6\;2^7)^{8}]^{9}:(\{y^1,x^6\},\emptyset)}
+	\inference[\runa{T-Const}]{}
+	{\Gamma,\Pi\vdash[5^5]^8:(\emptyset,\emptyset)}
 }
-{\Gamma;\Pi\vdash[let\;x\;(\lambda\;y.(y^1))^2\;(let\;z\;(x^3\;1^4)^5\;(x^6\;2^7)^{8})^{9}]^{10}:(\{y^1,x^6\},\emptyset)}\\[0.4cm]
-Where $\Gamma'=\Gamma,x^2:T_1\rightarrow T_2$, $T_1=(\emptyset,\emptyset)$, and $T_2=(\{y^1\},\emptyset)$, and\\
-we have two $y^{p_0}$, which are $y^3$ and $y^7$.
+{\Gamma,\Pi\vdash[(\lambda\;y.(PLUS\;3^1\;y^2)^3)^4\;5^5]^6:(\{y^2\},\emptyset)}\\[0.4cm]
+Where $\Gamma'=\Gamma[y^{p_0}:(\emptyset,\emptyset)]$
 \end{tabular}
 \caption{Abstraction type example}\label{FigEx.TAbs}
+\end{figure}
+
+\begin{figure}
+\begin{tabular}{l}
+\inference[\runa{T-Let}]
+{
+	\inference[\runa{T-Ref}]
+	{
+		\inference[\runa{T-Const}]{}
+		{\Gamma,\Pi\vdash 1^1:(\emptyset,\emptyset)}
+	}
+	{\Gamma,\Pi\vdash[ref\;1^1]^2:(\emptyset,\{\nu x\})}
+	\;\;
+	\inference[\runa{T-Let}]
+	{
+		\inference[\runa{T-Var}]{}
+		{\Gamma',\Pi\vdash x^3:(\{x^3\},\{\nu x\})}
+		\;\;
+		\inference[\runa{T-Ref-read}]
+		{
+			\inference[\runa{T-Var}]{}
+			{\Gamma'',\Pi\vdash x^4:(\{x^4,\nu x^5\},\{\nu x\})}
+		}
+		{\Gamma'',\Pi\vdash [!x^4]^5:(\{x^4,\nu x^5\},\emptyset)}
+	}
+	{\Gamma',\Pi\vdash [let\;y\;(x^3)\;(!x^4)^5]^6:(\{x^4,\nu x^5\},\emptyset)}
+}
+{\Gamma,\Pi\vdash[let\;x\;(ref\;1^1)^2\;(let\;y\;(x^3)\;(!x^4)^5)^6]^7:(\{x^4,\nu x^5\},\emptyset)}\\[0.4cm]
+Where $\Gamma=\Gamma[\nu x^2\mapsto(\emptyset,\emptyset)]$, $\Gamma'=\Gamma[x^2\mapsto(\emptyset,\{\nu x\})]$, and $\Gamma''=\Gamma'[y^3\mapsto(\{x^3\},\{\nu x\})]$
+\end{tabular}
+\caption{Reference type example}\label{FigEx.TRef}
 \end{figure}

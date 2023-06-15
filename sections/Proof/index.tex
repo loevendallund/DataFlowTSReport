@@ -10,7 +10,7 @@ And lastly, we will show the soundness of the type system.
 \subfile{agreement.tex}
 
 \subsection{Properties}
-Before we show the soundness proof, we will first present some properties about the semantics and type system.
+Before we present the soundness proof, we will first present some properties about the semantics and type system.
 These properties presents some areas about local information, and as such uses \cref{def:fv}.
 
 The first property we present is a property of the dependency function.
@@ -36,7 +36,14 @@ This strengthening lemma states that if there is a binding the type environment,
 The proof for \cref{lemma:Strength} can be found in \cref{app:StrProof}.
 %\subfile{StrProof/index.tex}
 
-We will now present the soundness of the type system.
+With history, \cref{lemma:His}, and strengthening, \cref{lemma:Strength}, defined we can then show the soundness theorem.
+This theorem compares the semantics for an occurrence to a type rule that concludes for this occurrence.
+Since we are interested if the type system is a sound approximation of the semantics, we need to make sure that an evaluation of an occurrence and the type for the occurrence agrees.
+As such, we assume that we the type environment and approximated order of program points are in an agreement with the binding models in the semantics.
+We also assume that all bindings in the environment are well-typed.
+
+Based on this we then need to make sure that, after an evaluation, that environments are still in agreement, and that the type we get is in agreement with the semantics.
+Lastly, we also need to make sure that we can type the value that an evaluation step produces.
 
 \begin{theorem}[Soundness of type system]
 	Suppose $e^{p'}$ is an occurrence where
@@ -66,7 +73,5 @@ We will now present the soundness of the type system.
 	\end{description}
 \end{proof}
 
-
-\todo[inline]{Select some interesting proof examples}
 %\subfile{SoundProof/index.tex}
 \end{document}
