@@ -1,23 +1,25 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \subsection{Type rules for values}
-For the sake of proving the type system, we present type rules for values.
-Where the type rules is given in \cref{fig:ValTypeRules}.
+For the sake of proving the type system, we present type rules for values, where the type rules is given in \cref{fig:ValTypeRules}.
 
-Since the type rules for closures and recursive closures also contain the environment, we also need to handle the environment.
-As such we define the judgement for environments, where all bindings in the environment also have a binding in the type environment.
+As the values for closures and recursive closures contains the environment from where they where declared, as such, before introducing the type rules for values we must define when the environment is well-typed.
 
 \begin{definition}[Environment judgement]\label{def:TEnv}
-	Let $v_1,\cdots,v_n$ be values such that $\Gamma';\Pi\vdash v_i:T_i$, for $1\leq i\leq n$.
+	Let $v_1,\cdots,v_n$ be values such that $\Gamma,\Pi\vdash v_i:T_i$, for $1\leq i\leq n$.
 	Let $env$ be an environment where $env=[x_1\mapsto v_1,\cdots,x_n\mapsto v_n]$, $\Gamma$ be a type environment, and $\Pi$ be the approximated order of program points.
 	We say that:
-	$$\Gamma;\Pi\vdash env$$
+	$$\Gamma,\Pi\vdash env$$
 	iff 
 	\begin{itemize}
 		\item For all $x_i\in dom(env)$ then $\exists x_i^p\in dom(\Gamma)$ where $\Gamma(x_i^p)=T_i$ then 
 			$$\Gamma,\Pi\vdash env(x_i):T_i$$
 	\end{itemize}
 \end{definition}
+
+In \cref{def:TEnv} we show when environments $env$ are well-typed.
+This definition states that given the type of all values that a variable is bound to in the $env$, then for a type environment, the $env$ is well typed if when we look up the value of all variables $x$ in $env$, 
+then there also exists an occurrence for $x$ in the type environment that agrees with the given type.
 
 \begin{description}
 	\item[\runa{Constant}] type rule differs from the rule \runa{T-Const}, since most occurrences can evaluate to a constant and as such we know that its type should be a base type.
@@ -27,14 +29,16 @@ As such we define the judgement for environments, where all bindings in the envi
 		Since locations can depend on other occurrences, we know that $\delta$ can be non-empty.
 		Since locations can have alias information, and that a location is considered to always be an alias to itself, we know that $\kappa$ can never be empty, as it should always contain an internal variable. 
 
-	\item[\runa{Closure}] type rule represents abstraction, and as such we know that it should have the abstraction type, $T_1\rightarrow T_2$.
-		Since a closure contains an abstraction parameter, body, and the environment from when it were declared, we also need to handle those part in the type rule.
+	\item[\runa{Closure}] type rule represents abstraction, and as such we know that it should have the abstraction type, $T_1\rightarrow T_2$, where we need to assume that the argument of the type $T_1$.
+		Since a closure contains the parameter, body, and the environment for an abstraction from when it were declared, we also need to handle those part in the type rule.
 		The components of the closure is handled in the premises, where we type the environment according to \cref{def:TEnv}.
 		We also type the body of the abstraction, we know that we need to update the type environment with the type $T_1$ for its parameter, and based on this we can then type the body to $T_2$.
 
 	\item[\runa{Recursive closure}] type rules is similar to the \runa{Closure} rule, but since this is a recursive closure, we additionally need to update the type environment with the recursive abstractions name to the type of the recursive function.
 
-	\item[\runa{Unit}] type rule simply have the base type, as it is not an abstraction and it also cannot have alias information, but it can depend on other occurrences.
+	\item[\runa{Unit}] type rule simply have the base type, as it is not an abstraction and it also cannot have alias information.
+		As the unit value is introduced from writing to references, $o=[o_1\;:=\;o_2]^p$, we know that from the type rule \runa{Ref-write} that the dependencies from the occurrence $o$ is the dependencies from $o_1$.
+		As such \runa{Unit} should also reflect this, where the set of occurrences $\delta$ can be non-empty.
 \end{description}
 
 \begin{figure}[H]

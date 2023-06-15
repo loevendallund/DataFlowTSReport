@@ -1,35 +1,45 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \subsection{Agreement}
-\todo[inline]{This section talks about the relation between the semantics and type system}
-\todo[inline]{$env,sto,w$ is a model of $\Gamma$}
-The first agreement we present here is the agreement for the type environment $\Gamma$ and dependency function $w$.
-The $\Gamma$ contains both local dependencies for variable occurrences and global dependencies for internal variable occurrences, while $w$ contains global dependencies for variable and location occurrences.
+This section introduces the agreement between the type system and the semantics, where we will present the relation between the binding models in the type system and semantics, and show the relation between the types and the semantics.
 
-As such. it is clear that $\Gamma$ is not a direct model of $w$, but models the current state that is evaluated, thus it models both the environment, store, and dependency function.
-This is clear, as both the environment and type environment both only contains local information for variables.
+We will first introduce the agreement between the binding models between the type system and semantics, i.e., show how the type environment and approximated order of program points relate to the environment, store, and dependency function.
+Then we will show the type agreement, that is, show that what conditions there are for a type to agree with the semantics.
+The type agreement needs to show when the dependencies agrees and for alias information.
+\bigskip
 
-On the other hand, locations are treated as global information in the type system, which are represented as internal variables, as such if a location exists in the store it would thus the equivalent would exists in the type environment.
-Since the type environment contains only occurrences, locations and internal variables can thus be compared by program points, as locations and internal variables are created and updated at the same program points.
-This relation is done by comparing between between the store, dependency function and type environment.
+The first agreement we present is the environment agreement, which ensures that that the type environment and approximated order of program points are a good approximation of the binding model in the type system, that is, for the environment $env$, store $sto$, dependency function $w$, and the relation of program points over $w$.
 
-Lastly, since the dependency function and type environment collects information about dependencies, the dependencies ar then compared.
-Since there a both local and global information, and the dependency function collects all information globally, the dependency comparison is done only on the the information  for occurrences that exists in the domain of both $w$ and $\Gamma$.
+Here $env$, $sto$, and $w$ contains information for en evaluation in the semantics, either before or after an evaluation.
+The type environment $\Gamma$ contains the local information for variable bindings and global information for internal variables, and the approximated order of program points $\Pi$ is an approximation of all program points in an occurrence.
+
+For these to agree, we relate them only to the information currently known in $env$, $sto$, and $w$, where for local information, the variables in $env$, then there is also an occurrence for that variable in $w$ and $\Gamma$.
+This ensures that every bound variable also exists in $w$ and $\Gamma$.
+Furthermore, we also ensures that the local declarations $x$ know by $env$, the dependencies of all occurrences for $x$ in $w$ and type in $\Gamma$ agrees, as defined in \cref{def:TAgree}.
+
+We similarly handles the agreement for global information, between $sto$, $w$ and $\Gamma$.
+Here we need to make sure that all currently known locations, then there exists an appropriate internal variable that represent that location.
+As we are denoting a location and the internal variable that represent this with the same program points, we always compare them by program points.
+We also make sure that the dependencies of all those locations also agrees with the type of the internal variable the represents them.
+
+Lastly, we also need to make sure that $\Pi$ is a good approximation of the information know in $w$, denoted as $\sqsubseteq_w$, and the order of programs points on $w$.
+The first condition for this is that, if an order is defined in $\sqsubseteq_w$, then $\Pi$ also agrees on this order.
+As for the second condition, since $\Pi$ is an approximation of an occurrence, and as such also approximates for all paths (the different branches from pattern matching), and $\Gamma$ contains all bindings for an internal variable in an occurrence.
+We then need to make sure that for all locations, $\loc$, currently known, then there exists a program point $p'$, such that by finding the greatest binding for $\loc$ currently known in $w$, 
+this occurrence also exists when finding all greatest binding for the set of $p$-chains $\Upsilon_{p'}$.
 
 \begin{definition}[Environment agreement]\label{def:EnvAgree}
 	Let $(w,\sqsubseteq_w)$ be a pair containing the dependency function and a relation over it, $env$ be an environment, $sto$ be the a store, $\Gamma$ be a type environment, and $\Pi$ be an approximated program point order.
 	We say that:
 	$$(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$$
 	if 
-	%\todo[inline]{Hans made a comment about the first part of 1 and 3, need to investigate this further}
-	%\todo[inline]{Simplify/rewrite the last agreement}
 	\begin{enumerate}
 		\item $\forall x\in dom(env).(\exists x^p\in dom(w))\wedge(x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma))$
 		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow w(x^p)=(L,V)\wedge\Gamma(x^p)=T.(w,env,(L,V))\models T$
 		\item $\forall \loc\in dom(sto).(\exists \loc^p\in dom(w))\wedge(\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}\Rightarrow\nu x^p\in dom(\Gamma))$
 		\item $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(w,env,(L,V))\models T$
 		\item if $p_1\sqsubseteq_w p_2$ then $p_1\sqsubseteq_\Pi p_2$
-		\item $\forall \loc^p\in dom(w).\exists\nu x^p dom(\Gamma)\Rightarrow \exists p'\in\cat{P}.uf_{\sqsubseteq_w}(\loc,w)\in uf_{\Upsilon_p'}(\nu x,\Gamma)$
+	\item $\forall \loc^p\in dom(w).\exists \nu x^p\in dom(\Gamma}\Rightarrow\exists p'\in\cat{P}.uf_{\sqsubseteq_w}(\loc,w)\in uf_{\Upsilon_{p'}}(\nu x,\Gamma)$
 	\end{enumerate}
 \end{definition}
 
