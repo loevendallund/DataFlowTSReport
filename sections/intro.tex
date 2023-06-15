@@ -15,16 +15,15 @@ Many data-flow analysis uses alias algorithms to compute this information.
 Two overall types of alias algorithm has been used, flow-sensitive which give precise information but are expensive, and flow-insensitive which are less precise but are inexpensive \cite{LiangDonglin1999Eaag}(ref to alias techniques).
 \bigskip
 
-This paper will focus on presenting a type system based approach for data-flow analysis for functional languages.
-Functional languages have seen a rise in popularity, as they take a different approach to programming languages as they take an expression based approach.
-In essence, functional languages that are based on $\lambda$-calculus are in essence a series function declarations and applications of those functions.
+This paper will focus on data-flow analysis with focus on a subset of the functional language ReScript, a new language based on OCaml with a JavaScript inspired syntax which targets JavaScript.
+ReScript offers a robust type system based on OCaml, which provides an alternative to other gradually typed languages that targets JavaScript.\cite{rescript_rebrand}
 
-Many different functional languages are being used and adopted, as many of those languages often have a strong type systems.
-Functional languages are also beginning to rise for web application, where ReScript is an alternative to TypeScript.
-The ReScript programming language is based on OCaml, with a JavaScript inspired syntax \cite{rescript_rebrand}, and compared to languages such as JavaScript and TypeScript, ReScript is a strongly typed language.
-\todo[inline]{Add something more about rescript, analysis, etc.}
+As ReScript provides integration with JavaScript, it provides its own toolchain and integrations.
+ReScript does, however, introduce an analysis tool for dead-code, exception, and termination analysis, but the tool is only experimental.\cite{reanalyze}
+As ReScript introduces mutability, through reference constructs for creation, reading, and writing,
 
-We will then present a type system for data-flow analysis for a ReScript inspired $\lambda$-calculus language with mutability, bindings, and pattern matching.
+As such, we will present a type system for data-flow analysis for bindings and alias analysis.
+This work is a generalization of \cref{DVNicky}, which focused on dead-value analysis.
 The type system we proposes provides the data information used at each program point and the alias information used.
 \bigskip
 

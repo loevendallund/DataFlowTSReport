@@ -1,0 +1,8 @@
+\runa{T-Let-1}\\[0.2cm]
+	\inference[]
+	{
+		\Gamma,\Pi\vdash e_1^{p_1}:(\delta,\kappa) &\\
+		\Gamma',\Pi\vdash e_2^{p_2}:T_2
+	}
+	{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p_1} \; e_2^{p_2}]^{p}:T_2}\\[0.3cm]
+	Where $\Gamma'=\Gamma[x^{p}:(\delta,\kappa\cup \{x\})]$ and $\kappa\neq\emptyset$

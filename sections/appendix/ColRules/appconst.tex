@@ -1,0 +1,8 @@
+\runa{App-const}\\[0.2cm]
+	\inference[]
+	{
+		env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
+		env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v_2,sto',(w',\sqsubseteq_w'),(L_2,V_2),p_2 \right\rangle
+	}
+	{env\vdash \left\langle \left[c\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[0.3cm]
+	Where $apply(c,v_1,v_2)=v$ and $(L,V)=(L_1\cup L_2,V_1\cup V_2)$

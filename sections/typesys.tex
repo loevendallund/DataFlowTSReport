@@ -3,29 +3,53 @@
 \section{Type system for data-flow analysis}\label{sec:TypeSys}
 \begin{itemize}
 	\item Introduction to type system
-	\item Typechecker
-	\item Slack
 	\begin{itemize}
-		\item No polymorphic types
-		\item No abstraction bindings to locations
+		\item Typechecker
+		\item Slack
+		\begin{itemize}
+			\item No polymorphic types
+			\item No abstraction bindings to locations
+		\end{itemize}
+	\item overapproximatiet
+	\item update all type rules.
+	\item change soundness proof, to refer to part of agreement by numbers.
 	\end{itemize}
+\item Explain how type system overapproximate
 \end{itemize}
 This section will introduce the type system for the data-flow analysis on the language presented in \cref{sec:lang}.
-The purpose of the type system presented here captures the notion of data-flow in in a program.
-Here, we assign terms with the data used to evaluate the term.
-Since the language introduces mutability, we also enable the analysis of aliases, for this we introduce the notion of internal variables, denoted as $\nu x,\; \nu y\in\cat{IVar}$, to represent the semantic notion of locations.
-We also introduce the category of \cat{Id} to denote all variables and internal variables, such that $\cat{Id}=\cat{Var}\cup\cat{IVar}$.
+The type system presented in this section is a type checker for global analysis of occurrences.
+The type checker assign types, presented in \cref{sec:types}, to occurrences given the basis, which will be presented in \cref{sec:basis}, and using the type assignment, which is presented in \cref{sec:Judge}.
+Since the language contains local information as bindings, and global information as locations, the type checker should also reflect both.
+Since locations are a semantic notation, we will present internal variables to represent locations in the type system, as $\nu x,\; \nu y\in\cat{IVar}$.
 
-\subsection{Types}
+Since locations, and internal variables, are not always bound to a variable, and not all aliases are used, the alias analysis is done by only typing the information used for an occurrences.
+Here, we are going to introduce the basis for aliasing, that partition all variables and internal variables.
+As such, it is possible to analyse from the type information for an occurrence, which aliases are actually used.
+As an example, consider the following occurrence:
+
+We also impose some restrictions on the type system, which are known to be safe.
+The first restrictions we impose are for that references cannot be bound to abstractions and the second is that abstractions can at most be used once, since the type system presented here does not allow for polymorphism.
+
+\subsection{Types}\label{sec:types}
 We denote the set of types as \cat{Types}, which are given by the following formation rules:
 
 $$T::=(\delta,\kappa)\mid T_1 \rightarrow T_2$$
 
 Here, we introduce two types, the base type $(\delta,\kappa)$ and the function type $T_1 \rightarrow T_2$.
-The base type is a tuple containing $\delta$ and $\kappa$, where $\delta$ represents the set of occurrences used to evaluate a term and $\kappa$ represent the set of alias information for the value the term evaluates to.
-As such, the idea is that if $\kappa$ is not empty then the value must evaluate to a location.
-We also keep track of the minimum known aliases for a reference.
-If, on the other hand, an expression has the function type then it represent that the term represents an abstraction that takes an argument of type $T_1$ and returns a value of type $T_2$.
+The idea is that an occurrence have the abstraction type if it represents a function that takes an argument of type $T_1$ and returns a type of $T_2$.
+The base type represent all other values, where $\delta$ represent the set of occurrences used to evaluate an occurrence and $\kappa$ represent the set of alias information.
+Here, if an occurrence have a type containing alias information, then it represent a location, where if the occurrence have a base type with alias information, then the occurrence represents a location, 
+and if the occurrence have the abstraction type where either $T_1$ or $T_2$ have are base types with alias information then the abstraction either takes a location as input or produces a location.
+
+\begin{example}[]
+Consider the following occurrence:
+\begin{lstlisting}[language=Caml, mathescape=true]
+(let x (3$^1$)$^2$ (let y (ref x$^3$)$^4$ (!y)))
+\end{lstlisting}
+Here, we can give $x$ the type $(\emptyset,\emptyset)$ as $x$ is bound to a constant and there a no variables or internal variables used.
+$y$ can then be given the type $(\emptyset,\{y,\nu y\})$, as the reference construct $ref$ creates a new reference, which $y$ is then an alias to, e.g., $y$ is bound to a location.
+Her $\nu y$ represents the reference from $ref$, and can thus be given the type $(\{x^3\},\emptyset)$, where $\nu y$ is bound to a constant, because of $x$, but the occurrence $x^3$ were used, so it should be part of the set of occurrences $\delta$.
+\end{example}
 
 Since the type system approximates the data used for terms, we introduce two unions.
 The first union is a simple union that expects the types to be similar, that is, only the base types are allowed to be different.
@@ -53,28 +77,36 @@ This type union is used to add an occurrence to a type, e.g., in the \runa{Var} 
 	\end{equation*}
 \end{definition}
 
-\subsection{Basis and type environment}
-Next, we will present the basis for the type checker and the type environment.
-For the type system, we present in \cref{sec:Judge}, the basis are assumptions about a program, where we will introduce the basis for aliasing and for an approximated order of program points.
-After we have introduced the basis, we will introduce the type environment, which keeps track of the types that an occurrence have, i.e., the type variables or internal variables have.
+\subsection{Basis and type environment}\label{sec:basis}
+Next, we will present the basis and type environment for the type system.
+The basis we are presenting here are assumptions used by the type checker in addition to the assignment of types, which are presented in \cref{sec:Judge}, where we are going to present a type base for aliasing and an approximated order of program points.
+
+We will also introduce the type environment, which are similar to the environment and store used in the semantics, as the type environment keeps track of the type of variables and internal variables.
+As such, the type environment is also a local approximation of the dependency function, as the purpose of the type system is to collect information about which occurrences are used.
+
+Similar to the lookup of the greatest binding for the dependency function, we are going to introduce an instantiation of the function from \cref{def:GBind} for the type environment in respect to the basis for approximated order of program points.
+\bigskip
+
+We will then introduce the type base for aliasing, as a partition of variables and internal variables used in an occurrence.
 
 \begin{definition}[Type Base for aliasing]
-	For a program $p$, let $id$ be the set of all variables and internal variables in $p$.
-	The type base $\kappa^0=\{\kappa^0_1,\cdots,\kappa^0_n\}$ is then a partition of $id$, where $\kappa_i^0\cap\kappa_j^0=\emptyset$ for all $i\neq j$.
+	For an occurrence $o$, let $var$ be the set of all variables and $ivar$ be the set of all internal variables in $o$.
+	The type base $\kappa^0=\{\kappa^0_1,\cdots,\kappa^0_n\}$ is then a partition of $var\cup ivar$, where $\kappa_i^0\cap\kappa_j^0=\emptyset$ for all $i\neq j$.
 \end{definition}
 
-The type base for aliasing is an assumption for which variables that shares the same internal variable, and as such, shares the same location.
-As such, if we have an assumption for a variable $x$, such that $\{x\}=\kappa_i$, then $x$ would not be an alias to a location.
-On the other hand if we have $\{y,\nu y\}=\kappa_j$, for a variable $y$ and internal variable $\nu y$, then $y$ is an alias for $\nu y$.
+The idea behind the base for type alias $\kappa_0$ is to make a partition of the variables and internal variables used in an occurrence.
+As such multiple variables can only belong to the same element $\kappa_0^i\in\kappa_0$, if there also exists an internal variable in $\kappa_0^i$.
 
 \begin{definition}[Approximated order of program points]
 	An approximated order of program points $\Pi$ is a pair, such that: 
 	$$\Pi=(\cat{P},\sqsubseteq_\Pi)$$
 	where
 	\begin{itemize}
-		\item \cat{P} is the set of program points in the program,
-		\item $\sqsubseteq_\Pi\subseteq\cat{P}\times\cat{P}$, and
-		\item $\sqsubseteq_\Pi$ is transitive, such that if $p\sqsubseteq_\Pi p'$ and $p'\sqsubseteq_\Pi p''$ then $p\sqsubseteq_\Pi p''$.
+		\item \cat{P} is the set of program points in an occurrence,
+		\item $\sqsubseteq_\Pi\subseteq\cat{P}\times\cat{P}$, where
+		\begin{itemize}
+			\item $\sqsubseteq_\Pi$ is transitive, such that if $p\sqsubseteq_\Pi p'$ and $p'\sqsubseteq_\Pi p''$ then $p\sqsubseteq_\Pi p''$.
+		\end{itemize}
 	\end{itemize}
 \end{definition}
 
@@ -88,9 +120,8 @@ The approximated order of program points is an assumption about the order for pr
 
 Next, we will introduce the type environment:
 \begin{definition}[Type Environment]
-	A type environment $\Gamma$ is a partial function $\Gamma:Id^P\rightharpoonup TYPES$
+	A type environment $\Gamma$ is a partial function $\Gamma:\cat{Var}^P\cup\cat{IVar}^P\rightharpoonup\cat{Types}$
 \end{definition}
-As such, $\Gamma$ represents the types for variables and internal variables.
 
 \begin{definition}[Updating Type Environments]
 	Let $\Gamma$ be a type environment, we write $\Gamma[u^p:T]$, for an occurrence $u^p$, to denote the type environment $\Gamma'$ where:
@@ -101,38 +132,46 @@ As such, $\Gamma$ represents the types for variables and internal variables.
 			T & \mbox{if}\;y^{p'}=u^{p}
 		\end{matrix}\right.
 	\end{align*}
-
 \end{definition}
 
-\iffalse
-\begin{definition}[Lookup function]
-	let $x$ be a variable, $p$ be a program point, $\Gamma$ be the type environment , and $\Pi$ be an approximated program order, then
-	$$\Lambda(x^p, \Gamma, \Pi)=p'$$
-	iff
-	$$p'' = inf\{x^{p_1}\in dom(\Gamma)\mid x^{p_2}\in dom(\Gamma).p_2\sqsubseteq_\Pi p_1\}$$
+Similar to the lookup of dependencies in the semantics, we need to similarly define how to lookup in the type environment.
+As the type environment contains both local information, for local declarations, and global information, for references, we need to define how to lookup both.
+
+For local information we introduce, similarly to lookup in the dependency function, and instantiation of the function presented in \cref{def:GBind}.
+The lookup is for information in the type environment, while the relation between program points is defined in the basis for approximated program points.
+
+\begin{definition}[]\label{def:GBindPi}
+	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Pi$ be the approximated order of program points that is a partial order, then $uf_{\sqsubseteq_\Pi}i$ is given by:
+	$$uf_{\sqsubseteq_\Pi}(u,\Gamma)=\inf\{u^p\in dom(\Gamma)\mid u^q\in dom(\Gamma).q\sqsubseteq_\Pi p\}$$
 \end{definition}
 
-Since $\Pi$ is partial order, and possible not a total order, we define a split of $\Pi$:
+The lookup for global information needs to be handled differently as the language contains pattern matching, as such, the language can contain different path of evaluation (where each pattern in the pattern matching construct introduces a new path).
+To handle the lookup of global information, we will first introduce the notion of $p$-chains as chains of program points with respect to the approximated order of program points, where the maximal program points is $p$.
+The idea of these $p$-chains is to describe the history behind an occurrence $u^p$, and thus also describe the occurrences that $u^p$ depends on.
 
-\begin{definition}[splitting $\Upsilon$]
-	Let $\Pi$ be a order of program points, we say that a subset of $\Pi$ is a total order $\Pi^{*}$ if all elements in $\Pi$ is related.
+\begin{definition}[$p$-chains]
+	Let $\Pi$ be an approximated order of program points, that is a partial order, and $p$ be a program point.
+	We then say that a $p$-chain, denoted as $\Pi_p^{*}$, is a total order where the maximal element is $p$ with respect to the order $\Pi$.
+	As such, the order $\Pi_p^{*}$ does not contain any pairs $(p,q)\in\sqsubseteq_\Pi$, where $p\neq q$, then $(p,q)\notin\sqsubseteq_{\Pi_p^{*}}$.
 \end{definition}
 
-\begin{definition}[splitting $\Upsilon$]
-	let $\Upsilon$ be a set of all total order of $\Pi$, where
-	\begin{itemize}
-		\item if $\Pi^{*}_i\in\Upsilon.\not\exists \Pi^{*}\in\Pi\Rightarrow\Pi^{*}_i\subseteq\Pi^{*}$
-	\end{itemize}
+We also denote $\Pi_p^{*}\in\Pi$, if the $p$-chain $\Pi_p^{*}$ can be be derived from $\Pi$.
+
+Since there can exists multiple paths in an occurrence, we define the set of all $p$-chains as follows:
+
+\begin{definition}[]
+	Let $\Pi$ be an approximated order of program points and $p$ be a program point.
+	We say that $\Upsilon_p$ is the set of all $p$-chains in $\Pi$.
 \end{definition}
 
-We then define a function to get all greatest lower-bound program points $p$ from the splitting $\Upsilon$
-\begin{definition}[Lookup function]
-	let $x$ be a variable, $p$ be a program point, $\Gamma$ be the type environment , $\Upsilon$ be a splitting of $\Pi$, then
-	$$\Lambda_\Upsilon(x^p, \Gamma, \Upsilon)=\bigcup_{\Pi^{'}\in\Upsilon}(\Lambda(x^p,\Gamma,\Pi^{*}))$$
-	iff
-	$$p'' = inf\{x^{p_1}\in dom(\Gamma)\mid x^{p_2}\in dom(\Gamma).p_2\sqsubseteq_\Pi p_1\}$$
+Since $\Upsilon_p$ contains all maximal $p$-chains in an approximated order of program points $\Pi$, with $p$ as the maximal element, we can then define the function to lookup all greatest element less than or equal to $p$.
+
+\begin{definition}[]\label{def:GBindUps}
+	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Upsilon_p$ be a set of $p$-chains, then $uf_{Upsilon_p}$ is given by:
+	$$uf_{\Upsilon_p}(u,\Gamma)=\bigcup_{\Pi_p^{*}\in\Upsilon_p}uf_{\Pi_p^{*}}(u,\Gamma)$$
 \end{definition}
-\fi
+
+The function, defined in \cref{def:GBindUps}, takes the union of the greatest binding of each element using the function defined in \cref{def:GBindPi}.
 
 \subsection{Judgement}\label{sec:Judge}
 We will now present the judgement and type rules for the language, that is, how we assign types to terms.
@@ -143,94 +182,22 @@ And should be read as, the occurrence $e^p$ has type $T$, given the dependency b
 
 A highlight of type rules can be found in \cref{fig:TypeSys}, and all type rules can be found in \cref{App:TypeSys}.
 
-In the type system, need to lookup information in our type environment for local and global information.
-Here, we introduce two functions, one for looking up local information and one for looking up global information.
-
-The first function, lookup of local information, is an instantiation of the function presented in \cref{def:GBind}, given by:
-\begin{definition}[]
-	Let $u\in \cat{Id}$ be either a variable or internal variable, $\Gamma$ be a type environment, and $\Pi$ be the approximated order of program points that is a partial order, then $uf_\Pi$ is given by:
-	$$uf_{\sqsubseteq_\Pi}(u,\Gamma)=\inf\{u^p\in dom(\Gamma)\mid u^q\in dom(\Gamma).q\sqsubseteq_\Pi p\}$$
-\end{definition}
-
-To be able to lookup information about the global information, i.e., for internal variables we need also need to handle branching as the language has pattern matching.
-To do this, we introduce the notion of $p$-chains as maximal chains where the maximal element is the program point $p$.
-The idea of these $p$-chains is to describe the history behind an occurrence $u^p$, and thus also describe the occurrences that $u^p$ depends on.
-
-\begin{definition}[$p$-chains]
-	Let $\Pi$ be an approximated order of program points that is a partial order and $p$ be a program point.
-	We then say that a $p$-chain, denoted as $\Pi_p^{*}$, is a maximal total order of $\Pi$ where the maximal element is $p$, i.e., if there exists a $(p,q)\in\sqsubseteq_\Pi$ then $(p,q)\notin\sqsubseteq_{\Pi_p^{*}}$.
-\end{definition}
-
-We also denote $\Pi_p^{*}\in\Pi$, if the $p$-chain $\Pi_p^{*}$ can be be derived from $\Pi$.
-We then define the set of all $p$-chains of $\Pi$ as:
-
-\begin{definition}[$\Upsilon$]
-	Let $\Pi$ be an approximated order of program points and $p$ be a program point.
-	We say that $\Upsilon_p$ is the set of all $p$-chains of $\Pi$.
-\end{definition}
-
-We can then define the function that gets all greatest bindings for global information, as follows:
-
-\begin{definition}[Greatest binding for $\Upsilon_p$]
-	Let $u\in \cat{Id}$ be either a variable or internal variable, $\Gamma$ be a type environment, and $\Upsilon_p$ be a set of $p$-chains, then $uf_{Upsilon_p}$ is given by:
-	$$uf_{\Upsilon_p}(u,\Gamma)=\bigcup_{\Pi_p^{*}\in\Upsilon_p}uf_{\Pi_p^{*}}(u,\Gamma)$$
-\end{definition}
-
-\iffalse
-Since $\Pi$ is an approximated order of program points, we know that it also must be a partial order.
-Since we know that the language, presented in \cref{sec:lang}, introduce pattern matching, where a program can contain branches, we then know that $\Pi$ must not be a total order if the program contains pattern matching.
-When using the $\Lambda$ function we get the greatest lower-bound of an element, in respect to the ordering $\Pi$, which works for local bindings.
-However, in the case of global information, that is, for internal variables we can have multiple paths in the program where an internal variable is bound to.
-As an example, take the following example:
-
-\begin{lstlisting}[language=Caml, mathescape=true]
-(let x (ref 1$^1$)$^2$ (!(case 1 (1 (let y (x$^3$:=1$^4$)$^5$ (x$^6$))$^7$) (2 (x$^8$))$^{9}$)$^{10}$))$^{11}$
-\end{lstlisting}
-Here, we create an internal variable at program point $2$ (and an alias to $x$), where we read the reference that is returned from the case expression.
-In the case expression, in the first pattern we write to the reference before returning it, and in the second case we just return the reference.
-We can then see that if take the first pattern, we expect get the type from the write expression, while if we take the second pattern we expect to get the original type.
-
-As such, we introduce a splitting of $\Pi$ into total orders, such that we have a total order for each pattern in a case expression.
-First, we denote $\Pi^{*}$ as a total order of $\Pi$, such that:
-
-\begin{definition}[Total order $\Pi^{*}$]
-	Let $\Pi$ be an approximated order of program points that is a partial order.
-	We then say that $\Pi^{*}$ is a total order of $\Pi$, written as $\Pi^{*}\in\Pi$, if all program points in $\Pi^{*}$ is related.
-\end{definition}
-
-For total orders, we use the notation $\Pi^{*}\in\Pi$, since there can exists multiple different total orders in $\Pi$.
-From this, we can the define the set of total order $\Upsilon$ as such:
-
-\begin{definition}[$\Upsilon$]
-	$\Upsilon$ is a set of total orders of $\Pi$, such that, if:
-	$$\exists \Pi^{*}_i\in\Upsilon.\not\exists\Pi^{*}_j\in\Pi.\Pi^{*}_i\neq\Pi^{*}_j\wedge\Pi^{*}_i\subset\Pi^{*}_j$$
-\end{definition}
-
-With the set of total orders defined, we can then define a function to retrieve all greatest lower-bound as:
-
-\begin{definition}[$\Lambda_\Upsilon$ function]
-	Let $u\in \cat{Id}$ be either a variable or internal variable, $p\in\cat{P}$ be a program point, $\Gamma$ be the type base, and $\Upsilon$ a set the approximated order of program points that are total orders, then $\Lambda_\Upsilon$ is as follows:
-	$$\Lambda_\Upsilon(u,p,\Gamma)=\bigcup_{\Pi_i\in\Upsilon}\inf\{u^{p'}\in dom(\Gamma)\mid u^q\in dom(\Gamma).q\sqsubseteq_{\Pi_j} p'\wedge p'\sqsubseteq_\Pi p\}$$
-\end{definition}
-\fi
-
 \begin{description}
-	\item[\runa{T-Const}] is the simplest type rule, as there is nothing to track for constants.
+	\item[\runa{T-Const}] rule, for occurrence $c^p$, is the simplest type rule, as there is nothing to track for constants.
 
-	\item[\runa{T-Var}] lookup the type of a variable in $\Gamma$ by using the $\Lambda_\Pi$ function, by finding the greatest lower-bound to the program points $p$.
-		Since a variable occurrence is used, we add at to the type by using the $\sqcup$ union.
+	\item[\runa{T-Var}] rule, for occurrence $x^p$, looks up the type in the environment, by finding the greatest binding using \cref{def:GBindPi}, and add the occurrence $x^p$ to the type.
 
-	\item[\runa{T-Let-1}] creates a local binding for a variable, with the type of $e_1^{p_1}$, that can be used in $e_2^{p_2}$.
+	\item[\runa{T-Let-1}] rule, for occurrence $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^p$, creates a local binding for a variable, with the type of $e_1^{p_1}$ that can be used in $e_2^{p_2}$.
 		The \runa{T-Let-1} rule assumes that the type of $e_1^{p_1}$ is a base type with alias information, i.e., $\kappa\neq\emptyset$.
 		If this is the case, then $e_1^{p_1}$ must evaluate to a location, in the semantics.
-		For other cases, when $e_1^{p_1}$ is not a base type with alias information, is handled by the \runa{T-Let-2} rule.
+		The other cases, when $e_1^{p_1}$ is not a base type with alias information, are handled by the \runa{T-Let-2} rule.
 
-	\item[\runa{T-Case}] is an over approximation of all cases in the pattern matching expression, which is done by taking an union of the type of each case.
+	\item[\runa{T-Case}] rule, for occurrence $[\mbox{case}\;e^{p}\;tilde{\pi}\;tilde{o}]^{p'}$, is an over-approximation of all cases in the pattern matching expression, by taking an union of the type of each case.
 		Since the type of $e^p$ is used to evaluate the pattern matching, we also add this type to the type of the pattern matching.
 
 
-	\item[\runa{T-Ref-read}] is used to retrieve the type of references, where $e^p$ must thus be a base type with alias information.
-		Since the type system is an over approximation, there can be multiple internal variables in $\kappa$ and multiple occurrences we need to read from.
+	\item[\runa{T-Ref-read}] rule, for occurrence $[!e^{p}]^{p'}$, is used to retrieve the type of references, where $e^p$ must thus be a base type with alias information.
+		Since the type system is an over-approximation, there can be multiple internal variables in $\kappa$ and multiple occurrences we need to read from.
 		As such we need to lookup for all internal variables and also possible for multiple program points.
 		This is due to there can be multiple writes to the references, depending on which case in the pattern matching is evaluated, we need to consider all paths, as such we use the $\Lambda_\Upsilon$ function.
 \end{description}
@@ -238,39 +205,13 @@ With the set of total orders defined, we can then define a function to retrieve 
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{T-Const}\\[0.2cm]
-			\inference[]{}
-			{\Gamma,\Pi\vdash  c^{p}:(\emptyset,\emptyset)}\\[1cm]
-
-		\runa{T-Var}\\[0.2cm]
-			\inference[]{}
-			{\Gamma,\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}\\[0.3cm]
-			Where $p'=\Lambda_\Pi(x,p,\Gamma)$, $\Gamma(x^{p'})=T$\\[1cm]
-
-		\runa{T-Let-1}\\[0.2cm]
-			\inference[]
-				{\Gamma,\Pi\vdash e_1^{p}:(\delta,\kappa) &\\
-				\Gamma[x^p:(\delta,\kappa\cup\{x\})],\Pi\vdash e_2^{p}:T_2}
-				{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[0.3cm]
-				Where $\kappa\neq\emptyset$\\[1cm]
-
-		\runa{T-Case}\\[0.2cm]
-			\inference[]
-				{\Gamma,\Pi\vdash e^{p}:(\delta,\kappa) &\\
-				\Gamma',\Pi\vdash e_i^{p_i}:T_i\;\;\;(1\leq i\leq|\tilde{\pi}|)}
-				{\Gamma,\Pi\vdash [\mbox{case}\;e^{p}\;\tilde{\pi}\;\tilde{o}]^{p'}:T\sqcup(\delta,\kappa)}\\[0.3cm]
-				Where $e_i^{p_i}\in\tilde{o}$, $s_i\in\tilde{\pi}$, and\\
-				$\Gamma'=\Gamma[x^p:(\delta,\kappa)]$ if $s_i=x$\\[1cm]
-
-		\runa{T-Ref-read}\\[0.2cm]
-			\inference[]
-				{\Gamma,\Pi\vdash  e^{p}:(\delta,\kappa)}
-				{\Gamma,\Pi\vdash [!e^{p}]^{p'}:T\sqcup(\delta\cup\delta',\emptyset)}\\
-			Where $\kappa\neq\emptyset$, $\delta'=\{\nu x^{p'}\mid\nu x\in\kappa\}$, $\nu x_1,\cdots,\nu x_n\in\kappa$.\\ 
-			$\{p_1,\cdots,p_m\},\cdots,\{p_1',\cdots,p_s'\}=\Lambda_\Upsilon(\nu x_1,p',\Gamma),\cdots,\Lambda_\Upsilon(\nu x_n,p',\Gamma)$, and\\
-			$T=\Gamma(\nu x_1^{p_1})\cup\cdots\cup\Gamma(\nu x_1^{p_m})\cup\cdots\cup\Gamma(\nu x_n^{p_1'})\cup\cdots\cup\Gamma(\nu x_n^{p_s'})$
+		\input{sections/appendix/TSRules/const.tex}\\[0.7cm]
+		\input{sections/appendix/TSRules/var.tex}\\[0.7cm]
+		\input{sections/appendix/TSRules/let1.tex}\\[0.7cm]
+		\input{sections/appendix/TSRules/case.tex}\\[0.7cm]
+		\input{sections/appendix/TSRules/refread.tex}\\[0.7cm]
 	\end{tabular}
-	\caption{Type system}
+	\caption{Selected rules from the type system}
 	\label{fig:TypeSys}
 \end{figure}
 

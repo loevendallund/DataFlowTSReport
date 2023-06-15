@@ -42,15 +42,13 @@ The formation rules is presented in \cref{fig:coresyntax}.
 			Occurrence \; o &::= &e^p \\\\
 
 			expression \; e &::= &x \mid c \mid o_1\;o_2 \mid \lambda x.o\\
+			&| &c \; o_1 \; o_2\\
 			&| &\mbox{let} \; x \; o_1 \; o_2 \\
 			&| &\mbox{let rec} \; x \; o_1 \; o_2 \\
 			&| &\mbox{case} \; o_1 \; \tilde{\pi} \; \tilde{o}\\
 			&| &\mbox{ref} \; o \mid o_1 := o_2 \mid \; !o\\\\
 
-			Patterns		\; \tilde{\pi} &::= &(s_1,\cdots,s_n)\\\\
-
-			Occurrences \; \tilde{o} &::= &(e_1^{p_1},\cdots,e_n^{p_n})\\\\
-
+			Pattern \; s &::= &n \mid b \mid x \mid \_
 		\end{tabular}
 	\end{minipage}
 	\begin{minipage}[t]{0.45\textwidth}
@@ -59,15 +57,14 @@ The formation rules is presented in \cref{fig:coresyntax}.
 			Constant\; c &::= &n \mid b\\
 			&| &PLUS \\
 			&| &MINUS \\
-			&| &TIMES\\
 			&| &TIMES \\
 			&| &EQUAL \\
 			&| &LESS\\
-			&| &GREATER\\
-			&| &NOT \\ \\
+			&| &GREATER\\ \\
 
-			Pattern \; s &::= &n \mid b \mid x \mid \_ \\
+			Patterns		\; \tilde{\pi} &::= &(s_1,\cdots,s_n)\\\\
 
+			Occurrences \; \tilde{o} &::= &(e_1^{p_1},\cdots,e_n^{p_n})
 		\end{tabular}
 	\end{minipage}
 	\caption{Abstract syntax}
@@ -80,9 +77,8 @@ Some notable constructs is further explained below.
 		Applications uses juxtaposition, where abstractions have exactly one argument.
 
 	\item[Constants] $c$ are either natural numbers $n$, boolean values $b$, or functional constants.
-		We introduce a function $apply$, that for each functional constant returns the result of applying a constant $c$ to its arguments.
-		Since we use juxtaposition, we will do the same for $apply$, such that if a functional constant takes more than one argument, we then need to use apply twice, such that for $PLUS$ we have:
-		$$apply(apply(PLUS,2),2)=2+2$$
+		We introduce a function $apply$, that for each functional constant $c$ returns the result of applying $c$ to its arguments.
+		$$apply(PLUS,2,2)=2+2$$
 
 	\item[Bindings] $\mbox{let} \; x \; o_1 \; o_2$ and $\mbox{let rec} \; f \; o_1 \; o_2$, also called local declarations, are immutable bindings that binds variables to values.
 		We introduce two constructs for bindings which are recursive or non-recursive bindings.
@@ -280,8 +276,13 @@ With \cref{def:OccPP} defined, we present the instantiation of \cref{def:BinRel}
 	Then $\sqsubseteq_w$ is given by:
 	$$\sqsubseteq_w\subseteq\{(p,p')\mid p,p'\in(points(dom(w))\cup points(ran(w)))\}$$
 \end{definition}
-\todo[inline]{Add more, to make sure that we can enforce that the relation is a partial order}
-We say that $w$ is a partial order if $\sqsubseteq_w$ is a partial order.
+
+As the dependency function is a model of which occurrences and occurrence is dependent on, and the relation on a dependency function should also model the order a value is evaluated in, we define the partial order over a dependency function.
+
+\begin{definition}[Partial order of $w$]
+	Let $w\in\cat{W}$ be a dependency function and $\sqsubseteq_w$ be a binary relation over $w$.
+	We say that $w$ is partial order if $\sqsubseteq_w$ is a partial order.
+\end{definition}
 
 \begin{example}[]\label{ex:depRel}
 	Consider the example from \cref{ex:dep}, if we introduce a binary relation over the dependency function $w_{ex}$, such that:
@@ -322,85 +323,56 @@ Based on \cref{def:GBind}, we can present an instantiation of the function for t
 We will now introduce the big-step semantics for our language and highlight some interesting transition rules.
 In the big-step semantics, the transitions are of the from:
 \begin{align*}
-env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle
+env\vdash\left\langle e^{p'},sto,(w,\sqsubseteq_w),p\right\rangle\rightarrow\left\langle v,sto',(w,\sqsubseteq_w),(L,V),p''\right\rangle
 \end{align*}
-Where $env\in\cat{Env}$, $sto\in\cat{Sto}$, and $\psi,\;\psi'\in\Psi$.
-This should be read as, given the store $sto$, the pair $\psi$, and the previous program point $p$, the occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated pair $\psi'$, the dependency pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
+Where $env\in\cat{Env}$, $sto\in\cat{Sto}$, and $w\in\cat{W}$.
+This should be read as, given the store $sto$, a dependency function $w$, A relation over $w$, and the previous program point $p$, the occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, 
+a updated relation over $w'$, the dependency pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
 
 The transition system is given by:
-$$((\cat{Occ}\cup\cat{Values})\times\cat{Store}\times\cat{W}\times\cat{P},\rightarrow,\cat{Values}\cat{Store}\times\Psi\times\Pow{\cat{Loc}^P\times\cat{Var}^P}\times\cat{P})$$
+$$(\cat{Occ}\cup\cat{Values})\times\cat{Store}\times(\cat{W}\times(\cat{P}\times\cat{P})\times\cat{P},\rightarrow,\cat{Values}\times\cat{Store}\times(\cat{W}\times(\cat{P}\times\cat{P}))\times\Pow{\cat{Loc}^P\times\cat{Var}^P}\times\cat{P}$$
 A highlight of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}, the rest can be found in \cref{App:ColSem}.
 
-\todo[inline]{Need to fix/rewrite for locations, since the description (and rule shown above) is old}
 \begin{description}
-	\item[\runa{Const}] is the simplest rule, as it has no premises and does not have any side effects.
+	\item[\runa{Const}] rule, for the occurrence $c^{p'}$, is the simplest rule, as it has no premises and does not have any side effects.
 		As constants are evaluated to the constant value, no dependencies are used, i.e., no variable or location occurrences are used to evaluate a constant.
 
-	\item[\runa{Var}] This rule uses the environment and dependency function to get the value for a variable $x$ and its dependencies.
-		Here, the $inf$ function is used, to get the greatest lower-bound of a variable in respect to the ordering $\sqsubseteq_w$ relation.
-		Since we used to variable, we add it to the set of variable occurrences in the dependency pair, we got from the lookup in $w$.
+	\item[\runa{Var}] rule, for the occurrence $x^{p'}$, uses the environment to get the value $x$ is bound to and the dependency function $w$ to get its dependencies.
+		To lookup the dependencies, the function $uf_{\sqsubseteq_w}$ is used to get the greatest binding a variable is bound to, in respect to the ordering $\sqsubseteq_w$.
+		Since the occurrence of $x$ is used, it is added to the set of variable occurrences we got from the lookup of $x$ dependencies.
 
-	\item[\runa{Let}] creates a local binding that can be used later on.
-		This rule extends both the environment and the pair $\psi$ by the value of evaluating $e_1^{p_1}$ and its dependencies.
-		Here, we make a local binding for the variable in $e_2^{p_2}$, while the extension of $\psi$ is thus known for the rest of the program, since $\psi$ is a global collection of dependencies.
+	\item[\runa{Let}] rule, for the occurrence $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, creates a local binding that can be used in $e_2^{p_2}$
+		\runa{Let} evaluate $e_1^{p_1}$ to get the value $x$ will be bound to in the environment and the dependencies used to evaluate $e_1^{p_1}$ is bound in the dependency function.
+		As we reach the program point $p_1$ after evaluating $e_1^{p_1}$, and it is also the program point before evaluating $e_2^{p_2}$, the binding of $x$ is $w$ is to the program points $p_1$.	
 
-	\item[\runa{Loc-new}] creates a new reference, binds it to the value of $e^{p'}$, in the store, and extends the dependency function $w$.
-		As references are considered global, and has no alias when created, the value of \runa{Loc-new} is a location.
+	\item[\runa{Ref}] rule, for the occurrence $[\mbox{ref} e^{p'}]^{p''}$, creates a new location and binds it, in the store $sto$, to the value evaluated from $e^{p'}$.
+		The \runa{Ref} rule also binds the dependencies from evaluating the body $e^{p'}$ in the dependency function $w$ at the program point $p''$.
+		As the \runa{Ref} rule only creates a location, and binds it in $sto$, the environment is not updated as there \runa{Ref} does not in itself give any alias information.
+		To create an alias for a location, it should be bound to a variable using the \runa{Let} rule.
 
-	\item[\runa{Loc-read}] The \runa{Loc-read} rule expects that $e^{p'}$ is evaluated to a location $\loc$, and then lookup the value of $\loc$ in the store.
-		Since the dependencies 
+	\item[\runa{Ref-read}] rule, for the occurrence $!e^{p'}$, evaluates the body $e^{p'}$ to a value, that must be a location $\loc$, and reads the value of $\loc$ in the store.
+		The \runa{Ref-read} rule also makes a lookup for the dependencies $\loc$ is bound to in the dependency function $w$, as there could be multiple bindings for $\loc$, in $w$, at different program points.
+		We use the $uf_{\sqsubseteq_w}$ function to get greatest binding of $\loc$ with respect to the ordering $\sqsubseteq_w$, and we also add the location occurrence $\loc^{p'}$ to the set of locations.
 
-	\item[\runa{Loc-write}] rule updates the store with a new binding and updates the dependency function with the new dependencies.
-		The extension is done to a new program points, which is not already used in the program, and the extension to the dependency function, we also adds the greatest lower-bound of $\loc$, in $w'$.
-		Similarly to the \runa{Var} rule, we add the newly created location occurrence to $L'$, in the extension of $w''$.
+	\item[\runa{Ref-write}] rule, for the occurrence $[e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}$, evaluate $e_1^{p_1}$ to a location $\loc$ and $e_2^{p_2}$ to a value $v$ and binds $\loc$ in the store $sto$ to the value $v$.
+		The dependency function is also extended with a new binding for $\loc$ at the program point $p'$.
 \end{description}
 
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{Const}\\[0.2cm]
-			\inference[]{}
-				{env\vdash \left\langle c^{p'},sto,\psi,p \right\rangle \rightarrow \left\langle c,sto,\psi,(\emptyset,\emptyset),p' \right\rangle}\\[1cm]
-			
-		\runa{Var}\\[0.2cm]
-			\inference[]{}
-			{env\vdash \left\langle x^{p'},sto,\psi,p \right\rangle \rightarrow \left\langle v,sto,\psi,(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[0.4cm]
-				Where $env(x)=v$, $\psi=(w,\sqsubseteq_w)$, $p''=\inf_\psi (x)$, and $w(x^{p''})=(L,V)$\\[1cm]
-
-		\runa{Let}\\[0.2cm]
-			\inference[]
-			{env\vdash \left\langle e_1^{p_1},sto,\phi,p \right\rangle \rightarrow \left\langle v_1,sto_1,\phi_1,(L_1,V_1),p_1 \right\rangle &\\
-			env[x\mapsto v_1]\vdash \left\langle e_2^{p_2},sto_1,\phi_2,p_1 \right\rangle \rightarrow \left\langle v,sto',\phi',(L,V),p_2 \right\rangle}
-			{env\vdash \left\langle \left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,\phi,p \right\rangle \rightarrow \left\langle v,sto',\phi',(L,V),p' \right\rangle}\\[0.4cm]
-		Where $\phi_1=(w_1,\sqsubseteq_w^1)$, $\phi_2=(w_1[x^{p_1}\mapsto(L,V)],\sqsubseteq_w^1)$\\[1cm]
-
-		\runa{Ref}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L,V),p' \right\rangle}
-				{env\vdash \left\langle [\mbox{ref}\;e^{p'}]^{p''},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto''[\loc\mapsto v],w'',(\emptyset,\emptyset),p'' \right\rangle}\\[0.4cm]
-			Where $\loc = next$, $sto''=sto'[next\mapsto new\;\loc]$ and $w''=w'[\loc^{p''}\mapsto (L,V)]$\\[1cm]
-
-		\runa{Ref-read}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e^{p'},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto',w',(L,V),p' \right\rangle}
-				{env\vdash \left\langle \left[!e^{p'}\right]^{p''},sto,w,p \right\rangle \rightarrow \left\langle v,sto',w',(L\cup\{\loc^{p''}\},V),p'' \right\rangle}\\[0.4cm]
-			Where $sto'(\loc)=v$\\[1cm]
-
-
-		\InfName{Ref-write}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e_1^{p'},sto,w,p \right\rangle \rightarrow \left\langle \loc,sto',w',(L,V),p' \right\rangle &\\
-				env \vdash \left\langle e_2^{p''},sto',w',p' \right\rangle \rightarrow \left\langle v,sto'',w'',(L',V'),p'' \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p'}:=e_2^{p''}\right]^{p_3},sto,w,p \right\rangle \rightarrow \left\langle (),sto_3,w_3,(L,V),p_3 \right\rangle}\\[0.4cm]
-				Where $sto_3=sto''[\loc\mapsto v]$, $p_2$ is fresh, $p_4=inf_{p''}(\loc,w')$\\
-				$w_3=w''[\loc^{p_2}\mapsto(L'\cup\{\loc^{p_4}\},V')]$
+		\input{sections/appendix/ColRules/const.tex}\\[0.7cm]
+		\input{sections/appendix/ColRules/var.tex}\\[0.7cm]
+		\input{sections/appendix/ColRules/let.tex}\\[0.7cm]
+		\input{sections/appendix/ColRules/ref.tex}\\[0.7cm]
+		\input{sections/appendix/ColRules/refread.tex}\\[0.7cm]
+		\input{sections/appendix/ColRules/refwrite.tex}
 	\end{tabular}
-	\caption{Sellect rules from the semantics}
+	\caption{Selected rules from the semantics}
 	\label{fig:ColSem}
 \end{figure}
 
-Next, we will present some examples that illustrates how the dependency function is used to model parts of the data-flow in the semantics.
-
+\todo[inline]{Insert examples here}
 \iffalse
 \begin{example}[Data-flow for abstractions]\label{ex:DFAbs}
 The following program creates a local binding to the identity function and applies it twice.

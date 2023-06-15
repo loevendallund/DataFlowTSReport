@@ -1,0 +1,7 @@
+\runa{T-Let-2}\\[0.2cm]
+	\inference[]
+	{
+		\Gamma,\Pi\vdash e_1^{p_1}:T_1 &\\
+		\Gamma[x^p:T_1],\Pi\vdash e_2^{p_2}:T_2
+	}
+	{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p_1} \; e_2^{p_2}]^{p'}:T_2}

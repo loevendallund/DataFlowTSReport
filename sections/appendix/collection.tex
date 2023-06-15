@@ -4,44 +4,12 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{Const}\\[0.2cm]
-			\inference[]{}
-				{env\vdash \left\langle c^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle c,sto,(w,\sqsubseteq_w),(\emptyset,\emptyset),p' \right\rangle}\\[1cm]
-			
-		\runa{Var}\\[0.2cm]
-			\inference[]{}
-				{env\vdash \left\langle x^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqsubseteq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[0.3cm]
-				Where $env(x)=v$, $\psi=(w,\sqsubseteq_w)$, $p''=\inf_\psi (x)$, and $w(x^{p''})=(L,V)$\\[1cm]
-
-		\runa{Abs}\\[0.2cm]
-			\inference[]{}
-				{env\vdash \left\langle \left[\lambda\;x.e^{p'}\right]^{p''},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqsubseteq_w),(\emptyset,\emptyset),p'' \right\rangle}\\[0.3cm]
-			Where $v=\left\langle x,e^{p'},env\right\rangle$\\[1cm]
-
-			\todo[inline]{The last premise, for $\sqsubseteq_w^3$, push this down to future work}
-		\runa{App}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
-				env \vdash \left\langle e_2^{p_2},sto',(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v',sto'',(w_2,\sqsubseteq_w^2),(L_2,V_2),p_2 \right\rangle &\\
-				env'[x\mapsto v'] \vdash \left\langle e_3^{p_3},sto'',(w_2,\sqsubseteq_w^3),p_2 \right\rangle \rightarrow \left\langle v'',sto',(w',\sqsubseteq_w'),(L_3,V'_3),p_3 \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v'',sto',(w',\sqsubseteq_w'),(L_1\cup L_3,V_1\cup V_3),p' \right\rangle}\\[0.3cm]
-				Where $v=\left\langle x,e_3^{p_3},env'\right\rangle$, $w_3=w_2[x^{p_2}\mapsto (L_2,V_2)]$, $\psi_2=(w_2,\sqsubseteq_w^2)$, and\\
-				if $inf_{\sqsubseteq_w^2}(x,w_2)=p''$ (where $p''\neq\epsilon$) then $\sqsubseteq_w^3=\sqsubseteq_w^2\cup(p'',p_3)$ else $\sqsubset_w^3=\sqsubset_w^2$\\[1cm]
-
-		\runa{App-const}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle c,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
-				env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v',sto',(w',\sqsubseteq_w'),(L_2,V_2),p_2 \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[0.3cm]
-			Where $apply(c,v')=v$ and $(L,V)=(L_1\cup L_2,V_1\cup V_2)$\\[1cm]
-
-		\runa{App-rec}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
-				env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v_2,sto_2,(w_2,\sqsubseteq_w^2),(L_2,V_2),p_2 \right\rangle &\\
-				env'[x\mapsto v_2, f\mapsto\left\langle x,f,e,env'\right\rangle] \vdash \left\langle e_3^{p_3},sto_2,(w_3,\sqsubseteq_w^2),p_2 \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L_3,V_3),p_3 \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[0.3cm]
-			Where $(L,V)=(L_1\cup L_3,V_1\cup V_3)$, $v_1=\left\langle x,f,e_3^{p_3},env'\right\rangle$, $w_3=w_2[x^{p_2}\mapsto (L_2,V_2)]$
+		\input{sections/appendix/ColRules/const.tex}\\[1cm]
+		\input{sections/appendix/ColRules/var.tex}\\[1cm]
+		\input{sections/appendix/ColRules/abs.tex}\\[1cm]
+		\input{sections/appendix/ColRules/app.tex}\\[1cm]
+		\input{sections/appendix/ColRules/apprec.tex}\\[1cm]
+		\input{sections/appendix/ColRules/appconst.tex}
 	\end{tabular}
 	\label{fig:InfDV}
 \end{figure}
@@ -49,48 +17,12 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{Let}\\[0.2cm]
-			\inference[]
-			{env\vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
-			env[x\mapsto v_1]\vdash \left\langle e_2^{p_2},sto_1,(w_2,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p_2 \right\rangle}
-			{env\vdash \left\langle \left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[0.3cm]
-		Where $w_2=(w_1[x^{p_1}\mapsto(L,V)]$\\[1cm]
-
-		\runa{Let-rec}\\[0.2cm]
-			\inference[]
-			{env\vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
-			env\left[f\mapsto\left\langle x,f,e_1^{p_1},env'\right\rangle\right]\vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p_2 \right\rangle}
-			{env\vdash \left\langle \left[\mbox{let rec}\;f\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[0.3cm]
-		Where $v=\left\langle x,e_1^{p'},env'\right\rangle$, and $w_2=w_1[f^{p_2}\mapsto(L_1,V_1)]$\\[1cm]
-
-		\runa{Case}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e^{p''},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_e,sto'',(w'',\sqsubseteq_w''),(L'',V''),p'' \right\rangle &\\
-				env[env'] \vdash \left\langle e_j^{p_j},sto'',(w''',\sqsubseteq_w''),p'' \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L',V'),p_i \right\rangle}
-				{env\vdash \left\langle \left[\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[0.3cm]
-			Where $match(v_e,s_i)=\perp$ for all $1\leq u<j\leq|\tilde{\pi}|$, $match(v_e,s_j)=env'$, and \\
-			$w'''=w''[x\mapsto(L'',V'')]$ if $env'=[x\mapsto v_e]$ else $w'''=w''$\\[1cm]
-
-		\runa{Ref}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
-				{env\vdash \left\langle \left[\mbox{ref}\;e^{p'}\right]^{p''},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto'',(w'',\sqsubseteq_w'),(\emptyset,\emptyset),p'' \right\rangle}\\[0.3cm]
-			Where $\loc=next$, $sto''=sto'[next\mapsto new(\loc),\loc\mapsto v]$, and\\
-			$w''=w'[\loc^{p'}\mapsto (L,V)]$\\[1cm]
-
-		\runa{Ref-read}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
-				{env\vdash \left\langle \left[!e^{p'}\right]^{p''},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L\cup\{\loc^{p''}\},V),p'' \right\rangle}\\[0.3cm]
-			Where $sto'(\loc)=v$\\[1cm]
-
-		\runa{Ref-write}\\[0.2cm]
-			\inference[]
-				{env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
-				env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto_2,(w_2,\sqsubseteq_w^2),(L_2,V_2),p_2 \right\rangle}
-				{env\vdash \left\langle \left[e_1^{p_1}:=e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle (),sto',(w',\sqsubseteq_w'),(L_1,V_1),p' \right\rangle}\\[0.3cm]
-				Where $sto'=sto_2[\loc\mapsto v]$, $\loc^{p''}=inf_{\sqsubseteq_w^2}(\loc,w_2)$,\\
-				$w'=w_2[\loc^{p_2}\mapsto(L_2,V_2)]$, and $\sqsubseteq_w'=\sqsubseteq_w^2\cup(p'',p_2)$
+		\input{sections/appendix/ColRules/let.tex}\\[1cm]
+		\input{sections/appendix/ColRules/letrec.tex}\\[1cm]
+		\input{sections/appendix/ColRules/case.tex}\\[1cm]
+		\input{sections/appendix/ColRules/ref.tex}\\[1cm]
+		\input{sections/appendix/ColRules/refread.tex}\\[1cm]
+		\input{sections/appendix/ColRules/refwrite.tex}
 	\end{tabular}
 	\label{fig:InfDV}
 \end{figure}

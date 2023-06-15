@@ -4,45 +4,13 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{T-Const}\\[0.2cm]
-			\inference[]{}
-				{\Gamma,\Pi\vdash  c^{p}:(\emptyset,\emptyset)}\\[1cm]
-
-		\runa{T-Var}\\[0.2cm]
-			\inference[]{}
-			{\Gamma,\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}\\[0.3cm]
-			$x^{p'}=uf_{ \sqsubseteq_\Pi}(x,\Gamma)$, and $\Gamma(x^{p'})=T$\\[1cm]
-
-		\runa{T-Abs}\\[0.2cm]
-			\inference[]
-				{\Gamma[x^{p_0}:T_1],\Pi\vdash  e^{p}:T_2}
-				{\Gamma,\Pi\vdash  [\lambda\;x.e^{p}]^{p'}:T_1\rightarrow T_2}\\[0.3cm]
-				Where $p'\sqsubseteq_\Pi p_0\wedge p_0\sqsubseteq_\Pi p$\\[1cm]
-
-		\runa{T-App}\\[0.2cm]
-			\inference[]
-				{\Gamma,\Pi\vdash e_1^{p}:T_1\rightarrow T_2 &\\
-				\Gamma,\Pi\vdash e_2^{p'}:T_1}
-				{\Gamma,\Pi\vdash [e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[1cm]
-
-		\runa{T-Let-1}\\[0.2cm]
-			\inference[]
-				{\Gamma,\Pi\vdash e_1^{p}:(\delta,\kappa) &\\
-				\Gamma',\Pi\vdash e_2^{p}:T_2}
-				{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[0.3cm]
-				Where $\Gamma'=\Gamma[x^{p}:(\delta,\kappa\cup \{x\})]$ and $\kappa\neq\emptyset$\\[1cm]
-
-		\runa{T-Let-2}\\[0.2cm]
-			\inference[]
-				{\Gamma,\Pi\vdash e_1^{p}:T_1 &\\
-				\Gamma[x^p:T_1],\Pi\vdash e_2^{p}:T_2}
-				{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}\\[1cm]
-
-		\runa{T-Let-rec}\\[0.2cm]
-			\inference[]
-				{\Gamma,\Pi\vdash e_1^{p}:T_1\rightarrow T_2 &\\
-				\Gamma[f^p:T_1\rightarrow T_2],\Pi\vdash e_2^{p}:T}
-				{\Gamma,\Pi\vdash [\mbox{let rec}\; f \; e_1^{p} \; e_2^{p'}]^{p''}:T}\\[1cm]
+		\input{sections/appendix/TSRules/const.tex}\\[1cm]
+		\input{sections/appendix/TSRules/var.tex}\\[1cm]
+		\input{sections/appendix/TSRules/abs.tex}\\[1cm]
+		\input{sections/appendix/TSRules/app.tex}\\[1cm]
+		\input{sections/appendix/TSRules/appconst.tex}\\[1cm]
+		\input{sections/appendix/TSRules/let1.tex}\\[1cm]
+		\input{sections/appendix/TSRules/let2.tex}\\[1cm]
 	\end{tabular}
 	\label{fig:TypeSys1}
 \end{figure}
@@ -50,35 +18,11 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\runa{T-Case}\\[0.2cm]
-			\inference[]
-				{\Gamma,\Pi\vdash e^{p}:(\delta,\kappa) &\\
-				\Gamma',\Pi\vdash e_i^{p_i}:T_i\;\;\;(1\leq i\leq|\tilde{\pi}|)}
-				{\Gamma,\Pi\vdash [\mbox{case}\;e^{p}\;\tilde{\pi}\;\tilde{o}]^{p'}:T\sqcup(\delta,\kappa)}\\[0.3cm]
-				Where $e_i^{p_i}\in\tilde{o}$ and $s_i\in\tilde{\pi}$ $T=\bigcup_{i=1}^{|\tilde{\pi}|}T_i$, and\\
-				$\Gamma'=\Gamma[x^p:(\delta,\kappa)]$ if $s_i=x$\\[1cm]
-
-		\runa{T-Ref}\\[0.2cm]
-			\inference[]
-				{\Gamma,\Pi\vdash  e^{p}:(\delta',\kappa')}
-				{\Gamma[\nu x^{p'}:(\delta',\kappa')],\Pi\vdash [\mbox{ref}\;e^{p}]^{p'}:(\emptyset,\kappa)}\\
-				Where $\nu x$ is fresh, and $\kappa=\{\nu x\}$\\[1cm]
-
-		\runa{T-Ref-read}\\[0.2cm]
-			\inference[]
-				{\Gamma,\Pi\vdash  e^{p}:(\delta,\kappa)}
-				{\Gamma,\Pi\vdash [!e^{p}]^{p'}:T\sqcup(\delta\cup\delta',\emptyset)}\\
-			Where $\kappa\neq\emptyset$, $\delta'=\{\nu x^{p'}\mid\nu x\in\kappa\}$, $\nu x_1,\cdots,\nu x_n\in\kappa$.\\ 
-			$\{\nu x_1^{p_1},\cdots,\nu x_1^{p_m}\}=uf_{\Upsilon_{p'}}(\nu x_1,\Gamma),\cdots,\{\nu x_n^{p_1'},\cdots,\nu x_n^{p_s'}\}=uf_{\Upsilon_{p'}}(\nu x_n,\Gamma)$, and\\
-			$T=\Gamma(\nu x_1^{p_1})\cup\cdots\cup\Gamma(\nu x_1^{p_m})\cup\cdots\cup\Gamma(\nu x_n^{p_1'})\cup\cdots\cup\Gamma(\nu x_n^{p_s'})$\\[1cm]
-
-		\runa{T-Ref-write}\\[0.2cm]
-			\inference[]
-				{\Gamma,\Pi\vdash  e_1^{p_1}:(\delta,\kappa)&\\
-				\Gamma,\Pi\vdash  e_2^{p_2}:(\delta_2,\kappa_2)}
-				{\Gamma',\Pi\vdash [e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}:(\delta,\emptyset)}\\
-			Where $\Gamma'=\Gamma[\nu x_1:(\delta_2,\kappa_2),\cdots,\nu x_n:(\delta_2,\kappa_2)]$\\
-			and $\nu x_1,\cdots,\nu x_n\in\{\nu x\mid\nu x\in\kappa\}$
+		\input{sections/appendix/TSRules/letrec.tex}\\[1cm]
+		\input{sections/appendix/TSRules/case.tex}\\[1cm]
+		\input{sections/appendix/TSRules/ref.tex}\\[1cm]
+		\input{sections/appendix/TSRules/refread.tex}\\[1cm]
+		\input{sections/appendix/TSRules/refwrite.tex}
 	\end{tabular}
 	\label{fig:TypeSys2}
 \end{figure}

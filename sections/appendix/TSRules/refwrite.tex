@@ -1,0 +1,9 @@
+\runa{T-Ref-write}\\[0.2cm]
+	\inference[]
+	{
+		\Gamma,\Pi\vdash  e_1^{p_1}:(\delta,\kappa)&\\
+		\Gamma,\Pi\vdash  e_2^{p_2}:(\delta_2,\kappa_2)
+	}
+	{\Gamma',\Pi\vdash [e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}:(\delta,\emptyset)}\\
+	Where $\Gamma'=\Gamma[\nu x_1:(\delta_2,\kappa_2),\cdots,\nu x_n:(\delta_2,\kappa_2)]$\\
+	and $\nu x_1,\cdots,\nu x_n\in\{\nu x\mid\nu x\in\kappa\}$

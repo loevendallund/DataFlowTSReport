@@ -1,0 +1,9 @@
+\runa{Ref-write}\\[0.2cm]
+	\inference[]
+	{
+		env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
+		env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto_2,(w_2,\sqsubseteq_w^2),(L_2,V_2),p_2 \right\rangle
+	}
+	{env\vdash \left\langle \left[e_1^{p_1}:=e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle (),sto',(w',\sqsubseteq_w'),(L_1,V_1),p' \right\rangle}\\[0.3cm]
+	Where $sto'=sto_2[\loc\mapsto v]$, $\loc^{p''}=inf_{\sqsubseteq_w^2}(\loc,w_2)$,\\
+	$w'=w_2[\loc^{p'}\mapsto(L_2,V_2)]$, and $\sqsubseteq_w'=\sqsubseteq_w^2\cup(p'',p')$

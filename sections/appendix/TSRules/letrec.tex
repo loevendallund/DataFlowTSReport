@@ -1,0 +1,7 @@
+\runa{T-Let-rec}\\[0.2cm]
+	\inference[]
+	{
+		\Gamma,\Pi\vdash e_1^{p}:T_1\rightarrow T_2 &\\
+		\Gamma[f^p:T_1\rightarrow T_2],\Pi\vdash e_2^{p}:T
+	}
+	{\Gamma,\Pi\vdash [\mbox{let rec}\; f \; e_1^{p} \; e_2^{p'}]^{p''}:T}

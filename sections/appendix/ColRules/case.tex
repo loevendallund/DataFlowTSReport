@@ -1,0 +1,9 @@
+\runa{Case}\\[0.2cm]
+	\inference[]
+	{
+		env \vdash \left\langle e^{p''},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_e,sto'',(w'',\sqsubseteq_w''),(L'',V''),p'' \right\rangle &\\
+		env[env'] \vdash \left\langle e_j^{p_j},sto'',(w''',\sqsubseteq_w''),p'' \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L',V'),p_i \right\rangle
+	}
+	{env\vdash \left\langle \left[\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[0.3cm]
+	Where $match(v_e,s_i)=\perp$ for all $1\leq u<j\leq|\tilde{\pi}|$, $match(v_e,s_j)=env'$, and \\
+	$w'''=w''[x\mapsto(L'',V'')]$ if $env'=[x\mapsto v_e]$ else $w'''=w''$

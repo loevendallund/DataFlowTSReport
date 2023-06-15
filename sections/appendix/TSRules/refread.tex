@@ -1,0 +1,7 @@
+\runa{T-Ref-read}\\[0.2cm]
+	\inference[]
+	{\Gamma,\Pi\vdash  e^{p}:(\delta,\kappa)}
+	{\Gamma,\Pi\vdash [!e^{p}]^{p'}:T\sqcup(\delta\cup\delta',\emptyset)}\\
+	Where $\kappa\neq\emptyset$, $\delta'=\{\nu x^{p'}\mid\nu x\in\kappa\}$, $\nu x_1,\cdots,\nu x_n\in\kappa$.\\ 
+	$\{\nu x_1^{p_1},\cdots,\nu x_1^{p_m}\}=uf_{\Upsilon_{p'}}(\nu x_1,\Gamma),\cdots,\{\nu x_n^{p_1'},\cdots,\nu x_n^{p_s'}\}=uf_{\Upsilon_{p'}}(\nu x_n,\Gamma)$, and\\
+	$T=\Gamma(\nu x_1^{p_1})\cup\cdots\cup\Gamma(\nu x_1^{p_m})\cup\cdots\cup\Gamma(\nu x_n^{p_1'})\cup\cdots\cup\Gamma(\nu x_n^{p_s'})$

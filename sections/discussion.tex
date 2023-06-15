@@ -1,27 +1,37 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
-\section{Discussion and conclussion}\label{sec:Conc}
-In this paper, we have presented a type system for data-flow and alias analysis, that collects the variables and internal variables used to evaluate an occurrence.
-\section{Future work}\label{sec:FW}
-In this section we will present some areas which could be worked on.
+\section{Conclusion}\label{sec:Conc}
+In this paper, we have introduced an alternative for data-flow analysis used in many languages for compiler optimization.
+The data-flow analysis presented here makes a global analysis, based on type systems to type each occurrence $o$ with variables used to evaluate $o$.
+As the language in focus here also introduce mutability, through references, the type system also handles alias analysis.
+
+As the type system presented here gives type information for each occurrence, as an approximation of information used.
+We also gives an approximation of where references are possible used, and an approximation of which version of those references are used.
+There are, however, still slack in the type system presented, e.g., only allowing references to be bound to base types (and as such, not being bound to abstractions).
+As the type system approximate over all patterns in pattern matching, it also approximates for unreachable patterns.
+
+\subsection{Future work}\label{sec:FW}
+We will now introduce potential future work, as areas of improvement for the type system
 
 \paragraph{Polymorphism}
-One area to look at, is to introduce polymorphism to the type system which can reduce the slack of the type system.
-One way is to introduce polymorphism to the base types, which would allow the typing of abstraction used at multiple places.
+Introducing polymorphism would be an ideal place to extend upon the type system, as abstractions are restricted in the current type system.
+Here, polymorphism for the base type, that is for $(\delta,\kappa)$, would allow for abstractions to be used multiple times in an occurrence, the input and output type would not be restricted from only allowing the exact same input type.
 
-\paragraph{Extending locations}
-Right now, locations are restricted upon, since it does not allow bindings to abstractions.
-This would be a good place to extend, where there is two directions this could be handled.
-The extension would follow Polymorphism, as either it should only allows for bindings to similar functions, or allows for free bindings.
+\paragraph{Extending references}
+Another place to extend are for references, as they only allow for bindings to base types.
+As references are defined currently in the type system, they cannot be bound to abstractions.
+However, this would also introduce complications, as abstractions need the information known at the time it were declared.
+Another complication would be that if different references has different types, e.g., if it had an abstraction type at one points and a base type at another point.
+Here, either we should require references to always have the same type, e.g., with base type polymorphism.
 
 \paragraph{Type inference}
 Another area is to make a type inference algorithm, which can find the type information.
 To make type inference for the type system would need to find an approximated order of program points, find a proper $\kappa_0$ and typing for abstractions, that is, find all the places where the parameter should be bound.
 
 \paragraph{Extending with more language constructs}
-As this is a small $\lambda$ calculus with a couple of interesting constructs, such as mutability, pattern matching, and local bindings.
-An area to look at is to introduce more constructs to the language, such as lazy evaluation, constructors, and modules.
-The lazy evaluation could either be through a wrapping construct or as a core part of the language.
-Constructors could introduce user specified constructs, which also would extend upon the pattern matching.
-Modules would wrap part of a program which could then be reused multiple places.
+It would also be interesting to introduce more language constructs, as the language presented only contains a small amount of constructs, such as mutability and pattern matching.
+Some interesting constructs to add could be records, constructors and deconstructors, modules, or lazy evaluation.
+Here, lazy evaluation could take multiple forms, either by introducing it as a core part of the language, where every bindings are lazy evaluated, or add special constructs for lazy evaluation.
+Modules, on the other hand, would allow for wrapping an occurrence, or multiple occurrences into a module, which could then be used in multiple places.
+
 \end{document}

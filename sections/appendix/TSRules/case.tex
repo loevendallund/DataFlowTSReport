@@ -1,0 +1,9 @@
+\runa{T-Case}\\[0.2cm]
+	\inference[]
+	{
+		\Gamma,\Pi\vdash e^{p}:(\delta,\kappa) &\\
+		\Gamma',\Pi\vdash e_i^{p_i}:T_i\;\;\;(1\leq i\leq|\tilde{\pi}|)
+	}
+	{\Gamma,\Pi\vdash [\mbox{case}\;e^{p}\;\tilde{\pi}\;\tilde{o}]^{p'}:T\sqcup(\delta,\kappa)}\\[0.3cm]
+	Where $e_i^{p_i}\in\tilde{o}$ and $s_i\in\tilde{\pi}$ $T=\bigcup_{i=1}^{|\tilde{\pi}|}T_i$, and\\
+	$\Gamma'=\Gamma[x^p:(\delta,\kappa)]$ if $s_i=x$

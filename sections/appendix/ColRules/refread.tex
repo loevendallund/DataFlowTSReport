@@ -1,0 +1,5 @@
+\runa{Ref-read}\\[0.2cm]
+	\inference[]
+	{env \vdash \left\langle e^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto',(w',\sqsubseteq_w'),(L_1,V_1),p_1 \right\rangle}
+	{env\vdash \left\langle \left[!e^{p_1}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L\cup L_1\cup\{\loc^{p''}\},V\cup V_1),p' \right\rangle}\\[0.3cm]
+	Where $sto'(\loc)=v$, $\loc^{p''}=uf_{\sqsubseteq_w'}(\loc,w')$, and $w'(\loc^{p''})=(L,V)$

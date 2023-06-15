@@ -23,14 +23,14 @@ Since there a both local and global information, and the dependency function col
 	if 
 	%\todo[inline]{Hans made a comment about the first part of 1 and 3, need to investigate this further}
 	%\todo[inline]{Simplify/rewrite the last agreement}
-	\begin{itemize}
+	\begin{enumerate}
 		\item $\forall x\in dom(env).(\exists x^p\in dom(w))\wedge(x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma))$
 		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow w(x^p)=(L,V)\wedge\Gamma(x^p)=T.(w,env,(L,V))\models T$
 		\item $\forall \loc\in dom(sto).(\exists \loc^p\in dom(w))\wedge(\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}\Rightarrow\nu x^p\in dom(\Gamma))$
 		\item $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(w,env,(L,V))\models T$
 		\item if $p_1\sqsubseteq_w p_2$ then $p_1\sqsubseteq_\Pi p_2$
 		\item $\forall \loc^p\in dom(w).\exists\nu x^p dom(\Gamma)\Rightarrow \exists p'\in\cat{P}.uf_{\sqsubseteq_w}(\loc,w)\in uf_{\Upsilon_p'}(\nu x,\Gamma)$
-	\end{itemize}
+	\end{enumerate}
 \end{definition}
 
 In \cref{def:EnvAgree}, the agreement contains a lot of conditions, but in essence it states:
@@ -41,6 +41,7 @@ In \cref{def:EnvAgree}, the agreement contains a lot of conditions, but in essen
 		The comparison is thus done by comparing program points and since this is global, the comparison is done for all program points that exists for a a location $\loc$ in $w$.
 \end{description}
 
+\todo[inline]{Explain why $T_1$ is not used in the type agreement}
 \begin{definition}[Type agreement]\label{def:TAgree}
 	Let $env$ be an environment, $\psi$ be a pair, $(L,V)$ be a dependency pair, and $T$ be a type.
 	We say that:

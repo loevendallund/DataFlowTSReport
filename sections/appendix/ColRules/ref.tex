@@ -1,0 +1,6 @@
+\runa{Ref}\\[0.2cm]
+	\inference[]
+	{env \vdash \left\langle e^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
+	{env\vdash \left\langle \left[\mbox{ref}\;e^{p'}\right]^{p''},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto'',(w'',\sqsubseteq_w'),(\emptyset,\emptyset),p'' \right\rangle}\\[0.3cm]
+	Where $\loc=next$, $sto''=sto'[next\mapsto new(\loc),\loc\mapsto v]$, and\\
+	$w''=w'[\loc^{p'}\mapsto (L,V)]$

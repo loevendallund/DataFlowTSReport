@@ -1,0 +1,8 @@
+\runa{Let}\\[0.2cm]
+	\inference[]
+	{
+		env\vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
+		env[x\mapsto v_1]\vdash \left\langle e_2^{p_2},sto_1,(w_2,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p_2 \right\rangle
+	}
+	{env\vdash \left\langle \left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[0.3cm]
+	Where $w_2=w_1[x^{p_1}\mapsto(L,V)]$
