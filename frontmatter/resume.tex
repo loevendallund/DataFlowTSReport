@@ -1,0 +1,49 @@
+\documentclass[../master.tex]{subfiles}
+\begin{document}
+\section{Resume}
+I dette projekt har vi studeret området for data-flow analyse for programeringssproget ReScript.
+ReScript er et funktionelt programeringssproget baseret by OCaml, med fokus by at compile til JavaScript.
+I forhold til andre sprog med at compile til JavaScript som mål, introducerer ReScript et rebust type system.
+Selvom ReScript er baseret på OCaml, så anvender ReScript deres eget build system og kun anvender dele af OCaml.
+Dette, og at ReScript stadigvæk er et ungt sprog, mangler ReScript analyse værktøjer der kan hjælpe udviklerer og optimerer compileren.
+De har dog et eksperimentelt analyse værktøj, ReAnalyze, som kan give informationer såsom død-code og terminering.
+
+Here er data-flow analyse er en teknik brugt til at samle information der bliver brugt igennem et program, som ofter anvendes til at optimere et program.
+Under optimerings processen, bliver data-flow analysen brugt til en række forskellige område, såsom eleminering af død kode og constant propagation.
+Eftersom mange programeringssproget introducer locationer og pointers som en del af sproget, skal data-flow analysen også tage højde for aliasering, altså hvilke variabler der deler samme location, som bliver brugt til at sørger for sikkerheden af analysen.
+\bigskip
+
+Til dette har vi valgt at lave et data-flow analyse værktøj for ReScript, hvor vi har valgt at fokuserer på en delmængde af ReScript sproget, altså for et $\lambda$-calculus med mønstermatching, muterbarhed, og lokale deklerationer.
+Eftersom vi analyserer på et funktionelt sprog, some derved er udtryk baseret, laver vi analysen på forekomster os syntaktiske og semantiske elementer, altså af udtryk, variabler, og lokationer.
+Siden vi er intereseret i forekomster, annoterer vi forekomster med program punkter.
+
+Hertil, præsenterer vi en formel beskrivelse af sproget, dets syntax og semantik, hvor den præsenteret semantiks formål er at vise den semantiske data-flow et program.
+For at kunne repræsenterer data-flow for et program indsamler vi de semantiske forekomster anvendt til at evaluerer en forekomst.
+Vi definerer afhængigheder af som de variabler og lokationer anvendt i en evaluering.
+Vi introducerer også en afhængigheds funktioner some binder dekleration, argumenter fra abstraktioner, og lokation forekomster til de forekomster de er afhængige af.
+
+Siden afhængigheds funktionen ikke indeholder en ordning i sig selv, bruger vi også en relation of de program punkter der er i afhængigheds funktionen.
+Denne relation bliver anvendt når der skal slås op i afhængigheds funktionen, e.g., når vi skal slå op hvad en variable eller lokation er afhænig af, hvortil vi anvender en funktion til at slå op for det maksimale program punkt en forekomst er bundet til.
+\bigskip
+
+Baseret på sproget, definierer vi et type system for data-flow analyse, med formål at samle afhængigheder der bliver brugt og alias information for en syntaktisk forekomst.
+Siden de egenskaber vi vil fange i et program er forekomst afhængighed og aliasing, præsenterer vi type some repræsenterer de forskellige værdier i sproget, altså funktioner, rekursive funktioner, lokationer, etc.
+Siden lokationer er en semantisk notation, vi introducer notation for interne variable, som er den syntaktiske repræsentation of locationer.
+
+Vi introducerer en base type og abstraktions type, hvor abstraktions typen repræsenterer funktioner, mens base typen repræsenterer typen af de andre værdier.
+Hertil, består base typen of en mængde af forekomster og mængden af alias informationen.
+Mængden af forekomster bliver brugt til at samle de forekomster der er blevet anvendt til at evaluerer en forekomst, og derved den syntaktiske repræsentation of afhængigheder.
+Alias information er en mængde der kan indeholde variabler og intern variable.
+Denne mængde repræsenterer hvis værdien af en forekomst er en lokation, så vil alias mængden indeholde information omkring lokationen.
+
+Ligesom for semantikken, introducerer vi type miljøet som er en approksimation of afhængigheds funktionen.
+Hvortil vi, ligesom to afhængigheds funktionen, introducerer en funktion til at slå op for det maksimale element.
+Siden type miljøet også indeholder global information, anvender vi en funktion til at slå op for alle maksimale forekomster.
+Siden vi approksimerer i type system, kan der være græne, introduceret af mønstermatchingen, hvor vi sørger for at få det maksimale forekomst for hver græn.
+
+Til sidst præsenterer vi sundhedsresultatet af type systemet, hvor vi viser hvordan bindingsmodelerne i type systemet og semantikken relaterer til hinanden, og at typen respekterer afhængighederne i semantikken.
+
+
+
+\newpage
+\end{document}

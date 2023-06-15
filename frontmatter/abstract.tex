@@ -1,2 +1,11 @@
 \begin{abstract}
+	As ReScript introduces a strongly typed language that targets JavaScript, as an alternative to gradually typed languages, such as TypeScript.
+	While ReScript is build upon OCaml, it provides its own build system and integration with JavaScript, as such not much analysis has been introduced to ReScript.
+	They do provide an experimental analysis tool to analyse areas, such as dead-code and termination.
+	
+	As data-flow analysis have been used for decades in compiler optimization, as they provide information about the data-flow in programs.
+	As many languages uses locations, the data-flow analysis must consider aliasing to ensure safety.
+
+	In this paper, we present a type system for data-flow analysis for a subset of the ReScript language, more specific for a $\lambda$-calculus with mutability and pattern matching.
+	The type system is a local analysis that collects information about what variables are used and alias information.
 \end{abstract}
