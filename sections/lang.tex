@@ -3,17 +3,15 @@
 \section{Language}\label{sec:lang}
 This section will introduce a functional programming language, based on a subset of ReScript.
 As this is a generalization of a dead-value analysis system, the language presented here is based on the one found in \cite{DVNicky}.
-The language presented here is basically a $\lambda$-calculus with bindings, pattern matching and mutability.
-As the purpose of the dependency analysis is to analyse each subexpression of a program and differentiate them, the language is extended to label all expressions and subexpression.
-For the sake of the rest of the paper, we call the label a program point.
-When labelling a syntactical element or semantical element, we call it an occurrence, such that the syntactical occurrences makes up the program, an is thus labelled expressions, while semantical occurrences are then variables and locations.
+The language we present is basically a $\lambda$-calculus with bindings, pattern matching and mutability.
+As the purpose of the dependency analysis is to analyse each subexpression of a program and differentiate them, the language is extended with labelling, which we also call program points, all expressions and subexpressions.
+When labelling a syntactical element or semantic element, we call it an occurrence, such that the analysis is done for an occurrence and its sub-occurrences, while the semantic occurrences are variables and locations.
 
-The language we present here, we assume that all local bindings, including recursive bindings, are unique.
-This can also be ensured by using $\alpha$-conversion.
-We also make a distinction between labelled and unlabelled expressions, such that an occurrence is a labelled expression, and unlabelled expressions are just called expressions.
+In the language we assume that all local bindings, and recursive bindings, are unique, which can be ensured by using $\alpha$-conversion on an occurrence.
+We also make a distinction between labelled and unlabelled expressions, such that we call occurrences as labelled expression, and we call unlabelled expressions as expressions.
 
-In this section will first formally introduce the abstract syntax for the language, and then the semantics.
-The semantics introduced here is an operational big-step semantics where we add the notion of program points and a mechanism for collecting dependencies.
+In this section we will first formally introduce the abstract syntax for the language, where we will then present binding models.
+Then we will present the dependency function, to model the semantic flow-data, and lastly we will present the semantic as a big-step operational semantics.
 
 \subsection{Syntax}
 This section introduces the abstract syntax of the language, based on the one presented in \cite{DVNicky}.
@@ -28,13 +26,13 @@ The syntactic categories for the language is defined as:
 	\loc\in &\;\cat{Loc} &-\;&\mbox{The category for constants}
 \end{align*}
 
-We also introduce a notation for occurrences of categories where, for a category $cat$, we write $cat^\cat{P}$ to denote the pair $cat\times\cat{P}$, for expression occurrences as such:
+We also introduce a notation for occurrences of categories where, for a category $cat$, we write $cat^\cat{P}$ to denote the pair $cat\times\cat{P}$, for occurrences as such:
 $\cat{Exp}^\cat{P}=\cat{Exp}\times\cat{P}$.
 
 Since the category for occurrences are labelled expressions, it can further be defined as:
 $$\cat{Occ}=\cat{Exp}^\cat{P}$$
 
-The formation rules is presented in \cref{fig:coresyntax}.
+The formation rules is then presented in \cref{fig:coresyntax}.
 
 \begin{figure}[H]
 	\begin{minipage}[t]{0.45\textwidth}
@@ -74,35 +72,34 @@ The formation rules is presented in \cref{fig:coresyntax}.
 
 Some notable constructs is further explained below.
 \begin{description}
-	\item[Abstractions] $\lambda\;x.o$ denotes functions with a parameter $x$ and body $o$.
-		Applications uses juxtaposition, where abstractions have exactly one argument.
+	\item[Abstractions] $\lambda\;x.o$ denotes an abstraction, with a parameter $x$ and body $o$.
 
 	\item[Constants] $c$ are either natural numbers $n$, boolean values $b$, or functional constants.
 		We introduce a function $apply$, that for each functional constant $c$ returns the result of applying $c$ to its arguments.
 		$$apply(PLUS,2,2)=2+2$$
 
-	\item[Bindings] $\mbox{let} \; x \; o_1 \; o_2$ and $\mbox{let rec} \; f \; o_1 \; o_2$, also called local declarations, are immutable bindings that binds variables to values.
-		We introduce two constructs for bindings which are recursive or non-recursive bindings.
+	\item[Bindings] $\mbox{let} \; x \; o_1 \; o_2$ and $\mbox{let rec} \; f \; o_1 \; o_2$, also called local declarations, are immutable bindings that binds the variables $x$ to values $o_1$ evaluates to.
+		We also introduces non-recursive and recursive bindings, by using the \emph{rec} keyword.
 
-	\item[Reference] $\mbox{ref\;o}$ is the construct for creating references which are handled as locations and allows for binding local declarations to them.
-		We also introduces constructs for reading from a location, $!o$, and writing to a location $o_1\;:=\;o_2$.
+	\item[Reference] $\mbox{ref\;o}$ is the construct for creating references which are handled as locations and allows for binding locations to local declarations.
+		We also introduces constructs for reading from references, $!o$, and writing to references, $o_1\;:=\;o_2$.
 
 	\item[Pattern matching] $\mbox{case} \; o_1 \; \tilde{\pi} \; \tilde{o}$, matches an occurrence with the ordered set, $\tilde{\pi}$, of patterns.
-		For each pattern in $\tilde{\pi}$ there is also an occurrence in $\tilde{o}$, as such both the set of patterns and the set of occurrences must be the same size.
+		For each pattern in $\tilde{\pi}$ there is also an occurrence in $\tilde{o}$, as such, both sets must be of equal size.
 		We also denote the size of patterns as $|\tilde{\pi}|$ and the size of occurrences as $|\tilde{o}|$.
 \end{description}
 
 \begin{example}[]\label{ex:write}
-The following occurrence:
+Consider the following occurrence:
 \begin{lstlisting}[language=Caml, mathescape=true]
 (let x (ref 3$^1$)$^2$ (let y (let z (5$^3$)$^4$ (x$^5$:=z$^7$)$^8$)$^{9}$ (!x)$^{10}$)$^{11}$)$^{12}$
 \end{lstlisting}
-First creates a reference to the constant 3 and binds the reference to $x$ (And as such creates an alias to x).
-Secondly we create a binding for $y$, where we first create a binding $z$ to the constant 5 before getting writing to the reference $x$ is bound to, to the value of $z$.
-Lastly, we read the reference $x$ is bound to.
+Here, we first creates a reference to the constant 3 and binds this reference to $x$ (Such that $x$ is an alias of this reference).
+Secondly we create a binding for $y$, where create a binding $z$, to the constant 5, before writing to the reference, that $x$ is bound to, to the value that $z$ is bound to.
+Lastly, we read the reference that $x$ is bound to, where we expect to retrieve the value $5$.
 \end{example}
 
-Later on, in (insert ref), we make use of the notion of free variables, which are defined in the usual way for $\lambda$-calculus and are as follows:
+Next we defined the notion of free variables, in the usual way for $\lambda$-calculus, as follows:
 \begin{definition}[Free variables]\label{def:fv}
 	The set of free variables is a function $fv:\cat{Occ}\rightarrow\Pow{\cat{Var}}$, given inductively by:
 	\begin{align*}
@@ -148,11 +145,11 @@ Later on, in (insert ref), we make use of the notion of free variables, which ar
 \fi
 
 \subsection{Environments and stores}\label{sec:EnvSto}
-We will now introduce the environments and stores used by the semantics, introduced in \cref{sec:sem}.
-Since the language we focus on introduces mutability, through the referencing wrappers, this needs to be reflecting in our bindings model.
-Here, the referencing wrappers can also be seen as how locations, or pointers, are created and handled, where we introduce stores to describe how they are bound.
+We will now introduce the binding model used in the semantics, where we will present the environments and stores.
+Since the language we focus on introduces mutability, through the referencing, this needs to be reflected in our bindings model.
+Here, the referencing constructs can also be seen as how locations, or pointers, are created and handled, as such we introduce notion of stores to describe how they are bound.
 
-Since this language is a functional language, the environment keeps the bindings we currently know, as such the environment is a function from variables to values.
+Since this language is a $\lambda$-calculus, the environment keeps the bindings we currently know and as such the environment is a function from variables to values.
 The set of values, \cat{Values}, is comprised by:
 \begin{itemize}
 	\item All constants are values.
@@ -162,7 +159,7 @@ The set of values, \cat{Values}, is comprised by:
 	\item Unit values, $()$, are values.
 \end{itemize}
 
-A value $v\in\cat{Values}$ is an expression given by the following formation rules:
+Where a value $v\in\cat{Values}$ is an expression given by the following formation rules:
 $$v::=c\mid\loc\mid\langle x,e^{p'},env\rangle\mid\langle x,f,e^{p''},env\rangle\mid ()$$
 
 \begin{definition}[]
@@ -172,7 +169,7 @@ $$v::=c\mid\loc\mid\langle x,e^{p'},env\rangle\mid\langle x,f,e^{p''},env\rangle
 Where $env\in\cat{Env}$ denotes an arbitrary environment in \cat{Env}.
 
 \begin{definition}[Update of environments]
-	Let $env$ be an environment.
+	Let $env\in\cat{Env}$ be an environment.
 	We write $env[x\mapsto v]$ to denote the environment $env'$ where:
 	\begin{align*}
 		env'(y)=
@@ -191,7 +188,6 @@ We also introduce a function which, for a given value $v$, returns all variables
 
 The store is a function that keeps the location bindings currently known.
 We also introduce a placeholder $next$, that represents the next free location.
-The store function is then given by:
 
 \begin{definition}[]
 	The set of all stores, \cat{Sto}, is the set of partial functions from locations, and the $next$ pointer, to values, given as:
@@ -200,7 +196,7 @@ The store function is then given by:
 Where $sto\in\cat{Sto}$ denotes an arbitrary store in \cat{Sto}.
 
 \begin{definition}[Update of stores]
-	Let $sto$ be a store.
+	Let $sto\in\cat{Sto}$ be a store.
 	We write $sto[\loc\mapsto v]$ to denote the store $sto'$ where:
 	\begin{align*}
 		sto'(\loc_1)=
@@ -218,20 +214,21 @@ This function is used on the location $next$ points to, to get a new free locati
 The goal of the collection semantics is to collect the semantic dependencies as they appear in a computation. 
 To this end, we use a dependency function that will tell us for each variable and location occurrence what other, previous occurrences they depend upon.
 
-As such, the dependency function is used to model the semantic flow of dependencies in an occurrence, where we also present and ordering between those occurrences.
-
+As such, we use the dependency function to model the semantic flow of dependencies in an occurrence, where we present and ordering between those occurrences to denote the flow.
 
 \begin{definition}[Dependency function]\label{def:DepFunc}
-	The set of dependency functions, $\cat{W}$, is a set of partial functions from location and variable occurrences to a dependency pair, such that:
+	The set of dependency functions, $\cat{W}$, is a set of partial functions from location and variable occurrences to a pair of dependencies, such that:
 	$$\cat{W}=\cat{Loc}^P\cup\cat{Var}^P\rightharpoonup\Pow{\cat{Loc}^P}\times\Pow{\cat{Var}^P}$$
 \end{definition}
-A lookup in a dependency function $w$ is, for a $u^p\in\cat{Loc}^P\cup\cat{Var}^P$, such that:
+A lookup in a dependency function $w$ is for an element $u^p\in\cat{Loc}^P\cup\cat{Var}^P$, such that:
 $$w(u^p)=(\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\},\{x_1^{p'_1},\cdots,x_m^{p'_m}\})$$
-This should be read as: a lookup of an occurrence $u^p$, that is for a variable or location occurrence, returns a pair of location and variable occurrences.
-We also denote the pair, retrieved from the dependency function, as a dependency pair where $(L,V)$ where $L=\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\}$ is the set of location occurrences and $V=\{x_1^{p'_1},\cdots,x_m^{p'_m}\}$ is the set of variable occurrences.
+This should be read as: a lookup of an occurrence $u^p$, a variable or location occurrence, returns a pair of location and variable occurrences.
+We also denote the pair, retrieved from the dependency function, which we call a dependency pair such that $(L,V)$ contains a set of location occurrences $L=\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\}$ 
+and a set of variable occurrences $V=\{x_1^{p'_1},\cdots,x_m^{p'_m}\}$.
 
-\begin{definition}[Update of $w$]\label{def:DepExt}
-	Let $w\in\cat{W}$ be a dependency function, we write $w[u^p\mapsto(L,V)]$ to denote the dependency function $w'$ where:
+\begin{definition}[Update of dependency functions]\label{def:DepExt}
+	Let $w\in\cat{W}$ be a dependency function and $u^p$ be either a variable or location occurrence.
+	We write $w[u^p\mapsto(L,V)]$ to denote the dependency function $w'$ where:
 	\begin{align*}
 		w'(v^q)=
 		\left\{\begin{matrix}
@@ -242,27 +239,27 @@ We also denote the pair, retrieved from the dependency function, as a dependency
 \end{definition}
 
 \begin{example}[]\label{ex:dep}
-	Consider the occurrence from \cref{ex:write}, where we can infer the following bindings for the dependency function $w_{ex}$:
+	Consider the occurrence from \cref{ex:write}, where we can infer the following bindings for a dependency function $w_{ex}$ over this occurrence:
 	$$w_{ex}=[x^2\mapsto(\emptyset,\emptyset),z^4\mapsto(\emptyset,\emptyset),y^9\mapsto(\emptyset,\{x^5\}),\loc^2\mapsto(\emptyset,\emptyset),\loc^8\mapsto(\emptyset,\{z^7\})]$$
 	Where $\loc$ is the location created from the reference construct.
-	Here, we can see that the variable bindings are disting, while the location $\loc$ is bound multiple times, for the program point $2$ and $8$.
+	Here, we can see that the variable bindings are distinct, an the location $\loc$ is bound multiple times, for the program points $2$ and $8$.
 
-	If we want to read a variable or location in $w_{ex}$, we must also know for which program point since there can exists multiple bindings for the same variable or location, at different program points.
-	By considering \cref{ex:write}, we would like to read the information from the location, that $x$ is an alias to.
-	As is visible from the occurrence in \cref{ex:write}, we know that we should read from $\loc^8$, since we wrote to $\loc$ at the program point $8$.
+	If we want to read a variable or location in $w_{ex}$, we must also know for which program point since there can exists multiple bindings for the same variable or location.
 \end{example}
 
-In the example above, \cref{ex:dep}, we can see that from $w_{ex}$ alone it is not possible to know which occurrence to read.
+By considering \cref{ex:dep}, we would like to read the information from the location, that $x$ is an alias to.
+As it is visible from the occurrence in \cref{ex:write}, we know that we should read from $\loc^8$, since we wrote that reference at the program point $8$.
+We can also see that from $w_{ex}$ alone it is not possible to know which occurrence to read, since there are no order defined between the bindings.
 We then present the notion of ordering, as a binary relation over program points:
 
 \begin{definition}[]\label{def:BinRel}
-	Let \cat{P} be a set of program points.
+	Let \cat{P} be a set of program points in an occurrence.
 	Then $\sqsubseteq$ is a binary relation of \cat{P}, such that:
 	$$\sqsubseteq\subseteq\cat{P}\times\cat{P}$$
 \end{definition}
 
 Since we are interested in the ordering of the elements in a dependency function $w$, we will define an instantiation of \cref{def:BinRel}.
-Since $w$, is a function from occurrences to a pair of occurrences, we first present the function of getting the program points from a set of occurrences:
+Since $w$, is a function from occurrences to a pair of occurrences, we first present a function for getting the program points from a set of occurrences:
 
 \begin{definition}[Occurring program points]\label{def:OccPP}
 	Let $O$ be a set of occurrences, then $points(O)$ is given by:
@@ -274,10 +271,10 @@ With \cref{def:OccPP} defined, we present the instantiation of \cref{def:BinRel}
 \begin{definition}[]\label{def:RelPoint}
 	Let $w\in\cat{W}$ be a dependency function.
 	Then $\sqsubseteq_w$ is given by:
-	$$\sqsubseteq_w\subseteq\{(p,p')\mid p,p'\in(points(dom(w))\cup points(ran(w)))\}$$
+	$$\sqsubseteq_w\subseteq\{(p,p')\mid p,p'\in(points(dom(w)\cup points(ran(w))))\}$$
 \end{definition}
 
-As the dependency function is a model of which occurrences and occurrence is dependent on, and the relation on a dependency function should also model the order a value is evaluated in, we define the partial order over a dependency function.
+As the dependency function $w$ is a model of which occurrences an occurrence is dependent on, the relation on $w$ should also model the order a value is evaluated in, as such we define the partial order over a dependency function.
 
 \begin{definition}[Partial order of $w$]
 	Let $w\in\cat{W}$ be a dependency function and $\sqsubseteq_w$ be a binary relation over $w$.
@@ -286,13 +283,14 @@ As the dependency function is a model of which occurrences and occurrence is dep
 
 \begin{example}[]\label{ex:depRel}
 	Consider the example from \cref{ex:dep}, if we introduce a binary relation over the dependency function $w_{ex}$, such that:
-	$$\sqsubseteq_{w_{ex}}=\{(2,4),(2,9),(5,9),(2,8),(7,2)\}$$
+	$$\sqsubseteq_{w_{ex}}=\{(2,4),(2,9),(5,9),(2,8),(8,2)\}$$
 	From this ordering, it is easy to see the ordering of the elements.
-	Since this ordering reflect the flow of the program in \cref{ex:write}, we know that the dependencies for the location (that x is bound to) is for the largest binding of $\loc$.
+	The ordering we present also respects the flow the occurrence from \cref{ex:write} would evaluate to.
+	We then know that the dependencies for the reference (that $x$ is an alias to) is for the largest binding of $\loc$.
 \end{example}
 
-As presented in \cref{def:RelPoint}, the dependency function and the binary relation are used to define flow of information.
-We can also see that the order defined by the binary relation $\sqsubseteq_w$, we need to lookup the greatest of $\sqsubseteq_w$.
+As presented in \cref{def:DepFunc} and \cref{def:RelPoint}, the dependency function and the binary relation are used to define the flow of information.
+As illustrated by \cref{ex:depRel}, we need to lookup the greatest of $\sqsubseteq_w$.
 
 We first present a generic function for the greatest binding of a relation $\sqsubseteq$ of program points.
 
@@ -301,61 +299,64 @@ We first present a generic function for the greatest binding of a relation $\sqs
 	$$uf(u,S)=\inf\{u^p\in S\mid u^q\in S.q\sqsubseteq p\}$$
 \end{definition}
 
-Based on \cref{def:GBind}, we can present an instantiation of the function for the order $\sqsubseteq_w$:
+Based on \cref{def:GBind}, we can present an instantiation of the function for the dependency function $w$ and an order over $w$, $\sqsubseteq_w$:
 
 \begin{definition}[]
-	Let $w$ be a dependency function, $\sqsubseteq_w$ be an order for $w$, $u$ be an element, either a variable or location, and $S$ be a set of occurrences, then $uf_{\sqsubseteq_w}$ is given by:
+	Let $w$ be a dependency function, $\sqsubseteq_w$ be an order over $w$, $u$ be an element, that is either a variable or location, then $uf_{\sqsubseteq_w}$ is given by:
 	$$uf_{\sqsubseteq_w}(u,w)=\inf\{u^p\in dom(w)\mid u^q\in dom(w.q\sqsubseteq_w p\}$$
 \end{definition}
 
 
 \begin{example}[]\label{ex:deplookup}
-	As a continuation of \cref{ex:depRel}, we can then lookup the greatest element for an element (i.e., a variable or location).
-	As we were interested in which location occurrence to lookup in $w_ex$, we can now use the function $uf_{\sqsubseteq_w}$:
+	As a continuation of \cref{ex:depRel}, we can now lookup the greatest element for an element, e.g., a variable or location.
+	As we were interested in finding the greatest bindings a location is bound to in $w_ex$, we can now use the function $uf_{\sqsubseteq_w}$:
 	$$uf_{\sqsubseteq_{w_ex}}(\loc,w_ex)=\inf\{\loc^p\in dom(w)\mid \loc^q\in dom(w). q\sqsubseteq_{w_ex} p\}$$
-	The set we get from are then as follows: $\{\loc^2,\loc^7\}$.
+	Where the set we get for $\loc$ are as follows: $\{\loc^2,\loc^8\}$.
 	From this, we find the greatest element:
-	$$\loc^7=\inf\{\loc^2,\loc^7\}$$
-	As we can see, from the $uf_w$ function we got $\loc^7$ which were the occurrence we wanted.
+	$$\loc^7=\inf\{\loc^2,\loc^8\}$$
+	As we can see, from the $uf_{w_ex}$ function, we got $\loc^8$ which were the occurrence we wanted.
 \end{example}
 
 \subsection{Collection semantics}\label{sec:sem}
 We will now introduce the big-step semantics for our language and highlight some interesting transition rules.
 In the big-step semantics, the transitions are of the from:
 \begin{align*}
-env\vdash\left\langle e^{p'},sto,(w,\sqsubseteq_w),p\right\rangle\rightarrow\left\langle v,sto',(w,\sqsubseteq_w),(L,V),p''\right\rangle
+env\vdash\left\langle e^{p'},sto,(w,\sqsubseteq_w),p\right\rangle\rightarrow\left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p''\right\rangle
 \end{align*}
 Where $env\in\cat{Env}$, $sto\in\cat{Sto}$, and $w\in\cat{W}$.
-This should be read as, given the store $sto$, a dependency function $w$, A relation over $w$, and the previous program point $p$, the occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, 
-a updated relation over $w'$, the dependency pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
+This should be read as: given the store $sto$, a dependency function $w$, A relation over $w$, and the previous program point $p$, the occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$, an updated dependency function $w'$, 
+a relation over $w'$, the dependency pair $(L,V)$, and the program point $p''$ reached after evaluating $e^{p'}$, given the bindings in the environment $env$.
 
 The transition system is given by:
-$$(\cat{Occ}\cup\cat{Values})\times\cat{Store}\times(\cat{W}\times(\cat{P}\times\cat{P})\times\cat{P},\rightarrow,\cat{Values}\times\cat{Store}\times(\cat{W}\times(\cat{P}\times\cat{P}))\times\Pow{\cat{Loc}^P\times\cat{Var}^P}\times\cat{P}$$
+$$((\cat{Occ}\cup\cat{Values})\times\cat{Store}\times(\cat{W}\times(\cat{P}\times\cat{P})\times\cat{P},\rightarrow,
+\cat{Values}\times\cat{Store}\times(\cat{W}\times(\cat{P}\times\cat{P}))\times\Pow{\cat{Loc}^P\times\cat{Var}^P}\times\cat{P})$$
 A highlight of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}, the rest can be found in \cref{App:ColSem}.
 
 \begin{description}
 	\item[\runa{Const}] rule, for the occurrence $c^{p'}$, is the simplest rule, as it has no premises and does not have any side effects.
 		As constants are evaluated to the constant value, no dependencies are used, i.e., no variable or location occurrences are used to evaluate a constant.
 
-	\item[\runa{Var}] rule, for the occurrence $x^{p'}$, uses the environment to get the value $x$ is bound to and the dependency function $w$ to get its dependencies.
+	\item[\runa{Var}] rule, for the occurrence $x^{p'}$, uses the environment to get the value $x$ is bound to and uses dependency function $w$ to get its dependencies.
 		To lookup the dependencies, the function $uf_{\sqsubseteq_w}$ is used to get the greatest binding a variable is bound to, in respect to the ordering $\sqsubseteq_w$.
-		Since the occurrence of $x$ is used, it is added to the set of variable occurrences we got from the lookup of $x$ dependencies.
+		Since the occurrence of $x$ is used, it is added to the set of variable occurrences we got from the lookup of the dependencies for $x$.
 
-	\item[\runa{Let}] rule, for the occurrence $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, creates a local binding that can be used in $e_2^{p_2}$
-		\runa{Let} evaluate $e_1^{p_1}$ to get the value $x$ will be bound to in the environment and the dependencies used to evaluate $e_1^{p_1}$ is bound in the dependency function.
-		As we reach the program point $p_1$ after evaluating $e_1^{p_1}$, and it is also the program point before evaluating $e_2^{p_2}$, the binding of $x$ is $w$ is to the program points $p_1$.	
+	\item[\runa{Let}] rule, for the occurrence $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, creates a local binding that can be used in $e_2^{p_2}$.
+		The \runa{Let} rule evaluate $e_1^{p_1}$, to get the value $v$, that $x$ will be bound to in the environment for $e_2^{p_2}$, and the dependencies used to evaluate $e_1^{p_1}$ is bound in the dependency function.
+		As we reach the program point $p_1$ after evaluating $e_1^{p_1}$, and it is also the program point before evaluating $e_2^{p_2}$, the binding of $x$ in $w$ is to the program points $p_1$.	
 
-	\item[\runa{Ref}] rule, for the occurrence $[\mbox{ref} e^{p'}]^{p''}$, creates a new location and binds it, in the store $sto$, to the value evaluated from $e^{p'}$.
-		The \runa{Ref} rule also binds the dependencies from evaluating the body $e^{p'}$ in the dependency function $w$ at the program point $p''$.
-		As the \runa{Ref} rule only creates a location, and binds it in $sto$, the environment is not updated as there \runa{Ref} does not in itself give any alias information.
+	\item[\runa{Ref}] rule, for the occurrence $[\mbox{ref}\;e^{p'}]^{p''}$, creates a new location and binds it in the store $sto$, to the value evaluated from $e^{p'}$.
+		The \runa{Ref} rule also binds the dependencies, from evaluating the body $e^{p'}$, in the dependency function $w$ at the program point $p''$.
+		As the \runa{Ref} rule creates a location (where we get the location from the $next$ pointer), and binds it in $sto$.
+		The environment is not updated as \runa{Ref} does not in itself give any alias information.
 		To create an alias for a location, it should be bound to a variable using the \runa{Let} rule.
 
-	\item[\runa{Ref-read}] rule, for the occurrence $!e^{p'}$, evaluates the body $e^{p'}$ to a value, that must be a location $\loc$, and reads the value of $\loc$ in the store.
-		The \runa{Ref-read} rule also makes a lookup for the dependencies $\loc$ is bound to in the dependency function $w$, as there could be multiple bindings for $\loc$, in $w$, at different program points.
-		We use the $uf_{\sqsubseteq_w}$ function to get greatest binding of $\loc$ with respect to the ordering $\sqsubseteq_w$, and we also add the location occurrence $\loc^{p'}$ to the set of locations.
+	\item[\runa{Ref-read}] rule, for the occurrence $[!e^{p_1}]^{p'}$, evaluates the body $e^{p_1}$ to a value, that must be a location $\loc$, and reads the value of $\loc$ in the store.
+		The \runa{Ref-read} rule also makes a lookup for the dependencies $\loc$ is bound to in the dependency function $w$.
+		As there could be multiple bindings for $\loc$, in $w$, at different program points, we use the $uf_{\sqsubseteq_{w'}}$ function to get greatest binding of $\loc$ with respect to the ordering $\sqsubseteq_{w'}$, 
+		and we also add the location occurrence $\loc^{p'}$ to the set of locations.
 
-	\item[\runa{Ref-write}] rule, for the occurrence $[e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}$, evaluate $e_1^{p_1}$ to a location $\loc$ and $e_2^{p_2}$ to a value $v$ and binds $\loc$ in the store $sto$ to the value $v$.
-		The dependency function is also extended with a new binding for $\loc$ at the program point $p'$.
+	\item[\runa{Ref-write}] rule, for the occurrence $[e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}$, evaluate $e_1^{p_1}$ to a location $\loc$ and $e_2^{p_2}$ to a value $v$, and binds $\loc$ in the store $sto$ to the value $v$.
+		The dependency function is also updated with a new binding for $\loc$ at the program point $p'$.
 \end{description}
 
 \begin{figure}[H]
