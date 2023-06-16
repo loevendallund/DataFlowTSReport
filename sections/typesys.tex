@@ -2,6 +2,7 @@
 \begin{document}
 \section{Type system for data-flow analysis}\label{sec:TypeSys}
 This section will introduce the type system for the data-flow analysis on the language presented in \cref{sec:lang}.
+Similarly to the language, the type rules, types and other parts are based on \cite{DVNicky}.
 The type system presented in this section is a type checker for global analysis of occurrences.
 The type checker assign types, presented in \cref{sec:types}, to occurrences given the basis, which will be presented in \cref{sec:basis}, and using the type assignment, which is presented in \cref{sec:Judge}.
 Since the language contains local information as bindings, and global information as locations, the type checker should also reflect both.

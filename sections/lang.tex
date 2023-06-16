@@ -2,6 +2,7 @@
 \begin{document}
 \section{Language}\label{sec:lang}
 This section will introduce a functional programming language, based on a subset of ReScript.
+As this is a generalization of a dead-value analysis system, the language presented here is based on the one found in \cite{DVNicky}.
 The language presented here is basically a $\lambda$-calculus with bindings, pattern matching and mutability.
 As the purpose of the dependency analysis is to analyse each subexpression of a program and differentiate them, the language is extended to label all expressions and subexpression.
 For the sake of the rest of the paper, we call the label a program point.
@@ -226,7 +227,7 @@ As such, the dependency function is used to model the semantic flow of dependenc
 \end{definition}
 A lookup in a dependency function $w$ is, for a $u^p\in\cat{Loc}^P\cup\cat{Var}^P$, such that:
 $$w(u^p)=(\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\},\{x_1^{p'_1},\cdots,x_m^{p'_m}\})$$
-This should be read as: a lookup of an occurrence $u^p$, that is for a variable or location occurrence, returns a pair of location occurrences and a set of variable occurrences.
+This should be read as: a lookup of an occurrence $u^p$, that is for a variable or location occurrence, returns a pair of location and variable occurrences.
 We also denote the pair, retrieved from the dependency function, as a dependency pair where $(L,V)$ where $L=\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\}$ is the set of location occurrences and $V=\{x_1^{p'_1},\cdots,x_m^{p'_m}\}$ is the set of variable occurrences.
 
 \begin{definition}[Update of $w$]\label{def:DepExt}
@@ -240,20 +241,19 @@ We also denote the pair, retrieved from the dependency function, as a dependency
 	\end{align*}
 \end{definition}
 
-Next, consider an example for the use of the dependency function $w$.
-
 \begin{example}[]\label{ex:dep}
-	Consider the example from \cref{ex:write}, we can infer the following for the dependency function:
+	Consider the occurrence from \cref{ex:write}, where we can infer the following bindings for the dependency function $w_{ex}$:
 	$$w_{ex}=[x^2\mapsto(\emptyset,\emptyset),z^4\mapsto(\emptyset,\emptyset),y^9\mapsto(\emptyset,\{x^5\}),\loc^2\mapsto(\emptyset,\emptyset),\loc^8\mapsto(\emptyset,\{z^7\})]$$
-	Here $\loc$ denotes a location created from a reference construct.
-	Here, we can see all variable bindings are distinct, while we have multiple location bindings as we first create a reference and later write to it before reading it.
+	Where $\loc$ is the location created from the reference construct.
+	Here, we can see that the variable bindings are disting, while the location $\loc$ is bound multiple times, for the program point $2$ and $8$.
 
-	If we want to read a variable or location in $w$, we must also know for which program point, as for example, we have multiple bindings of the element $\loc$ (for program point $2$ and $8$.
-	By considering \cref{ex:write}, we would like to read the information of the location $x$ is bound to, we it is easy to see that we would like to read from $\loc^8$ as the write happens later than the creation of the reference.
+	If we want to read a variable or location in $w_{ex}$, we must also know for which program point since there can exists multiple bindings for the same variable or location, at different program points.
+	By considering \cref{ex:write}, we would like to read the information from the location, that $x$ is an alias to.
+	As is visible from the occurrence in \cref{ex:write}, we know that we should read from $\loc^8$, since we wrote to $\loc$ at the program point $8$.
 \end{example}
 
-In the example above, \cref{ex:dep}, we can see that from $w$ alone it is not possible to know which occurrence to read, if we only know the value (i.e. the variable or location.
-We present the notion of ordering of program points as a binary relation over program points:
+In the example above, \cref{ex:dep}, we can see that from $w_{ex}$ alone it is not possible to know which occurrence to read.
+We then present the notion of ordering, as a binary relation over program points:
 
 \begin{definition}[]\label{def:BinRel}
 	Let \cat{P} be a set of program points.
@@ -309,7 +309,7 @@ Based on \cref{def:GBind}, we can present an instantiation of the function for t
 \end{definition}
 
 
-\begin{example}[]\label{ex:dep}
+\begin{example}[]\label{ex:deplookup}
 	As a continuation of \cref{ex:depRel}, we can then lookup the greatest element for an element (i.e., a variable or location).
 	As we were interested in which location occurrence to lookup in $w_ex$, we can now use the function $uf_{\sqsubseteq_w}$:
 	$$uf_{\sqsubseteq_{w_ex}}(\loc,w_ex)=\inf\{\loc^p\in dom(w)\mid \loc^q\in dom(w). q\sqsubseteq_{w_ex} p\}$$
