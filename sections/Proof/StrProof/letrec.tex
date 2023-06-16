@@ -2,10 +2,17 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\input{sections/appendix/TSRules/letrec.tex}
+	\runa{T-Let-rec}\\[0.2cm]
+	\inference[]
+	{
+		\Gamma',\Pi\vdash e_1^{p}:T\rightarrow T_2 &\\
+		\Gamma'[f^p:T\rightarrow T_2],\Pi\vdash e_2^{p}:T_2
+	}
+	{\Gamma',\Pi\vdash [\mbox{let rec}\; f \; e_1^{p} \; e_2^{p'}]^{p''}:T_2}
 	\end{tabular}
 \end{figure}
-From our assumption, we know that $x\notin fv(x^p)$.
+Where $\Gamma'=\Gamma[x^{p'}:T_1]$.
+From our assumption, we know that $x\notin fv(e^p)$.
 By \cref{def:fv} we know:
 \begin{itemize}
 	\item $x\notin fv(e_1^{p_1})$,
@@ -17,4 +24,4 @@ By our induction hypothesis we can get:
 	\item $\Gamma[f^{p_1}:T_1\rightarrow T_2],\Pi\vdash e_2^{p_2}:T$
 \end{itemize}
 Where we can then conclude that:
-$$\Gamma,\Pi\vdash [\mbox{let rec}\; f \; e_1^{p_1} \; e_2^{p_2}]^{p}:T$$
+$$\Gamma,\Pi\vdash [\mbox{let rec}\; f \; e_1^{p_1} \; e_2^{p_2}]^{p}:T_2$$

@@ -2,10 +2,19 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\input{sections/appendix/TSRules/case.tex}
+	\runa{T-Case}\\[0.2cm]
+	\inference[]
+	{
+		\Gamma',\Pi\vdash e^{p}:(\delta,\kappa) &\\
+		\Gamma'',\Pi\vdash e_i^{p_i}:T_i\;\;\;(1\leq i\leq|\tilde{\pi}|)
+	}
+	{\Gamma',\Pi\vdash [\mbox{case}\;e^{p}\;\tilde{\pi}\;\tilde{o}]^{p'}:T\sqcup(\delta,\kappa)}\\[0.3cm]
 	\end{tabular}
 \end{figure}
-From our assumption, we know that $x\notin fv(x^p)$.
+Where $\Gamma'=\Gamma[x^{p'}:T_1]$, $e_i^{p_i}\in\tilde{o}$ and $s_i\in\tilde{\pi}$ $T=\bigcup_{i=1}^{|\tilde{\pi}|}T_i$, and
+$\Gamma''=\Gamma'[x^p:(\delta,\kappa)]$ if $s_i=x$
+
+From our assumption, we know that $x\notin fv(e^p)$.
 By \cref{def:fv} we know:
 \begin{itemize}
 	\item $x\notin fv(e^{p''})$,
@@ -14,7 +23,8 @@ By \cref{def:fv} we know:
 By our induction hypothesis we can get:
 \begin{itemize}
 	\item $\Gamma,\Pi\vdash e^{p''}:(\delta,\kappa)$,
-	\item $\Gamma[y^{p''}:(\delta,\kappa)],\Pi\vdash e_2^{p_2}:T$
+	\item $\Gamma[x^p:(\delta,\kappa)],\Pi\vdash e_i^{p_i}:T_i$ if $s_i=x$
+	\item $\Gamma,\Pi\vdash e_i^{p_i}:T_i$ if $s_i\neq x$
 \end{itemize}
 Where we can then conclude that:
 $$\Gamma,\Pi\vdash [\mbox{case}\;e^{p''}\;\tilde{\pi}\;\tilde{o}]^{p}:T$$

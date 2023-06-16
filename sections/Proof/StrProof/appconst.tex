@@ -1,0 +1,27 @@
+\item[\runa{T-App-const}] Here $e^p=[c\;e_1^{p_1} \; e_2^{p_2}]^p$, where
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+	\runa{T-App-const}\\[0.2cm]
+	\inference[]
+	{
+		\Gamma,\Pi\vdash e_1^{p}:(\delta_1,\emptyset) &\\
+		\Gamma,\Pi\vdash e_2^{p'}:(\delta_2,\emptyset)
+	}
+	{\Gamma,\Pi\vdash [c\;e_1^{p} \; e_2^{p'}]^{p''}:(\delta_1\cup\delta_2,\emptyset)}\\[0.3cm]
+	\end{tabular}
+\end{figure}
+Where $\Gamma'=\Gamma[x^{p'}:T_1]$, and $c$ is a functional constant.
+From our assumption, we know that $x\notin fv(e^p)$.
+By \cref{def:fv}, we then know:
+\begin{itemize}
+	\item $x\notin fv(e_1^{p_1})$,
+	\item $x\notin fv(e_2^{p_2})$
+\end{itemize}
+Then from our induction hypothesis we can get:
+\begin{itemize}
+	\item $\Gamma,\Pi\vdash e_1^{p_1}:(\delta_1,\emptyset)$,
+	\item $\Gamma,\Pi\vdash e_2^{p_2}:(\delta_2,\emptyset)$
+\end{itemize}
+Where we can then conclude that:
+$$\Gamma,\Pi\vdash [c\;e_1^{p_1} \; e_2^{p_2}]^{p}:T_2$$

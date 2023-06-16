@@ -2,10 +2,15 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\input{sections/appendix/TSRules/ref.tex}
+	\runa{T-Ref}\\[0.2cm]
+	\inference[]
+	{\Gamma,\Pi\vdash  e^{p}:(\delta',\kappa')}
+	{\Gamma[\nu x^{p'}:(\delta',\kappa')],\Pi\vdash [\mbox{ref}\;e^{p}]^{p'}:(\emptyset,\kappa)}\\
 	\end{tabular}
 \end{figure}
-From our assumption, we know that $x\notin fv(x^p)$.
+Where $\nu x$ is fresh, $\kappa=\{\nu x\}$, and $\Gamma'=\Gamma[x^{p'}:T_1]$.
+
+From our assumption, we know that $x\notin fv(e^p)$.
 By \cref{def:fv} we know:
 \begin{itemize}
 	\item $x\notin fv(e_1^{p_1})$,
@@ -15,4 +20,4 @@ By our induction hypothesis we can get:
 	\item $\Gamma,\Pi\vdash e_1^{p_1}:(\delta',\kappa')$,
 \end{itemize}
 Where we can then conclude that:
-$$\Gamma,\Pi\vdash [\mbox{ref}\;e_1^{p_1}]^{p}:T$$
+$$\Gamma,\Pi\vdash [\mbox{ref}\;e_1^{p_1}]^{p}:(\emptyset,\kappa)$$

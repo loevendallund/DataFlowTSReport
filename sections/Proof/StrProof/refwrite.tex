@@ -2,11 +2,18 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\input{sections/appendix/TSRules/refwrite.tex}
+	\runa{T-Ref-write}\\[0.2cm]
+	\inference[]
+	{
+		\Gamma',\Pi\vdash  e_1^{p_1}:(\delta,\kappa)&\\
+		\Gamma',\Pi\vdash  e_2^{p_2}:(\delta_2,\kappa_2)
+	}
+	{\Gamma'',\Pi\vdash [e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}:(\delta,\emptyset)}\\
 	\end{tabular}
 \end{figure}
+Where $\Gamma'=\Gamma[x^{p'}:T_1]$, $\Gamma''=\Gamma'[\nu x_1:(\delta_2,\kappa_2),\cdots,\nu x_n:(\delta_2,\kappa_2)]$ and $\nu x_1,\cdots,\nu x_n\in\{\nu x\mid\nu x\in\kappa\}$
 
-From our assumption, we know that $x\notin fv(x^p)$.
+From our assumption, we know that $x\notin fv(e^p)$.
 By \cref{def:fv} we know:
 \begin{itemize}
 	\item $x\notin fv(e_1^{p_1})$,
@@ -18,4 +25,5 @@ By our induction hypothesis we can get:
 	\item $\Gamma,\Pi\vdash e_1^{p_1}:(\delta_2,\kappa_2)$,
 \end{itemize}
 Where we can then conclude that:
-$$\Gamma,\Pi\vdash [e_1^{p_1}\;:=\;e_2^{p_2}]^{p}:T$$
+$$\Gamma_1,\Pi\vdash [e_1^{p_1}\;:=\;e_2^{p_2}]^{p}:(\delta,\emptyset)$$
+Where $\Gamma_1=\Gamma[\nu x_1:(\delta_2,\kappa_2),\cdots,\nu x_n:(\delta_2,\kappa_2)]$

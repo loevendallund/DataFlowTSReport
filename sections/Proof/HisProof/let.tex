@@ -12,5 +12,5 @@ By virtue of our induction hypothesis, we can get the following from the premise
 \end{description}
 We then need to show that: if $y^{p''}\in dom(w')\backslash dom(w)$ then $y\notin fv(e^{p'})$.
 By \cref{def:fv} we know that $fv([\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'})=fv(e_1^{p_1})\cup fv(e_2^{p_2})\backslash\{x\}$, and the only variable that is not handled by \cat{1)}, \cat{2)}, and \cat{3)} is $x^{p_2}$.
-Where $x$ is not a free variable in $e_1^{p_1}$, but $x$ is possibly free $e_2^{p_2}$.
+Where $x$ is not a free variable in $e_1^{p_1}$, but $x$ is possibly free in $e_2^{p_2}$.
 From \cref{def:fv}, we know that $x$ is not free in $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, we then get: if $y^{p''}\in dom(w')\backslash dom(w)$ then $y\notin fv(e^{p'})$.

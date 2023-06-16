@@ -11,11 +11,8 @@ And lastly, we will show the soundness of the type system.
 
 \subsection{Properties}
 Before we present the soundness proof, we will first present some properties about the semantics and type system.
-These properties presents some areas about local information, and as such uses \cref{def:fv}.
-
-The first property we present is a property of the dependency function.
-Since the dependency function is global, and as such they can contain side effects after evaluation, 
-any new variable bindings introduced to the dependency function by evaluating an occurrence $e^p$, those variables are then not free in $e^p$.
+The first property we present is for the dependency function,since the dependency function is global, and as such they can contain side effects after an evaluation.
+This property states that if any new variable bindings is introduced to the dependency function, by evaluating an occurrence $e^p$, those variables are not free in $e^p$.
 
 \begin{lemma}[History]\label{lemma:His}
 	Suppose $e^p$ is an occurrence, that
@@ -27,8 +24,7 @@ The proof for \cref{lemma:His} can be found in \cref{app:HisProof}.
 
 %\subfile{HisProof/index.tex}
 
-The second property is the strengthening of the type environment.
-This strengthening lemma states that if there is a binding the type environment, used to type an occurrence $e^p$, and the variables is not free in $e^p$ then the binding can be removed.
+The second property is the strengthening of the type environment, which states that if there is a binding the type environment, used to type an occurrence $e^p$, and the variables is not free in $e^p$ then the binding can be removed.
 
 \begin{lemma}[Strengthening]\label{lemma:Strength}
 	If $\Gamma[x^{p'}:T'],\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma,\Pi\vdash e^{p}:T$
@@ -36,14 +32,12 @@ This strengthening lemma states that if there is a binding the type environment,
 The proof for \cref{lemma:Strength} can be found in \cref{app:StrProof}.
 %\subfile{StrProof/index.tex}
 
-With history, \cref{lemma:His}, and strengthening, \cref{lemma:Strength}, defined we can then show the soundness theorem.
-This theorem compares the semantics for an occurrence to a type rule that concludes for this occurrence.
-Since we are interested if the type system is a sound approximation of the semantics, we need to make sure that an evaluation of an occurrence and the type for the occurrence agrees.
-As such, we assume that we the type environment and approximated order of program points are in an agreement with the binding models in the semantics.
-We also assume that all bindings in the environment are well-typed.
+With history, \cref{lemma:His}, and strengthening, \cref{lemma:Strength}, defined we can then present the soundness theorem.
+This theorem compares the semantics, for an occurrence, to a type rule that concludes this occurrence.
+Since we are interested in, if the type system is a sound approximation of the semantics, we need to make sure that an evaluation of an occurrence, and the type for the occurrence agrees.
+As such, we assume that the type environment and approximated order of program points are in an agreement with the binding models in the semantics, and we also assume that the environment is well-typed.
 
-Based on this we then need to make sure that, after an evaluation, that environments are still in agreement, and that the type we get is in agreement with the semantics.
-Lastly, we also need to make sure that we can type the value that an evaluation step produces.
+Based on these assumptions, we then need to make sure that, after an evaluation, we are still in agreement, we can type the value, and the type is in agreement with the semantics.
 
 \begin{theorem}[Soundness of type system]
 	Suppose $e^{p'}$ is an occurrence where

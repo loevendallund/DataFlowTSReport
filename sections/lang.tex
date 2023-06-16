@@ -107,6 +107,7 @@ Next we defined the notion of free variables, in the usual way for $\lambda$-cal
 		fv(c^p)&=\emptyset\\
 		fv([\lambda\;y.e^{p'}]^p)&=fv(e^{p'})\backslash\{y\}\\
 		fv([e_1^{p_1}\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\\
+		fv([c\;e_1^{p_1}\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\\
 		fv([\mbox{let}\;y\;e_1^{p_1}\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\backslash\{y\}\\
 		fv([\mbox{let rec}\;f\;e_1^{p_1}\;e_2^{p_2}]^p)&=fv(e_1^{p_1})\cup fv(e_2^{p_2})\backslash\{f\}\\
 		fv([\mbox{case}\;e^{p'}\;(s_1,\cdots,s_n)\;(e_1^{p_1},\cdots,e_n^{p_n})]^p)&=fv(e^{p'})\cup fv(e_1^{p_1})\cup\cdots\cup fv(e_n^{p_n})\backslash(\tau(s_1)\cup\cdots\cup\tau(s_n))\\

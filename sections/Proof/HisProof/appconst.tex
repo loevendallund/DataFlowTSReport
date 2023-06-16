@@ -5,10 +5,10 @@
 		\input{sections/appendix/ColRules/appconst.tex}
 	\end{tabular}
 \end{figure}
-By virtue of our induction hypothesis, we can get the follow from the premises:
+By virtue of our induction hypothesis, we can get the following from the premises:
 \begin{description}
 	\item[1)] if $y^{p''}\in dom(w_1)\backslash dom(w)$ then $y\notin fv(e_1^{p_1})$
 	\item[2)] if $y^{p''}\in dom(w')\backslash dom(w_1)$ then $y\notin fv(e_2^{p_2})$
 \end{description}
 We the need to show that: if $y^{p''}\in dom(w')\backslash dom(w)$ then $y\notin fv(e^{p'})$.
-By \cref{def:fv} we know that $fv([e_1^{p_1}\;e_2^{p_2}]^{p'})=fv(e_1^{p_1})\cup fv(e_2^{p_2})$, this case follows immediately.
+By \cref{def:fv} we know that $fv([e_1^{p_1}\;e_2^{p_2}]^{p'})=fv(e_1^{p_1})\cup fv(e_2^{p_2})$, this case then follows.

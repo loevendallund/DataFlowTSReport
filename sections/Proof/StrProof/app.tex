@@ -2,10 +2,17 @@
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{l}
-		\input{sections/appendix/TSRules/app.tex}
+		\runa{T-App}\\[0.2cm]
+		\inference[]
+		{
+			\Gamma',\Pi\vdash e_1^{p}:T_1\rightarrow T_2 &\\
+			\Gamma',\Pi\vdash e_2^{p'}:T_1
+		}
+		{\Gamma',\Pi\vdash [e_1^{p} \; e_2^{p'}]^{p''}:T_2}
 	\end{tabular}
 \end{figure}
-From our assumption, we know that $x\notin fv(x^p)$.
+Where $\Gamma'=\Gamma[x^{p'}:T_1]$.
+From our assumption, we know that $x\notin fv(e^p)$.
 By \cref{def:fv}, we then know:
 \begin{itemize}
 	\item $x\notin fv(e_1^{p_1})$,

@@ -1,32 +1,18 @@
 \documentclass[../../master.tex]{subfiles}
 \begin{document}
 \subsection{Agreement}
-This section introduces the agreement between the type system and the semantics, where we will present the relation between the binding models in the type system and semantics, and show the relation between the types and the semantics.
+This section introduces the agreement between the type system and the semantics, where we will present the relation between the binding models in the type system and semantics, and show the relation between them.
 
-We will first introduce the agreement between the binding models between the type system and semantics, i.e., show how the type environment and approximated order of program points relate to the environment, store, and dependency function.
-Then we will show the type agreement, that is, show that what conditions there are for a type to agree with the semantics.
-The type agreement needs to show when the dependencies agrees and for alias information.
+We will first introduce the agreement between the binding models, i.e., show how the type environment and approximated order of program points relate to the environment, store, and dependency function.
+Then we will show the type agreement, i.e., show the conditions for when a type agrees with the semantics.
+As such, the type agreement needs to show when the dependencies agrees and alias if the alias information agrees with the basis.
 \bigskip
 
-The first agreement we present is the environment agreement, which ensures that that the type environment and approximated order of program points are a good approximation of the binding model in the type system, that is, for the environment $env$, store $sto$, dependency function $w$, and the relation of program points over $w$.
+The first agreement we present is the environment agreement, which ensures that that the type environment and approximated order of program points are a good approximation of the binding model in the semantics, i.e., 
+for the environment $env$, store $sto$, dependency function $w$, and the relation of program points over $w$.
 
 Here $env$, $sto$, and $w$ contains information for en evaluation in the semantics, either before or after an evaluation.
 The type environment $\Gamma$ contains the local information for variable bindings and global information for internal variables, and the approximated order of program points $\Pi$ is an approximation of all program points in an occurrence.
-
-For these to agree, we relate them only to the information currently known in $env$, $sto$, and $w$, where for local information, the variables in $env$, then there is also an occurrence for that variable in $w$ and $\Gamma$.
-This ensures that every bound variable also exists in $w$ and $\Gamma$.
-Furthermore, we also ensures that the local declarations $x$ know by $env$, the dependencies of all occurrences for $x$ in $w$ and type in $\Gamma$ agrees, as defined in \cref{def:TAgree}.
-
-We similarly handles the agreement for global information, between $sto$, $w$ and $\Gamma$.
-Here we need to make sure that all currently known locations, then there exists an appropriate internal variable that represent that location.
-As we are denoting a location and the internal variable that represent this with the same program points, we always compare them by program points.
-We also make sure that the dependencies of all those locations also agrees with the type of the internal variable the represents them.
-
-Lastly, we also need to make sure that $\Pi$ is a good approximation of the information know in $w$, denoted as $\sqsubseteq_w$, and the order of programs points on $w$.
-The first condition for this is that, if an order is defined in $\sqsubseteq_w$, then $\Pi$ also agrees on this order.
-As for the second condition, since $\Pi$ is an approximation of an occurrence, and as such also approximates for all paths (the different branches from pattern matching), and $\Gamma$ contains all bindings for an internal variable in an occurrence.
-We then need to make sure that for all locations, $\loc$, currently known, then there exists a program point $p'$, such that by finding the greatest binding for $\loc$ currently known in $w$, 
-this occurrence also exists when finding all greatest binding for the set of $p$-chains $\Upsilon_{p'}$.
 
 \begin{definition}[Environment agreement]\label{def:EnvAgree}
 	Let $(w,\sqsubseteq_w)$ be a pair containing the dependency function and a relation over it, $env$ be an environment, $sto$ be the a store, $\Gamma$ be a type environment, and $\Pi$ be an approximated program point order.
@@ -42,17 +28,38 @@ this occurrence also exists when finding all greatest binding for the set of $p$
 	\item $\forall \loc^p\in dom(w).\exists \nu x^p\in dom(\Gamma)\Rightarrow\exists p'\in\cat{P}.uf_{\sqsubseteq_w}(\loc,w)\in uf_{\Upsilon_{p'}}(\nu x,\Gamma)$
 	\end{enumerate}
 \end{definition}
+The idea behind the environment agreement is that we need to make sure that semantics and type system talks about the same, i.e., if the dependencies in the semantics is also captured in the type environment, the alias information is captured, 
+that $\Pi$ is a good approximation, in respect to $w$, and the $p$-chains captures the global occurrence.
+As such, the type environment focuses on three areas: \cat{1)} local information variables, \cat{2)} the global information for references, and \cat{3)} the approximated order of program points.
+It should be noted at the agreement only relates the information known by $env$, $sto$, and $w$.
+
+\begin{description}
+	\item[1)] The agreement for local information only relates the information currently known by $env$, and that the information known by $w$ and $\Gamma$ agrees, in respect to \cref{def:TAgree}.
+		This is ensured by \cat{1)} and \cat{2)}.
+
+	\item[2)] We similarly handles agreement for the global information known, which is ensured by \cat{3)} and \cat{4)}.
+		Since $\Gamma$ contains the global information for references, we require that there exists a corresponding internal variable to the currently known locations, by comparing them by program points.
+		We also ensures that the dependencies from a location occurrence agrees with the type of a corresponding internal variable occurrence, in respect to \cref{def:TAgree}.
+
+	\item[3)] We also needs to ensure that $\Pi$ is a good approximation of the order $\sqsubseteq_w$ and the greatest binding function for $p$-chains ensures that we always get the necessary reference occurrences.
+	\cat{5)} ensures that if an order is defined in $\sqsubseteq_w$, then $\Pi$ also agrees on this order.
+
+	For \cat{6)}, we need to ensure that for any location currently known the exists a corresponding internal variable where, getting the greatest binding of this occurrence, $\loc^p$, then there exists a program point $p'$, 
+	such that looking up all greatest bindings for the $p'$-chain, there exists an internal variable occurrence that corresponds to $\loc^p$.
+\end{description}
+\bigskip
 
 With the environment agreement defined, we can present the type agreement.
-As the type can be abstractions and base types, with or without alias information, we have different requirements, depending on the value.
-Here, the idea is that if the value is a location, then we check that both the set of occurrences agrees with the dependency pair, presented in \cref{def:DepAgree}, and check if the alias information agrees with the semantic binding model, \cref{def:AliasAgree}.
+As the type can be abstractions and base types, with or without alias information, we have different requirements for handling them, as such we relate each requirement to a value
+Here, the idea is that if the value is a location, then we check that both the set of occurrences agrees with the dependency pair, presented in \cref{def:DepAgree}, 
+and check if the alias information agrees with the semantics, \cref{def:AliasAgree}.
 If the value is not a location, then the type can either be an abstraction type or base type.
-For the base type, we only need to check the agreement between the set of occurrences and the dependency pair.
-However, if the type is a location, the we need to check that $T_2$ agrees with binding model.
-Since we are only concerned about the return type $T_2$ for abstractions, are that, if the argument parameter is used in the body of the abstraction, then the dependencies would already be part of the return type.
+For the base type, we check that the agreement between the set of occurrences and the dependency pair agrees.
+If the type is an abstraction, then we check that $T_2$ agrees with binding model.
+We are only concerned about the return type $T_2$ for abstractions, since if the argument parameter is used in the body of the abstraction, then the dependencies would already be part of the return type.
 
 \begin{definition}[Type agreement]\label{def:TAgree}
-	Let $env$ be an environment, $\psi$ be a pair, $(L,V)$ be a dependency pair, and $T$ be a type.
+	Let $env$ be an environment, $w$ be a dependency function, $\sqsubseteq_w$ be a relation over $w$, $(L,V)$ be a dependency pair, and $T$ be a type.
 	We say that:
 	$$(env,v,(w,\sqsubseteq_w),(L,V))\models(\Gamma,T)$$
 	iff
@@ -76,30 +83,36 @@ Since we are only concerned about the return type $T_2$ for abstractions, are th
 \end{definition}
 
 \begin{definition}[Dependency agreement]\label{def:DepAgree}
-	Let $env$ be an environment, $(L,V)$ be a dependency pair, and $\delta$ be a set of variables.
+	Let $env$ be an environment, $(L,V)$ be a dependency pair, and $\delta$ be a set of occurrences.
 	We say that:
 	$$(env,(L,V))\models\delta$$
 	if
 	\begin{itemize}
 		\item $V\subseteq\delta$,
-		\item For all $\loc^p\in L$ where $\exists x\in dom(env).env(x)=\loc$, we then have $\{x\in dom(env)\mid env(x)=\loc\}\subseteq \kappa_i^0$ for a $\kappa_i^0\in\delta$
-		\item For all $\loc^p\in L$ where $\not\exists x \in dom(env).env(x)=\loc$ then there exists a $\kappa_i^0\in\delta$ such that $\kappa_i^0\subseteq\cat{IVar}$
+		\item For all $\loc^p\in L$ where $env^{\loc}\neq\emptyset$, we then have $\{x\in dom(env)\mid env(x)=\loc\}\subseteq \kappa_i^0$ for a $\kappa_i^0\in\delta$
+		\item For all $\loc^p\in L$ where $env^{\loc}=\emptyset$ then there exists a $\kappa_i^0\in\delta$ such that $\kappa_i^0\subseteq\cat{IVar}$
 	\end{itemize}
 \end{definition}
 
+The dependency agreement, defined in \cref{def:DepAgree}, ensures that $\delta$ at leas contains all information from the dependency pair.
+
+
 \begin{definition}[Alias agreement]\label{def:AliasAgree}
-	Let $env$ be an environment, $(w,\sqsubseteq_w)$ be a pair of a dependency function and a relation over $w$, $\loc$ be a location, and $\kappa$ be an alias set.
+	Let $env$ be an environment, $w$ be a pair of a dependency function, $\sqsubseteq_w$ be a relation over $w$, $\loc$ be a location, and $\kappa$ be an alias set.
 	We say that:
 	$$(env,(w,\sqsubseteq_w),\loc)\models(\Gamma,\kappa)$$
 	if
 	\begin{itemize}
 		\item $\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa$
 		\item $env^{-1}(\loc)\neq\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
-			(env^{-1}(\loc)\subseteq\kappa^0_i)\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i)$
+			(env^{-1}(\loc)\subseteq\kappa^0_i)\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\\\nu x\in\kappa^0_i\wedge\nu x\in\kappa)$
 		\item $env^{-1}(\loc)=\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
-			(\kappa^0_i\subseteq\cat{IVar})\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i)$
-		%\item $\forall\loc^p\in dom(w).(env^{-1}(\loc)\cap\cat{Var}\neq\emptyset)\Rightarrow(\exists \kappa^0_i\in\kappa.\exists\nu x^p\in dom(\Gamma).\nu x\in\kappa^0_i\wedge env^{-1}(\loc)\subseteq\kappa^0_i)$
-		%\item $\forall\loc^p\in dom(w).(env^{-1}(\loc)\subseteq\cat{IVar})\Rightarrow(\exists \kappa^0_i\in\kappa.\exists\nu x^p\in dom(\Gamma).\nu x\in env^{-1}(\loc)\subseteq\kappa^0_i)$
+			(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i\wedge\nu x\in\kappa)$
 	\end{itemize}
 \end{definition}
+
+The alias agreement, defined in \cref{def:AliasAgree}, ensures that the alias information in $\kappa$ is also known the environment.
+To do this, we ensure that if there exists alias information in the environment $env$, then there exists an alias base $\kappa^0_i\in\kappa^0$ such that the currently know alias information known in 
+in $env$ is a subset of $\kappa^0_i$, and that there exists a $\nu x\in\kappa$, such that $\nu x\in \kappa^0_i$.
+If there is no currently known alias information, we simply check that there exists a corresponding internal variable, that is part of an alias base.
 \end{document}
