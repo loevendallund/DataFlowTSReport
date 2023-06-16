@@ -4,7 +4,7 @@
 \subsection{History}\label{app:HisProof}
 Here, we present the proof for the history, that is, all variables introduced in an evaluation of an occurrence, and bound to the dependency function, is not free.
 
-\begin{lemma}[History]\label{lemma:His}
+\begin{lemma}[History]
 	Suppose $e^p$ is an occurrence, that
 	$$env\vdash\left\langle e^{p},sto,(w,\sqsubseteq_w),p'\right\rangle\rightarrow\left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p''\right\rangle$$
 		and $x^{p_1}\in dom(w')\backslash dom(w)$.
@@ -15,7 +15,7 @@ Here, we present the proof for the history, that is, all variables introduced in
 \subsection{Strengthening}\label{app:StrProof}
 Here, we present the proof for strengthening of type environments.
 
-\begin{lemma}[Strengthening]\label{lemma:Strength}
+\begin{lemma}[Strengthening]
 	If $\Gamma[x^{p'}:T'],\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma,\Pi\vdash e^{p}:T$
 \end{lemma}
 \subfile{../Proof/StrProof/index.tex}

@@ -28,7 +28,7 @@ Where $T=T'\sqcup(\delta,\kappa)$, $T'=\bigcup_{i=1}^{|\tilde{\pi}|}T_i$, $e_i^{
 We must show that \cat{1)} $\Gamma,\Pi\vdash v:T$, \cat{2)} $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$, and \\
 \cat{3)} $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
 
-To conclude, we first need to show for the premise, where due to our assumption and from the first premise, we can use the induction hypothesis, where we then get:
+To conclude, we first need to show for the premises, where due to our assumption and from the first premise, we can use the induction hypothesis to get:
 \begin{itemize}
 	\item $\Gamma,\Pi\vdash v_e:(\delta,\kappa)$,
 	\item $(env,sto'',(w'',\sqsubseteq_w''))\models(\Gamma,\Pi)$,
@@ -41,24 +41,26 @@ Since in the rule \runa{T-Case} we take the union of all patterns, we can then f
 	\item $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T_j)$
 \end{itemize}
 
-If we have \cat{a)} $\Gamma',\Pi\vdash env[env']$ and \cat{b)} $(env[env'],sto'',(w''',\sqsubset_w''))\models(\Gamma',\Pi)$, we can then conclude by our induction hypothesis.
+If we have \cat{a)} $\Gamma',\Pi\vdash env[env']$ and \cat{b)} $(env[env'],sto'',(w''',\sqsubset_w''))\models(\Gamma',\Pi)$, we can then conclude the second premise by our induction hypothesis.
 \begin{description}
 	\item[a)] We know that either we have $\Gamma'=\Gamma[x\mapsto(\delta,\kappa)]$ and $env[x\mapsto v_e]$ if $s_j=x$, or $\Gamma'=\Gamma$ and $env$ if $s_j\neq x$.
 		\begin{itemize}
-			\item if $s_j\neq x$: Then we just have $\Gamma,\Pi\vdash env$
-			\item if $s_j=x$: Then we have $\Gamma[x\mapsto(\delta,\kappa)],\Pi\vdash env[x\mapsto v_e]$, which hold due to to the first premise.
+			\item if $s_j\neq x$: Then we have $\Gamma,\Pi\vdash env$
+			\item if $s_j=x$: Then we have $\Gamma[x\mapsto(\delta,\kappa)],\Pi\vdash env[x\mapsto v_e]$, which hold due to the first premise.
 		\end{itemize}
 	\item[b)] We know that either we have $\Gamma'=\Gamma[x\mapsto(\delta,\kappa)]$ and $env[x\mapsto v_e]$ if $s_j=x$, or $\Gamma'=\Gamma$ and $env$ if $s_j\neq x$.
 		\begin{itemize}
 			\item if $s_j\neq x$: then we have $(env,sto'',(w'',\sqsubset_w''))\models(\Gamma,\Pi)$.
 			\item if $s_j=x$: then $(env[x\mapsto v_e],sto'',(w''',\sqsubset_w''))\models(\Gamma[x\mapsto(\delta,\kappa)],\Pi)$, since we know that $(env,sto'',(w'',\sqsubset_w''))\models(\Gamma,\Pi)$, we only need to show for $x$.
-				Since we have $x\in dom(env)$ and $x^{p_j}\in dom(w''')$ and $x^{p_j}\in dom(\Gamma')$ and due to the 1 premise, we then know that $(env[x\mapsto v_e],sto'',(w''',\sqsubset_w''))\models(\Gamma[x\mapsto(\delta,\kappa)],\Pi)$.
+				Since we have $x\in dom(env)$, $x^{p_j}\in dom(w''')$ and $x^{p_j}\in dom(\Gamma')$ and due to the first premise, we know that $(env[x\mapsto v_e],sto'',(w''',\sqsubset_w''))\models(\Gamma[x\mapsto(\delta,\kappa)],\Pi)$.
 		\end{itemize}
 \end{description}
 Based on \cat{a)} and \cat{b)} we can then conclude:
 
 \begin{description}
 	\item[1)] Since $\Gamma',\Pi\vdash v:T_j$, then we also must have $\Gamma',\Pi\vdash v:T$, since $T$ only contains more information than $T_j$.
-	\item[2)] By the second premise, \cref{lemma:His}, and \cref{lemma:Strength}, we can then get $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$.
-	\item[3)] Due to \cat{1)}, \cat{2)}, \cat{a)}, and \cat{b)} we can then conclude that $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
+	\item[2)] By the second premise, \cref{lemma:His}, and \cref{lemma:Strength}, we can then get 
+		$$(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$$
+	\item[3)] Due to \cat{1)}, \cat{2)}, \cat{a)}, and \cat{b)} we can then conclude that
+		$$(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$$
 \end{description}
