@@ -1,0 +1,706 @@
+\documentclass[acmsmall,sigplan]{acmart}
+\input{setup/preamble.tex}
+\input{setup/macros.tex}
+
+\newcommand{\uf}{\ensuremath{\mathsf{IP}}}
+
+%\input{frontmatter/acm.tex}
+
+\begin{document}
+	%\subfile{frontmatter/resume.tex}
+   \input{frontmatter/titlepage.tex}
+	
+\section{Introduction}
+
+Data-flow analysis has been studied for decades to better to provide
+flow information of programs that is then used for
+different tasks for compiler optimization, debugging and understanding
+programs, testing and maintenance.  In the context of compiler
+optimization, the flow information provides data that may be
+used at given parts of the program at runtime.
+
+The classical approach uses an iterative algorithm based on
+representing the control-flow of a program as a graph.  The graph
+should provide a sound over-approximation of the control flow of a
+program, where edges represent the flow and nodes represent basic
+blocks.  By using the information in such graphs, many algorithms have
+been developed that annotate a graph and computing the maximal fixed
+point of the data flow equations that arise from it
+\cite{KildallGaryA1973Auat, RyderBarbara1988Idaa}.  Other techniques
+have also been presented, such as graph-free approaches
+\cite{HorspoolR.Niegel2002AGAt} and type systems with refinement types
+\cite{PavlinovicZvonimir2021Dfrt}.
+
+As type system have been used to provide a semantic analysis of
+programs usually used to characterize specific type of run-time
+errors. Type systems are implemented as either static or dynamic
+analysis, i.e., on compile time or run-time.  Type systems are widely
+used, from weakly typed languages such as JavaScript, to strongly
+typed languages commonly found in functional languages such as Haskell
+and Ocaml.
+
+A complication arises in imperative languages that admit
+references. Here one must take into account aliasing, i.e., multiple
+variables referring to the same location.  Many data-flow analyses use
+special alias algorithms to compute this information.  Two overall
+types of alias algorithm exist. Some are flow-sensitive and give
+precise information but are expensive, others are flow-insensitive and
+are less precise but inexpensive \cite{LiangDonglin1999Eaag,
+  EmamiMaryam1994Cipa}.
+
+In this paper we consider the recent programming language ReScript
+which is based on OCaml with a JavaScript inspired syntax which
+targets JavaScript.  ReScript offers a robust type system based on
+OCaml, which provides an alternative to other gradually typed
+languages that targets JavaScript .\cite{rescript_rebrand}. ReScript
+is also imperative and allows for mutability, through reference
+constructs for creation, reading, and writing,
+
+ReScript provides integration with JavaScript and provides its own
+compiler toolchain and build system for optimizing and compiling to
+JavaScript.  ReScript introduces an analysis tool for
+dead-code, exception, and termination analysis, but the tool is only
+experimental.\cite{reanalyze} 
+
+We present a type system for data-flow analysis for bindings and alias
+analysis in a subset of ReScript that functional and imperative
+features. Our type system provides the data information used at each
+program point and the alias information used.  Since the analysis we
+present focus collecting dependencies that are used to evaluate a part
+of a program, we present a local analysis of programs.
+
+The type system is sound.
+
+\section{A fragment of ReScript}\label{sec:lang}
+
+The fragment of ReScript that we study in this paper is a
+$\lambda$-calculus with bindings, pattern matching and mutability. In
+this section we describe the syntax of our fragment and give a
+big-step semantics that is tailored to keep track of dependencies.
+ 
+\subsection{Syntax}
+
+As the purpose of the dependency analysis is to analyse each
+subexpression of a program and differentiate them, we label every
+subexpression of a ReScript program. These \emph{program points} are
+used for tracking the information flow. We call a labelled expression
+$e^p$ where $p$ is a program point an \emph{occurrence}.
+
+The syntactic categories for the language are
+%
+\begin{align*}
+	p\in &\;\cat{P} &-\;&\mbox{Program points} \\
+	e\in &\;\cat{Exp} &-\;&\mbox{Expressions} \\
+	o\in &\;\cat{Occ} &-\;&\mbox{Occurrences} \\
+	c\in &\;\cat{Con} &-\;&\mbox{Constants} \\
+	x,\;f\in &\;\cat{Var} &-\;&\mbox{Variables} \\
+	\loc\in &\;\cat{Loc} &-\;&\mbox{Constants}
+\end{align*}
+
+When given a syntactic category $\mathbf{C}$, we let $\mathbf{C}^{P}$
+denote the pair $\mathbf{C}\times\cat{P}$, so that e.g.
+$\cat{Exp}^\cat{P}=\cat{Exp}\times\cat{P}$. As occurrences are
+labelled expressions, we have that $\cat{Occ}=\cat{Exp}^\cat{P}$.
+
+The formation rules are shown below.
+%
+\begin{align*}
+  \text{Occurrences} \; o &::= e^p \mid (e^{p_1}_1, \ldots,
+                                 e^{p_n}_n) \\[5mm]
+\text{Expressions} \; e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o\\
+			& \mid c \; o_1 \; o_2\\
+			& \mid \mbox{let} \; x \; o_1 \; o_2 \\
+			& \mid \mbox{let rec} \; x \; o_1 \; o_2 \\
+			& \mid \mbox{case} \; o_1 \; \tilde{\pi} \; \tilde{o}\\
+			& \mid \mbox{ref} \; o \mid o_1 := o_2 \mid \; !o\\[5mm]
+  \text{Patterns} \; \pi &::= n \mid b \mid x \mid \_  \mid
+                                (s_1,\cdots,s_n)\\
+\end{align*}
+%
+$\lambda\;x.o$ denotes an \emph{abstraction} with a parameter $x$ and body $o$.
+\emph{Constants} $c$ are either natural numbers $n$, boolean values $b$, or functional constants.
+		We introduce a function $apply$, that for each functional constant $c$ returns the result of applying $c$ to its arguments.
+
+\emph{Local declarations} $\mbox{let} \; x \; o_1 \; o_2$ and
+$\mbox{let rec} \; f \; o_1 \; o_2$ are immutable bindings that bind
+the variables $x$ to the value $o_1$ and evaluate to $o_2$. The latter
+form is recursive; $x$ is allowed to appear inside $o_1$. Mutability
+in ReScript is introduced using the \emph{reference} construct
+$\mbox{ref\;o}$. This construct creates a reference in the form of a
+location and allows for binding locations to local declarations. We
+can read from a reference for $o$ by writing $!o$ and write to a
+reference using the assignment construct $o_1\;:=\;o_2$. 
+
+\emph{Pattern matching} $\mbox{case} \; o_1 \; \tilde{\pi} \; \tilde{o}$, matches an
+occurrence with the ordered set, $\tilde{\pi}$, of patterns. For each
+pattern in $\tilde{\pi}$ there is also an occurrence in $\tilde{o}$.
+We denote the size of the tuple pattern $\pi$ by $|\tilde{\pi}|$ and
+the size of a tuple occurrence by $|\tilde{o}|$.
+
+We assume that all local bindings, and recursive bindings, are unique;
+this can be ensured by means of $\alpha$-conversion.
+
+\begin{example}[]\label{ex:write}
+Consider
+\begin{lstlisting}[language=Caml, mathescape=true]
+  (let x (ref 3$^1$)$^2$
+  (let y (let z (5$^3$)$^4$
+     (x$^5$:=z$^7$)$^8$)$^{9}$ (!x)$^{10}$)$^{11}$)$^{12}$
+\end{lstlisting}
+This creates a reference to the constant 3 and binds the reference to
+$x$ (so $x$ is an alias of this reference). Next a binding for $y$ is
+made and after that a binding of $z$ to the constant 5 before writing
+to the reference, that $x$ is bound to, to the value that $z$ is bound
+to.  Finally the reference that $x$ is bound to is read. We expect to
+retrieve the value $5$.
+\end{example}
+
+The notions of free and bound variables are defined as expected.
+
+\subsection{The binding model}\label{sec:EnvSto}
+
+We now present the binding model used in the semantics that
+follows. As we are dealing with an imperative language with
+references, we use an environment-store model. The environment keeps
+track of bindings of variables to values. Our fragment of ReScript
+contains the imperative constructs of mutability and referencing, so
+values can be locations.
+
+Moreover, as our language has first-class functions, values can also be closures.
+We have that
+\begin{itemize}
+	\item All constants are values.
+	\item Locations are values.
+	\item Closures, $\langle x,e^{p'},env\rangle$ are values.
+	\item Recursive closures, $\langle x,f,e^{p''},env\rangle$, are values.
+	\item Unit values, $()$, are values.
+\end{itemize}
+
+and we let $v$ range over \cat{Values}.
+
+\begin{definition}
+	The set of all environments, \cat{Env}, is the set of partial functions from variables to values, given as:
+	$$\cat{Env}=\cat{Var}\rightharpoonup\cat{Values}$$
+\end{definition}
+Where $env\in\cat{Env}$ denotes an arbitrary environment in \cat{Env}.
+
+Later, we need to find the set of variables bound to any given
+values. 
+\begin{definition}
+  Let $v$ be a value and $env\in\cat{Env}$ be an environment. The
+  inverse function $env^{-1} : \cat{Values} \to \cat{2}^{\cat{var}}$
+  is defined by
+  %
+	\[ env^{-1}(v)=\{x\in dom(env)\mid env(x)=v\} \]
+\end{definition}
+%
+We use a store to keep the information about values bound to locations
+and introduce a placeholder $next$ that represents the next free location.
+
+\begin{definition}
+	The set of all stores, \cat{Sto}, is the set of partial functions from locations and the $next$ pointer to values.
+\[ \cat{Sto}=\cat{Loc}\cup\{next\}\rightharpoonup\cat{Values} \]
+We let $sto\in\cat{Sto}$ denote an arbitrary store in \cat{Sto}.
+\end{definition}
+
+Moreover, we assume the existence of a function
+$new:\cat{Loc}\rightarrow\cat{Loc}$, which takes a location and finds
+the next location.
+
+For any function $f$ appearing in our binding model and in the
+dependency model in Section \ref{sec:DepFunc} we let $f[u
+\mapsto w]$ denote the function $f'$ such that $f(u') = f(u)$ for $u
+\neq u'$ and $f'(u') = w$.
+
+\subsection{Keeping track of dependencies}\label{sec:DepFunc}
+
+The goal of the semantics that follows is to collect the semantic
+dependencies as they appear in a computation. To this end, we use a
+dependency function that will tell us for each variable and location
+occurrence what other, previous occurrences they depend upon.
+
+\begin{definition}[Dependency function]\label{def:DepFunc}
+	The set of dependency functions, $\cat{W}$, is a set of partial functions from location and variable occurrences to a pair of dependencies, such that:
+\[
+  \cat{W}=\cat{Loc}^P\cup\cat{Var}^P\rightharpoonup\Pow{\cat{Loc}^P}\times\Pow{\cat{Var}^P} \] 
+\end{definition}
+For a dependency function $w$ and an
+$u^p\in\cat{Loc}^P\cup\cat{Var}^P$,
+%
+\[ w (u^p)=(\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\},\{x_1^{p'_1},\cdots,x_m^{p'_m}\}) \]
+%
+should be read as: a lookup of an occurrence $u^p$, a variable or
+location occurrence, returns a pair of location and variable
+occurrences. 
+We also denote the pair, retrieved from the dependency function, which
+we call a dependency pair such that $(L,V)$ contains a set of location
+occurrences $L=\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\}$  
+and a set of variable occurrences $V=\{x_1^{p'_1},\cdots,x_m^{p'_m}\}$.
+
+\begin{example}[]\label{ex:dep}
+	Consider the occurrence from \cref{ex:write}, where we can
+        infer the following bindings for a dependency function
+        $w_{ex}$ over this occurrence: 
+	\[
+          w_{ex}= \begin{array}{l}
+                    [x^2\mapsto(\emptyset,\emptyset),z^4\mapsto(\emptyset,\emptyset),y^9\mapsto(\emptyset,\{x^5\}),
+                    \\ \; \loc^2\mapsto(\emptyset,\emptyset),\loc^8\mapsto(\emptyset,\{z^7\})] \end{array} \]
+	where $\loc$ is the location created from the reference construct.
+	The variable bindings are distinct, an the location $\loc$ is
+        bound multiple times, for the program points $2$ and $8$. 
+
+	If we want to read a variable or location in $w_{ex}$, we must
+        also know for which program point since there can exists
+        multiple bindings for the same variable or location. 
+\end{example}
+
+By considering \cref{ex:dep}, we would like to read the information from the location, that $x$ is an alias to.
+As it is visible from the occurrence in \cref{ex:write}, we know that we should read from $\loc^8$, since we wrote that reference at the program point $8$.
+We can also see that from $w_{ex}$ alone it is not possible to know which occurrence to read, since there are no order defined between the bindings.
+We there introduce a notion of ordering in the form of a binary relation over program points:
+
+\begin{definition}[]\label{def:BinRel}
+	Let \cat{P} be a set of program points in an occurrence.
+	Then $\sqsubseteq$ is a binary relation of \cat{P}, such that:
+	$$\sqsubseteq\subseteq\cat{P}\times\cat{P}$$
+\end{definition}
+
+Since we are interested in the ordering of the elements in a dependency function $w$, we will define an instantiation of \cref{def:BinRel}.
+Since $w$, is a function from occurrences to a pair of occurrences, we first present a function for getting the program points from a set of occurrences:
+
+\begin{definition}[Occurring program points]\label{def:OccPP}
+	Let $O$ be a set of occurrences, then $points(O)$ is given by:
+	$$points(O)=\{p\in\cat{P}\mid\exists e^p\in O\}$$
+\end{definition}
+
+With \cref{def:OccPP} defined, we present the instantiation of \cref{def:BinRel} over a dependency function $w$:
+
+\begin{definition}[]\label{def:RelPoint}
+	Let $w\in\cat{W}$ be a dependency function.
+	Then $\sqsubseteq_w$ is given by:
+	$$\sqsubseteq_w\subseteq\{(p,p')\mid p,p'\in(points(dom(w)\cup points(ran(w))))\}$$
+\end{definition}
+
+As the dependency function $w$ is a model of which occurrences an occurrence is dependent on, the relation on $w$ should also model the order a value is evaluated in, as such we define the partial order over a dependency function.
+
+\begin{definition}[Partial order of $w$]
+	Let $w\in\cat{W}$ be a dependency function and $\sqsubseteq_w$ be a binary relation over $w$.
+	We say that $w$ is partial order if $\sqsubseteq_w$ is a partial order.
+\end{definition}
+
+\begin{example}[]\label{ex:depRel}
+	Consider the example from \cref{ex:dep}, if we introduce a binary relation over the dependency function $w_{ex}$, such that:
+	$$\sqsubseteq_{w_{ex}}=\{(2,4),(2,9),(5,9),(2,8),(8,2)\}$$
+	From this ordering, it is easy to see the ordering of the elements.
+	The ordering we present also respects the flow the occurrence from \cref{ex:write} would evaluate to.
+	We then know that the dependencies for the reference (that $x$ is an alias to) is for the largest binding of $\loc$.
+\end{example}
+
+As presented in \cref{def:DepFunc} and \cref{def:RelPoint}, the
+dependency function and the binary relation are used to define the
+flow of information. As illustrated by \cref{ex:depRel}, we need to
+lookup the greatest of $\sqsubseteq_w$. 
+
+The immediate predecessor of a $u$ wrt. a set of occurrences $S$ is
+the most recent element in $S$ seen before $u$. 
+
+\begin{definition}[Greatest binding]\label{def:GBind}
+	Let $u$ be an element, either a variable or location, and $S$
+        be a set of occurrences, then $\uf(u,S)$ is given by
+\[ \uf(u,S)=\inf\{u^p\in S\mid u^q\in S.q\sqsubseteq p\} \]
+\end{definition}
+
+Based on \cref{def:GBind}, we can present an instantiation of the function for the dependency function $w$ and an order over $w$, $\sqsubseteq_w$:
+
+\begin{definition}[]
+	Let $w$ be a dependency function, $\sqsubseteq_w$ be an order over $w$, $u$ be an element, that is either a variable or location, then $\uf_{\sqsubseteq_w}$ is given by:
+	$$\uf_{\sqsubseteq_w}(u,w)=\inf\{u^p\in dom(w)\mid u^q\in dom(w.q\sqsubseteq_w p\}$$
+\end{definition}
+
+
+\begin{example}[]\label{ex:deplookup}
+	As a continuation of \cref{ex:depRel}, we can now lookup the greatest element for an element, e.g., a variable or location.
+	As we were interested in finding the greatest bindings a location is bound to in $w_ex$, we can now use the function $\uf_{\sqsubseteq_w}$:
+	$$\uf_{\sqsubseteq_{w_ex}}(\loc,w_ex)=\inf\{\loc^p\in dom(w)\mid \loc^q\in dom(w). q\sqsubseteq_{w_ex} p\}$$
+	Where the set we get for $\loc$ are as follows: $\{\loc^2,\loc^8\}$.
+	From this, we find the greatest element:
+	$$\loc^7=\inf\{\loc^2,\loc^8\}$$
+	As we can see, from the $\uf_{w_ex}$ function, we got $\loc^8$ which were the occurrence we wanted.
+\end{example}
+
+\subsection{Collection semantics}\label{sec:sem}
+
+We can now introduce the big-step semantics for our language that
+collects dependency information. In this semantics, the transitions
+are of the form
+%
+\begin{align*}
+env\vdash\left\langle e^{p'},sto,(w,\sqsubseteq_w),p\right\rangle\rightarrow\left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p''\right\rangle
+\end{align*}
+%
+This should be read as: given the store $sto$, a dependency function
+$w$, a relation over $w$, and the previous program point $p$, the
+occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$,
+an updated dependency function $w'$, a relation over $w'$, the
+dependency pair $(L,V)$, and the program point $p''$ reached after
+evaluating $e^{p'}$, given the bindings in the environment $env$. 
+
+A selection of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}.
+
+\begin{description}
+	\item[\runa{Const}] rule, for the occurrence $c^{p'}$, is the simplest rule, as it has no premises and does not have any side effects.
+		As constants are evaluated to the constant value, no dependencies are used, i.e., no variable or location occurrences are used to evaluate a constant.
+
+	\item[\runa{Var}] rule, for the occurrence $x^{p'}$, uses the environment to get the value $x$ is bound to and uses dependency function $w$ to get its dependencies.
+		To lookup the dependencies, the function $\uf_{\sqsubseteq_w}$ is used to get the greatest binding a variable is bound to, in respect to the ordering $\sqsubseteq_w$.
+		Since the occurrence of $x$ is used, it is added to the set of variable occurrences we got from the lookup of the dependencies for $x$.
+
+	\item[\runa{Let}] rule, for the occurrence $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, creates a local binding that can be used in $e_2^{p_2}$.
+		The \runa{Let} rule evaluate $e_1^{p_1}$, to get the value $v$, that $x$ will be bound to in the environment for $e_2^{p_2}$, and the dependencies used to evaluate $e_1^{p_1}$ is bound in the dependency function.
+		As we reach the program point $p_1$ after evaluating $e_1^{p_1}$, and it is also the program point before evaluating $e_2^{p_2}$, the binding of $x$ in $w$ is to the program points $p_1$.	
+
+	\item[\runa{Ref}] rule, for the occurrence $[\mbox{ref}\;e^{p'}]^{p''}$, creates a new location and binds it in the store $sto$, to the value evaluated from $e^{p'}$.
+		The \runa{Ref} rule also binds the dependencies, from evaluating the body $e^{p'}$, in the dependency function $w$ at the program point $p''$.
+		As the \runa{Ref} rule creates a location (where we get the location from the $next$ pointer), and binds it in $sto$.
+		The environment is not updated as \runa{Ref} does not in itself give any alias information.
+		To create an alias for a location, it should be bound to a variable using the \runa{Let} rule.
+
+	\item[\runa{Ref-read}] rule, for the occurrence $[!e^{p_1}]^{p'}$, evaluates the body $e^{p_1}$ to a value, that must be a location $\loc$, and reads the value of $\loc$ in the store.
+		The \runa{Ref-read} rule also makes a lookup for the dependencies $\loc$ is bound to in the dependency function $w$.
+		As there could be multiple bindings for $\loc$, in $w$, at different program points, we use the $\uf_{\sqsubseteq_{w'}}$ function to get greatest binding of $\loc$ with respect to the ordering $\sqsubseteq_{w'}$, 
+		and we also add the location occurrence $\loc^{p'}$ to the set of locations.
+
+	\item[\runa{Ref-write}] rule, for the occurrence $[e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}$, evaluate $e_1^{p_1}$ to a location $\loc$ and $e_2^{p_2}$ to a value $v$, and binds $\loc$ in the store $sto$ to the value $v$.
+		The dependency function is also updated with a new binding for $\loc$ at the program point $p'$.
+\end{description}
+
+\begin{table*}
+%	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+          \runa{Var}\\[0.2cm]
+	\inference[]{}
+	{env\vdash \left\langle x^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqsubseteq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[6mm]
+	where $env(x)=v$, $x^{p''}=\uf_{\sqsubseteq_w}(x,w)$, and
+          $w(x^{p''})=(L,V)$ \\[4mm]
+	\inference[]{}
+	{env\vdash \left\langle x^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqsubseteq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[6mm]
+	where $env(x)=v$, $x^{p''}=\uf_{\sqsubseteq_w}(x,w)$, and $w(x^{p''})=(L,V)$
+          \\[4mm]
+	\inference[]
+	{
+		env\vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
+		env[x\mapsto v_1]\vdash \left\langle e_2^{p_2},sto_1,(w_2,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p_2 \right\rangle
+	}
+	{env\vdash \left\langle \left[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}\\[6mm]
+	where $w_2=w_1[x^{p_1}\mapsto(L,V)]$
+          \\[4mm]
+          \runa{Ref}\\
+	\inference[]
+	{env \vdash \left\langle e^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p' \right\rangle}
+	{env\vdash \left\langle \left[\mbox{ref}\;e^{p'}\right]^{p''},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto'',(w'',\sqsubseteq_w'),(\emptyset,\emptyset),p'' \right\rangle}\\[6mm]
+	where $\loc=next$, $sto''=sto'[next\mapsto new(\loc),\loc\mapsto v]$, and\\
+          $w''=w'[\loc^{p'}\mapsto (L,V)]$ \\[4mm]
+ \runa{Ref-read}\\
+	\inference[]
+	{env \vdash \left\langle e^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto',(w',\sqsubseteq_w'),(L_1,V_1),p_1 \right\rangle}
+	{env\vdash \left\langle \left[!e^{p_1}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqsubseteq_w'),(L\cup L_1\cup\{\loc^{p''}\},V\cup V_1),p' \right\rangle}\\[6mm]
+	where $sto'(\loc)=v$,
+          $\loc^{p''}=\uf_{\sqsubseteq_w'}(\loc,w')$, and
+          $w'(\loc^{p''})=(L,V)$ \\[4mm]
+\runa{Ref-write}\\
+	\inference[]
+	{
+		env \vdash \left\langle e_1^{p_1},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle \loc,sto_1,(w_1,\sqsubseteq_w^1),(L_1,V_1),p_1 \right\rangle &\\
+		env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqsubseteq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto_2,(w_2,\sqsubseteq_w^2),(L_2,V_2),p_2 \right\rangle
+	}
+	{env\vdash \left\langle \left[e_1^{p_1}:=e_2^{p_2}\right]^{p'},sto,(w,\sqsubseteq_w),p \right\rangle \rightarrow \left\langle (),sto',(w',\sqsubseteq_w'),(L_1,V_1),p' \right\rangle}\\[6mm]
+	where $sto'=sto_2[\loc\mapsto v]$, $\loc^{p''}=inf_{\sqsubseteq_w^2}(\loc,w_2)$,\\
+	$w'=w_2[\loc^{p'}\mapsto(L_2,V_2)]$, and
+          $\sqsubseteq_w'=\sqsubseteq_w^2\cup(p'',p')$ \\[6mm]
+	\end{tabular}
+	\caption{Selected rules from the semantics}
+	\label{fig:ColSem}
+\end{table*}
+
+\iffalse
+\begin{example}[Data-flow for abstractions]\label{ex:DFAbs}
+The following program creates a local binding to the identity function and applies it twice.
+
+\begin{lstlisting}[language=Caml, mathescape=true]
+(let x ($\lambda$ y.(y$^1$))$^2$ (let z (x$^3$ 1$^4$)$^5$ (x$^6$ 2$^7$)$^{8}$)$^{9}$)$^{10}$
+\end{lstlisting}
+The transition tree can be found in \cref{FigEx.Abs}.
+In the transition tree, we see that $\psi$ is extended a couple of times, where we will take a look at a couple of interesting extensions to $\psi$
+The first time we evaluate the abstraction body, $\psi$ is on the following form:
+
+$$\psi_2=(w_2=[x^{2}\mapsto(\emptyset,\emptyset), y^{4}\mapsto(\emptyset,\emptyset)],\sqsubseteq_w^2=\emptyset)$$
+Here, the lookup of the parameter $y$ is simple, as there are only one occurrence, where we then know that $inf_{\psi_2}(y)=4$.
+
+The second time we evaluate the body of the abstraction, $\psi$ is on the following form:
+
+$$\psi_3=(w_3=[x^{2}\mapsto(\emptyset,\emptyset), y^{4}\mapsto(\emptyset,\emptyset), y^{7}\mapsto(\emptyset,\emptyset)],\sqsubseteq_w^2=\{4,7\})$$
+Here, we now have two bindings for the parameter $y$, but since we also know that there are an ordering for the two occurrences of $y$, we then know that the program point $7$ is evaluated after $4$, as such we know that $inf_{\psi_3}(y)=7$.
+\end{example}
+
+\begin{landscape}
+\subfile{../examples/DFAbs.tex}
+\end{landscape}
+\fi
+
+\section{A type system for data-flow analysis}\label{sec:TypeSys}
+
+The the type system for data-flow analysis is an overapproximation of
+the big-step semantics.
+
+\subsection{An overview of the type system}
+
+The system assigns types, presented in \cref{sec:types}, to occurrences given the basis, which will be presented in \cref{sec:basis}, and using the type assignment, which is presented in \cref{sec:Judge}.
+Since the language contains local information as bindings, and global
+information as locations, the type checker must reflect this.
+
+Since locations are a semantic notation, we introduce a notion of
+\emph{internal} variables to represent them in the type
+system. Internal variables are denoted by
+$\nu x,\; \nu y\in\cat{IVar}$ and \cat{IVar} is the syntactic category
+for internal variables.
+
+As references are not always bound to variables, as such the reference
+does not contain any alias information, the analysis provides alias
+information used for evaluating an occurrence.  Here, we are going to
+introduce the basis for aliasing, as a partition of all variables and
+internal variables used in an occurrence.  As such, it is possible to
+analyse, from the type information of occurrences, which aliases are
+actually used.
+
+We also impose some restrictions on the type system, where the first
+restrictions is that references cannot be bound to abstractions.
+Since we do not introduce polymorphism, the use case for abstractions
+are reduced, as an abstraction cannot be used at multiple places.
+Consider the following occurrence:
+\begin{lstlisting}[language=Caml, mathescape=true]
+(let x ($\lambda$ y.y$^1$)$^2$ (x$^3$ (x$^4$ 1$^5$)$^6$)$^7$)$^8$
+\end{lstlisting}
+To type the occurrences used in both places where we apply the abstractions, we type of the argument in the innermost application is empty, as it applies a constant.
+For the second, and outermost, application, the argument type must contain the occurrence $x^4$, as it were used to evaluate the value for the argument.
+
+\subsection{Types}\label{sec:types}
+
+The set of types \cat{Types} is defined by the following formation rules:
+%
+\[ T ::=(\delta,\kappa)\mid T_1 \rightarrow T_2 \]
+%
+Here, we introduce two types, the base type $(\delta,\kappa)$ and the abstraction type $T_1 \rightarrow T_2$.
+The idea is that an occurrence have the abstraction type if it represents an abstraction that takes an argument of type $T_1$ and returns a type of $T_2$.
+The base type represent all other values, where $\delta$ represent the set of occurrences, used to evaluate an occurrence, and $\kappa$ represent the set of alias information.
+Here, if an occurrence have a type containing alias information, then it represent a location, where if the occurrence have a base type with alias information, then the occurrence must represents a reference. 
+If the occurrence have the abstraction type where either $T_1$ or $T_2$ have are base types with alias information, then the abstraction either takes a reference as input or returns a reference.
+
+\begin{example}[]
+Consider the following occurrence:
+\begin{lstlisting}[language=Caml, mathescape=true]
+(let x (3$^1$)$^2$ (let y (ref x$^3$)$^4$ (!y)))
+\end{lstlisting}
+Here, we can type $x$ with $(\emptyset,\emptyset)$ as $x$ is bound to a constant and there a no variables or internal variables used.
+$y$ can then be given the type $(\emptyset,\{x,\nu y\})$, as the reference construct $ref$ creates a new reference, which $y$ is then an alias to, e.g., $y$ is bound to a location.
+Her $\nu y$ represents the reference from $ref$, and can thus be given the type $(\{x^3\},\emptyset)$, where $\nu y$ is bound to a constant, because of $x$, but the occurrence $x^3$ were used, so it should be part of the set of occurrences $\delta$.
+\end{example}
+
+Since the type system approximates the occurrences used to evaluate an occurrence, we introduce two unions.
+The first union is a simple union that expects the types to be similar, that is, only the base types are allowed to be different.
+\begin{definition}[Type union]
+	Let $T_1$ and $T_2$ be two types, then the type union, $\cup$, are as follows:
+	\begin{equation*}
+		T_1\cup T_2=
+		\left\{\begin{matrix}
+			\mbox{If } \; T_1=(\delta,\kappa) \;\mbox{and}\; T_2=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
+			\mbox{else if } \; T_1=T_1'\rightarrow T_1''\;\mbox{and}\;T_2=T_2'\rightarrow T_2'' & \mbox{then} \; (T_1'\cup T_2')\rightarrow (T_1''\cup T_2'')
+		\end{matrix}\right.
+	\end{equation*}
+\end{definition}
+
+The second type union, is to add additional type information to an arbitrary type.
+This type union is used to add an occurrence to a type, e.g., in the \runa{Var} rule where the variable occurrence needs to be added to the type of that variable.
+\begin{definition}[Base type union]
+	Let $T$ be an type and $(\delta,\kappa)$ be a base type, then the union of these are as follows:
+	\begin{equation*}
+		T\sqcup (\delta,\kappa)=
+		\left\{\begin{matrix}
+			\mbox{If } \; T=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
+			\mbox{else if } \; T=T_1\rightarrow T_2 & \mbox{then} \; T_1\rightarrow(T_2\sqcup (\delta,\kappa))
+		\end{matrix}\right.
+	\end{equation*}
+\end{definition}
+
+\subsection{Basis and type environment}\label{sec:basis}
+Next, we will present the basis and type environment for the type system.
+The basis we are presenting here are assumptions used by the type checker, in addition to the assignment of types which are presented in \cref{sec:Judge}, where we are going to present a type base for aliasing and an approximated order of program points.
+
+We will also introduce the type environment, which are similar to the environment and store used in the semantics, as the type environment keeps track of the type of variables and internal variables.
+As such, the type environment is also a approximation of the dependency function, as the purpose of the type system is to collect information about which occurrences are used and what alias information is used.
+
+Similar to the lookup of the greatest binding for the dependency function, we are going to introduce an instantiation of the function from \cref{def:GBind} for the type environment in respect to the basis for approximated order of program points.
+\bigskip
+
+We will then introduce the type base for aliasing, as a partition of variables and internal variables used in an occurrence.
+
+\begin{definition}[Type Base for aliasing]
+	For an occurrence $o$, let $var$ be the set of all variables and $ivar$ be the set of all internal variables in $o$.
+	The type base $\kappa^0=\{\kappa^0_1,\cdots,\kappa^0_n\}$ is then a partition of $var\cup ivar$, where $\kappa_i^0\cap\kappa_j^0=\emptyset$ for all $i\neq j$.
+\end{definition}
+
+The idea behind the base for type alias $\kappa_0$ is to make a partition of the variables and internal variables used in an occurrence.
+This partition represents the assumption about which variables are actually an alias to internal variables.
+As such multiple variables can only belong to the same element $\kappa_0^i\in\kappa_0$, if there also exists an internal variable in $\kappa_0^i$.
+
+\begin{definition}[Approximated order of program points]
+	An approximated order of program points $\Pi$ is a pair, such that: 
+	$$\Pi=(\cat{P},\sqsubseteq_\Pi)$$
+	where
+	\begin{itemize}
+		\item \cat{P} is the set of program points in an occurrence,
+		\item $\sqsubseteq_\Pi\subseteq\cat{P}\times\cat{P}$, where
+	\end{itemize}
+\end{definition}
+
+The approximated order of program points is an assumption about the order for program points for an occurrence $o$, as such, this approximation should be an approximation of the order that that can be derived from the semantics, presented in \cref{sec:sem}, for $o$.
+
+\begin{definition}[Partial order of $\Pi$]
+	Let $\Pi=(\cat{P},\sqsubseteq_\Pi)$ be an approximated order of program points.
+	We say that $\Pi$ is a partial order if $\sqsubseteq_\Pi$ is a partial order.
+\end{definition}
+\bigskip
+
+Next, we will introduce the type environment:
+\begin{definition}[Type Environment]
+	A type environment $\Gamma$ is a partial function $\Gamma:\cat{Var}^P\cup\cat{IVar}^P\rightharpoonup\cat{Types}$
+\end{definition}
+
+\begin{definition}[Updating Type Environments]
+	Let $\Gamma$ be a type environment.
+	We write $\Gamma[u^p:T]$, for an occurrence $u^p$, to denote the type environment $\Gamma'$ where:
+	\begin{align*}
+		\Gamma'(y^{p'})=
+		\left\{\begin{matrix}
+			\Gamma(y^{p'}) & \mbox{if}\;y^{p'}\neq u^{p}\\\	 
+			T & \mbox{if}\;y^{p'}=u^{p}
+		\end{matrix}\right.
+	\end{align*}
+\end{definition}
+
+Similar to the lookup of dependencies in the semantics, we need to similarly define how to lookup in the type environment.
+As the type environment contains both local information, for local declarations, and global information, for references, both cases should be handled.
+
+For local information we introduce, similarly to lookup in the dependency function, and instantiation of the function presented in \cref{def:GBind}.
+The lookup is for information in the type environment, over the relation between program points defined by the basis for approximated order of program points.
+
+\begin{definition}[]\label{def:GBindPi}
+	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Pi$ be the approximated order of program points that is a partial order, then $uf_{\sqsubseteq_\Pi}$ is given by:
+	$$uf_{\sqsubseteq_\Pi}(u,\Gamma)=\inf\{u^p\in dom(\Gamma)\mid u^q\in dom(\Gamma).q\sqsubseteq_\Pi p\}$$
+\end{definition}
+
+Where the lookup for global information needs to be handled differently as the language contains pattern matching, and as such, the language can contain different path of evaluation (where each pattern in the pattern matching construct introduces a new path).
+To handle the lookup of global information, we will first introduce the notion of $p$-chains as chains of program points with respect to the approximated order of program points, where the maximal program point is $p$.
+The idea of these $p$-chains is to describe the history behind an occurrence $u^p$, and can thus be used to describe what an internal variable depends on.
+
+\begin{definition}[$p$-chains]
+	Let $\Pi$ be an approximated order of program points, that is a partial order, and $p$ be a program point.
+	We then say that a $p$-chain, denoted as $\Pi_p^{*}$, is a maximal chain of with the maximal element $p$ with the respect to the order $\Pi$.
+	As such, any $p$-chain is a total order, where $\Pi_p^{*}$ does not contain any pairs $(p,q)\in\sqsubseteq_\Pi$, where $p\neq q$, then $(p,q)\notin\sqsubseteq_{\Pi_p^{*}}$.
+\end{definition}
+
+We also denote $\Pi_p^{*}\in\Pi$, if the $p$-chain $\Pi_p^{*}$ can be be derived from $\Pi$.
+Since there can exists multiple paths in an occurrence, we define the set of all $p$-chains as follows:
+
+\begin{definition}[]
+	Let $\Pi$ be an approximated order of program points and $p$ be a program point.
+	We say that $\Upsilon_p$ is the set of all $p$-chains in $\Pi$.
+\end{definition}
+
+Since $\Upsilon_p$ contains all $p$-chains in an approximated order of program points $\Pi$, with $p$ as the maximal element, we can then define the function to lookup all greatest element less than or equal to $p$.
+
+\begin{definition}[]\label{def:GBindUps}
+	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Upsilon_p$ be a set of $p$-chains, then $uf_{\Upsilon_p}$ is given by:
+	$$uf_{\Upsilon_p}(u,\Gamma)=\bigcup_{\Pi_p^{*}\in\Upsilon_p}uf_{\Pi_p^{*}}(u,\Gamma)$$
+\end{definition}
+
+The function, defined in \cref{def:GBindUps}, takes the union of the greatest binding, for an element, for each $p$-chain using the function defined in \cref{def:GBindPi}.
+
+\subsection{The type system}\label{sec:Judge}
+We will now present the judgement and type rules for the language, that is, how we assign types to occurrences.
+
+The type judgement is defined as:
+$$\Gamma,\Pi\vdash e^p: T$$
+And should be read as: the occurrence $e^p$ has type $T$, given the dependency bindings $\Gamma$ and the approximated order of program points $\Pi$.
+
+A highlight of type rules can be found in \cref{fig:TypeSys}, and all type rules can be found in \cref{App:TypeSys}.
+
+\begin{description}
+	\item[\runa{T-Const}] rule, for occurrence $c^p$, is the simplest type rule, as there is nothing to track for constants, and as such it has the type $(\emptyset,\emptyset)$.
+
+	\item[\runa{T-Var}] rule, for occurrence $x^p$, looks up the type for $x$ in the type environment, by finding the greatest binding using \cref{def:GBindPi}, and add the occurrence $x^p$ to the type.
+
+	\item[\runa{T-Let-1}] rule, for occurrence $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^p$, creates a local binding for a variable, with the type of $e_1^{p_1}$ that can be used in $e_2^{p_2}$.
+		The \runa{T-Let-1} rule assumes that the type of $e_1^{p_1}$ is a base type with alias information, i.e., $\kappa\neq\emptyset$.
+		If this is the case, then $e_1^{p_1}$ must evaluate to a location, in the semantics.
+		The other cases, when $e_1^{p_1}$ is not a base type with alias information, are handled by the \runa{T-Let-2} rule.
+		Since a pattern can be a variable, we updates the type environment with the type of $e^p$.
+
+	\item[\runa{T-Case}] rule, for occurrence $[\mbox{case}\;e^{p}\;\tilde{\pi}\;\tilde{o}]^{p'}$, is an over-approximation of all cases in the pattern matching expression, by taking an union of the type of each case.
+		Since the type of $e^p$ is used to evaluate the pattern matching, we also add this type to the type of the pattern matching.
+
+	\item[\runa{T-Ref-read}] rule, for occurrence $[!e^{p}]^{p'}$, is used to retrieve the type of references, where $e^p$ must be a base type with alias information.
+		Since the type system is an over-approximation, there can be multiple internal variables in $\kappa$ and multiple occurrences we need to read from.
+		As such we need to lookup for all internal variables and also possible for multiple program points.
+		As such, we use the $uf_{Upsilon_{p'}}$ to lookup for all $p'$-chains.
+\end{description}
+
+\begin{example}[Data-flow for abstractions]
+	Consider the following occurrence for application:
+	\begin{lstlisting}[language=Caml, mathescape=true]
+		(($\lambda$ y.(PLUS 3$^1$ y$^2$)$^3$)$^4$ 5$^5$)$^6$
+	\end{lstlisting}
+	The derivation tree for the occurrence can be found in \cref{FigEx.TAbs}.
+	Here, we show two applications, for \runa{T-App} and \runa{T-App-const}, where we create an abstraction that adds the constant $3$ to the argument of the abstraction, and applying the constant $5$ to the abstraction.
+
+	When typing the abstraction, we need too make an assumption about the parameter $y$ and the body.
+	As we are applying a constant to the argument, we can make an assumption that the type of the parameter should be $(\emptyset,\emptyset)$.
+
+	Based on this assumption for the type, we can then type the body of the abstraction.
+	As the body is an application for a functional constant, \runa{T-App-const}, we take a union for the types of each argument.
+\end{example}
+
+\begin{example}[Data-flow for references]
+	Consider the following occurrence:
+	\begin{lstlisting}[language=Caml, mathescape=true]
+		(let x (ref 1$^1$)$^2$ (let y (x$^3$) (!x$^4$)$^5$)$^6$)$^7$
+	\end{lstlisting}
+	The derivation tree for the occurrence can be found in \cref{FigEx.TRef}.
+	Here, we show the typing of references where we create a reference and create 2 aliases for it before reading from the reference.
+	When typing the reference, it modifies the base type $\Gamma$ with a new internal variable.
+	From the type information, it is clear that only $x$ and the internal variable $\nu x$ is used.
+\end{example}
+
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\input{sections/appendix/TSRules/const.tex}\\[0.7cm]
+		\input{sections/appendix/TSRules/var.tex}\\[0.7cm]
+		\input{sections/appendix/TSRules/let1.tex}\\[0.7cm]
+		\input{sections/appendix/TSRules/case.tex}\\[0.7cm]
+		\input{sections/appendix/TSRules/refread.tex}\\[0.7cm]
+	\end{tabular}
+	\caption{Selected rules from the type system}
+	\label{fig:TypeSys}
+\end{figure}
+
+% \begin{landscape}
+% \subfile{../examples/DFAbsT.tex}
+% \end{landscape}
+\end{document}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
