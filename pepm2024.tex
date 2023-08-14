@@ -4,6 +4,9 @@
 
 \newcommand{\uf}{\ensuremath{\mathsf{IP}}}
 
+\newcommand{\condinf}[3]{\begin{tabular}{l} \inference[]{#1}{#2} \\[5mm]
+                          #3 \end{tabular}}
+                       
 %\input{frontmatter/acm.tex}
 
 \begin{document}
@@ -12,12 +15,12 @@
 	
 \section{Introduction}
 
-Data-flow analysis has been studied for decades in order to better provide
-flow information of programs that is then used for
-different tasks for compiler optimization, debugging and understanding
-programs, testing and maintenance.  In the context of compiler
-optimization, the flow information provides data that may be
-used at given parts of the program at runtime.
+Data-flow analysis has been studied for decades in order to better
+provide flow information of programs that is then used for different
+tasks for compiler optimization, debugging and understanding programs,
+testing and maintenance.  In the context of compiler optimization, the
+flow information provides data that may be used at given parts of the
+program at runtime.
 
 The classical approach uses an iterative algorithm based on
 representing the control-flow of a program as a graph.  The graph
@@ -436,9 +439,11 @@ The first time we evaluate the abstraction body, $\psi$ is on the following form
 $$\psi_2=(w_2=[x^{2}\mapsto(\emptyset,\emptyset), y^{4}\mapsto(\emptyset,\emptyset)],\sqsubseteq_w^2=\emptyset)$$
 Here, the lookup of the parameter $y$ is simple, as there are only one occurrence, where we then know that $inf_{\psi_2}(y)=4$.
 
-The second time we evaluate the body of the abstraction, $\psi$ is on the following form:
-
-$$\psi_3=(w_3=[x^{2}\mapsto(\emptyset,\emptyset), y^{4}\mapsto(\emptyset,\emptyset), y^{7}\mapsto(\emptyset,\emptyset)],\sqsubseteq_w^2=\{4,7\})$$
+The second time we evaluate the body of the abstraction, $\psi$ is 
+%
+\[ \psi_3=(w_3=[x^{2}\mapsto(\emptyset,\emptyset),
+  y^{4}\mapsto(\emptyset,\emptyset),
+  y^{7}\mapsto(\emptyset,\emptyset)],\sqsubseteq_w^2=\{4,7\}) \]
 Here, we now have two bindings for the parameter $y$, but since we also know that there are an ordering for the two occurrences of $y$, we then know that the program point $7$ is evaluated after $4$, as such we know that $inf_{\psi_3}(y)=7$.
 \end{example}
 
@@ -507,29 +512,41 @@ Her $\nu y$ represents the reference from $ref$, and can thus be given the type 
 
 Since the type system approximates the occurrences used to evaluate an occurrence, we introduce two unions.
 The first union is a simple union that expects the types to be similar, that is, only the base types are allowed to be different.
-\begin{definition}[Type union]
-	Let $T_1$ and $T_2$ be two types, then the type union, $\cup$, are as follows:
-	\begin{equation*}
-		T_1\cup T_2=
-		\left\{\begin{matrix}
-			\mbox{If } \; T_1=(\delta,\kappa) \;\mbox{and}\; T_2=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
-			\mbox{else if } \; T_1=T_1'\rightarrow T_1''\;\mbox{and}\;T_2=T_2'\rightarrow T_2'' & \mbox{then} \; (T_1'\cup T_2')\rightarrow (T_1''\cup T_2'')
-		\end{matrix}\right.
-	\end{equation*}
-\end{definition}
 
-The second type union, is to add additional type information to an arbitrary type.
-This type union is used to add an occurrence to a type, e.g., in the \runa{Var} rule where the variable occurrence needs to be added to the type of that variable.
-\begin{definition}[Base type union]
-	Let $T$ be an type and $(\delta,\kappa)$ be a base type, then the union of these are as follows:
-	\begin{equation*}
-		T\sqcup (\delta,\kappa)=
-		\left\{\begin{matrix}
-			\mbox{If } \; T=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
-			\mbox{else if } \; T=T_1\rightarrow T_2 & \mbox{then} \; T_1\rightarrow(T_2\sqcup (\delta,\kappa))
-		\end{matrix}\right.
-	\end{equation*}
+\begin{definition}
+  	Let $T_1$ and $T_2$ be two types, then their union is defined as
+
+  \[
+T_1\cup T_2=
+    \begin{cases}
+      (\delta\cup\delta',\kappa\cup\kappa') & \begin{array}{l}
+                                                T_1=(\delta,\kappa) \\
+      T_2=(\delta',\kappa') \end{array} \\[3mm]
+       (T_1'\cup T_2')\rightarrow (T_1''\cup T_2'') &
+       \begin{array}{l} T_1=T_1'\rightarrow T_1'' \\;T_2=T_2'\rightarrow
+       T_2''  \end{array}\\[3mm]
+       (\delta' \cup \delta, \kappa \cup \kappa') & \begin{array}{l}
+                                                      T_1 =
+                                                      (\delta',\kappa') \\
+                                                      T_2 =
+                                                      (\delta,\kappa) \end{array}
+                                                    \\[3mm]
+       \text{undefined} & \text{otherwise}
+    \end{cases}
+\]
 \end{definition}
+% The second type union, is to add additional type information to an arbitrary type.
+% This type union is used to add an occurrence to a type, e.g., in the \runa{Var} rule where the variable occurrence needs to be added to the type of that variable.
+% \begin{definition}[Base type union]
+% 	Let $T$ be an type and $(\delta,\kappa)$ be a base type, then the union of these are as follows:
+% 	\begin{equation*}
+% 		T\sqcup (\delta,\kappa)=
+% 		\left\{\begin{matrix}
+% 			\mbox{If } \; T=(\delta',\kappa')  & \mbox{then} \; (\delta\cup\delta',\kappa\cup\kappa')\\
+% 			\mbox{else if } \; T=T_1\rightarrow T_2 & \mbox{then} \; T_1\rightarrow(T_2\sqcup (\delta,\kappa))
+% 		\end{matrix}\right.
+% 	\end{equation*}
+% \end{definition}
 
 \subsection{Basis and type environment}\label{sec:basis}
 Next, we will present the basis and type environment for the type system.
@@ -628,11 +645,15 @@ The function, defined in \cref{def:GBindUps}, takes the union of the greatest bi
 \subsection{The type system}\label{sec:Judge}
 We will now present the judgement and type rules for the language, that is, how we assign types to occurrences.
 
-The type judgement is defined as:
-$$\Gamma,\Pi\vdash e^p: T$$
-And should be read as: the occurrence $e^p$ has type $T$, given the dependency bindings $\Gamma$ and the approximated order of program points $\Pi$.
+Type judgements have the format
+%
+\[ \Gamma,\Pi\vdash e^p: T \]
+%
+and should be read as: the occurrence $e^p$ has type $T$, given the
+dependency bindings $\Gamma$ and the approximated order of program
+points $\Pi$. 
 
-A highlight of type rules can be found in \cref{fig:TypeSys}, and all type rules can be found in \cref{App:TypeSys}.
+A highlight of type rules can be found in \cref{fig:TypeSys}.
 
 \begin{description}
 	\item[\runa{T-Const}] rule, for occurrence $c^p$, is the simplest type rule, as there is nothing to track for constants, and as such it has the type $(\emptyset,\emptyset)$.
@@ -654,48 +675,354 @@ A highlight of type rules can be found in \cref{fig:TypeSys}, and all type rules
 		As such, we use the $uf_{Upsilon_{p'}}$ to lookup for all $p'$-chains.
 \end{description}
 
-\begin{example}[Data-flow for abstractions]
-	Consider the following occurrence for application:
-	\begin{lstlisting}[language=Caml, mathescape=true]
-		(($\lambda$ y.(PLUS 3$^1$ y$^2$)$^3$)$^4$ 5$^5$)$^6$
-	\end{lstlisting}
-	The derivation tree for the occurrence can be found in \cref{FigEx.TAbs}.
-	Here, we show two applications, for \runa{T-App} and \runa{T-App-const}, where we create an abstraction that adds the constant $3$ to the argument of the abstraction, and applying the constant $5$ to the abstraction.
+% \begin{example}[Data-flow for abstractions]
+% 	Consider the following occurrence for application:
+% 	\begin{lstlisting}[language=Caml, mathescape=true]
+% 		(($\lambda$ y.(PLUS 3$^1$ y$^2$)$^3$)$^4$ 5$^5$)$^6$
+% 	\end{lstlisting}
+% 	The derivation tree for the occurrence can be found in \cref{FigEx.TAbs}.
+% 	Here, we show two applications, for \runa{T-App} and \runa{T-App-const}, where we create an abstraction that adds the constant $3$ to the argument of the abstraction, and applying the constant $5$ to the abstraction.
 
-	When typing the abstraction, we need too make an assumption about the parameter $y$ and the body.
-	As we are applying a constant to the argument, we can make an assumption that the type of the parameter should be $(\emptyset,\emptyset)$.
+% 	When typing the abstraction, we need too make an assumption about the parameter $y$ and the body.
+% 	As we are applying a constant to the argument, we can make an assumption that the type of the parameter should be $(\emptyset,\emptyset)$.
 
-	Based on this assumption for the type, we can then type the body of the abstraction.
-	As the body is an application for a functional constant, \runa{T-App-const}, we take a union for the types of each argument.
-\end{example}
+% 	Based on this assumption for the type, we can then type the body of the abstraction.
+% 	As the body is an application for a functional constant, \runa{T-App-const}, we take a union for the types of each argument.
+% \end{example}
 
-\begin{example}[Data-flow for references]
-	Consider the following occurrence:
-	\begin{lstlisting}[language=Caml, mathescape=true]
-		(let x (ref 1$^1$)$^2$ (let y (x$^3$) (!x$^4$)$^5$)$^6$)$^7$
-	\end{lstlisting}
-	The derivation tree for the occurrence can be found in \cref{FigEx.TRef}.
-	Here, we show the typing of references where we create a reference and create 2 aliases for it before reading from the reference.
-	When typing the reference, it modifies the base type $\Gamma$ with a new internal variable.
-	From the type information, it is clear that only $x$ and the internal variable $\nu x$ is used.
-\end{example}
+% \begin{example}[Data-flow for references]
+% 	Consider the following occurrence:
+% 	\begin{lstlisting}[language=Caml, mathescape=true]
+%           (let x (ref 1$^1$)$^2$
+%           (let y (x$^3$) (!x$^4$)$^5$)$^6$)$^7$
+% 	\end{lstlisting}
+% 	The derivation tree for the occurrence can be found in \cref{FigEx.TRef}.
+% 	Here, we show the typing of references where we create a reference and create 2 aliases for it before reading from the reference.
+% 	When typing the reference, it modifies the base type $\Gamma$ with a new internal variable.
+% 	From the type information, it is clear that only $x$ and the internal variable $\nu x$ is used.
+% \end{example}
 
-\begin{figure}[H]
+\begin{table*}
 	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
-		\input{sections/appendix/TSRules/const.tex}\\[0.7cm]
-		\input{sections/appendix/TSRules/var.tex}\\[0.7cm]
-		\input{sections/appendix/TSRules/let1.tex}\\[0.7cm]
-		\input{sections/appendix/TSRules/case.tex}\\[0.7cm]
-		\input{sections/appendix/TSRules/refread.tex}\\[0.7cm]
+	\begin{tabular}{llll}
+\runa{T-Const} &
+	\inference[]{}
+	{\Gamma,\Pi\vdash  c^{p}:(\emptyset,\emptyset)} & 
+\runa{T-Var} &
+	\condinf{}
+	{\Gamma,\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}{where 
+	$x^{p'}=uf_{ \sqsubseteq_\Pi}(x,\Gamma)$, and
+          $\Gamma(x^{p'})=T$} \\[15mm]
+\runa{T-Let-1} &
+	\condinf{
+		\Gamma,\Pi\vdash e_1^{p_1}:(\delta,\kappa) \\
+		\Gamma',\Pi\vdash e_2^{p_2}:T_2
+	}
+	{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p_1} \; e_2^{p_2}]^{p}:T_2}{where $\Gamma'=\Gamma[x^{p}:(\delta,\kappa\cup \{x\})]$ and
+          $\kappa\neq\emptyset$} &
+\runa{T-Case} &
+	\condinf
+	{
+		\Gamma,\Pi\vdash e^{p}:(\delta,\kappa) \\
+		\Gamma',\Pi\vdash e_i^{p_i}:T_i\;\;\;(1\leq i\leq|\tilde{\pi}|)
+	}
+	{\Gamma,\Pi\vdash [\mbox{case}\;e^{p}\;\tilde{\pi}\;\tilde{o}]^{p'}:T\sqcup(\delta,\kappa)}
+	{where $e_i^{p_i}\in\tilde{o}$ and $s_i\in\tilde{\pi}$ $T=\bigcup_{i=1}^{|\tilde{\pi}|}T_i$, and\\
+          $\Gamma'=\Gamma[x^p:(\delta,\kappa)]$ if $s_i=x$} \\[18mm]
+\runa{T-Ref-read} &
+	\multicolumn{3}{l}{\condinf
+	{\Gamma,\Pi\vdash  e^{p}:(\delta,\kappa)}
+	{\Gamma,\Pi\vdash
+                    [!e^{p}]^{p'}:T\cup(\delta\cup\delta',\emptyset)}
+                   % {a}}
+	{where $\left\{\begin{array}{l}\kappa\neq\emptyset$, $\delta'=\{\nu x^{p'}\mid\nu x\in\kappa\}$, $\nu x_1,\cdots,\nu x_n\in\kappa\\ 
+	\{\nu x_1^{p_1},\cdots,\nu x_1^{p_m}\}=uf_{\Upsilon_{p'}}(\nu
+                  x_1,\Gamma),\cdots,\{\nu x_n^{p_1'},\cdots,\nu
+                  x_n^{p_s'}\}=uf_{\Upsilon_{p'}}(\nu x_n,\Gamma) \\
+	T=\Gamma(\nu x_1^{p_1})\cup\cdots\cup\Gamma(\nu
+                         x_1^{p_m})\cup\cdots\cup\Gamma(\nu
+                         x_n^{p_1'})\cup\cdots\cup\Gamma(\nu
+                         x_n^{p_s'})\end{array}\right\}$}} \\
+          & & &
 	\end{tabular}
 	\caption{Selected rules from the type system}
 	\label{fig:TypeSys}
-\end{figure}
+\end{table*}
 
 % \begin{landscape}
 % \subfile{../examples/DFAbsT.tex}
 % \end{landscape}
+
+\section{Soundness}\label{sec:Soundness}
+
+We will now show the soundness of the type system, i.e., the type of
+an occurrence correspond to the dependencies and the alias information
+from the semantics. 
+To show that the type system is sound, we will first introduce the
+type rules for values and the relation between the semantics and the
+type system. 
+After that, we will present some properties in the semantics and type system that are used in the soundness proof.
+And lastly, we will show the soundness of the type system. 
+
+\subsection{Type rules for values}
+For the sake of proving the type system, we present type rules for the values presented int \cref{sec:EnvSto}, where the type rules is given in \cref{fig:ValTypeRules}.
+
+As the values for closures and recursive closures contains an environment, from where they where declared, as such, before introducing the type rules for values we will present the notion for well-typed environments.
+
+\begin{definition}[Environment judgement]\label{def:TEnv}
+	Let $v_1,\cdots,v_n$ be values such that $\Gamma,\Pi\vdash v_i:T_i$, for $1\leq i\leq n$.
+	Let $env$ be an environment given by $env=[x_1\mapsto v_1,\cdots,x_n\mapsto v_n]$, $\Gamma$ be a type environment, and $\Pi$ be the approximated order of program points.
+	We say that:
+	$$\Gamma,\Pi\vdash env$$
+	iff 
+	\begin{itemize}
+		\item For all $x_i\in dom(env)$ then $\exists x_i^p\in dom(\Gamma)$ where $\Gamma(x_i^p)=T_i$ then 
+			$$\Gamma,\Pi\vdash env(x_i):T_i$$
+	\end{itemize}
+\end{definition}
+
+In \cref{def:TEnv} we show the notion of well-typed environments, which states that: given the type of all values, $T_i$, for all variables, $x_i$, bound in the $env$, 
+then there exists an occurrence of $x$ in $\Gamma$, where the type from looking up for that occurrences is is $T_i$.
+As such, we know that all bindings $x$ in $env$ also have a type in $\Gamma$ from when $x$ were declared.
+
+\begin{description}
+	\item[\runa{Constant}] type rule differs from the rule \runa{T-Const}, since most occurrences can evaluate to a constant and as such we know that its type should be a base type.
+		Since constants can depend on other occurrences, we know that $\delta$ can be non-empty, but since constants are not locations, we also know that it cannot contain alias information, and as such $\kappa$ should be empty.
+
+	\item[\runa{Location}] type rule represents locations, where we know that it must be a base type.
+		Since locations can depend on other occurrences, we know that $\delta$ can be non-empty.
+		As locations can contains alias information, and that a location is considered to always be an alias to itself, we know that $\kappa$ can never be empty, as it should always contain an internal variable. 
+
+	\item[\runa{Closure}] type rule represents abstraction, and as such we know that it should have the abstraction type, $T_1\rightarrow T_2$, where we need to make an assumption about the argument type $T_1$.
+		Since a closure contains the parameter, body, and the environment for an abstraction from when it were declared, we also need to handle those part in the type rule.
+		The components of the closure is handled in the premises, where the environment must be well-typed.
+		We also type the body of the abstraction, where we know that we need to update the type environment with the type $T_1$ for its parameter, Where we type the body with $T_2$.
+
+	\item[\runa{Recursive closure}] type rules is similar to the \runa{Closure} rule, but since this is a recursive closure, we additionally need to update the type environment with the name of the recursive binding to the type of the abstraction.
+
+	\item[\runa{Unit}] type rule simply have the base type, as it is not an abstraction and it also cannot have alias information.
+		As the unit value is introduced from writing to references, $o=[o_1\;:=\;o_2]^p$, we know that from the type rule \runa{Ref-write} that the dependencies from the occurrence $o$ should also contain the set of occurrences.
+		As such, the \runa{Unit} rule also contains a set of occurrences, $\delta$.
+\end{description}
+
+\begin{figure}[H]
+	\setlength\tabcolsep{8pt}
+	\begin{tabular}{l}
+		\runa{Constant}\\[0.2cm]
+			\inference[]{}
+				{\Gamma,\Pi\vdash  c:(\delta, \emptyset)}\\[1cm]
+
+		\runa{Location}\\[0.2cm]
+			\inference[]{}
+				{\Gamma,\Pi\vdash  \loc:(\delta, \kappa)}\\
+				Where $\kappa\neq\emptyset$\\[1cm]
+
+		\runa{Closure}\\[0.2cm]
+			\inference[]
+				{
+					\Gamma,\Pi\vdash env \\
+					\Gamma[x^{p}:T_1],\Pi\vdash e^{p'}:T_2
+				}
+				{\Gamma,\Pi\vdash \left\langle x^{p}, e^{p'}, env \right\rangle^{p''}:T_1\rightarrow T_2}\\[1cm]
+
+		\runa{Recursive closure}\\[0.2cm]
+			\inference[]
+				{
+					\Gamma,\Pi\vdash env \\
+					\Gamma[x^{p}:T_1,f^{p'}:T_1\rightarrow T_2],\Pi\vdash e^{p''}:T_2
+				}
+				{\Gamma,\Pi\vdash \left\langle x^{p}, f^{p'}, e^{p''}, env \right\rangle^{p_3}:T_1\rightarrow T_2}\\[1cm]
+
+		\runa{Unit}\\[0.2cm]
+			\inference[]{}
+				{\Gamma,\Pi\vdash  ():(\delta,\emptyset)}\\[0.5cm]
+	\end{tabular}
+	\caption{Type rules for values}
+	\label{fig:ValTypeRules}
+\end{figure}
+\end{document}
+
+\subsection{Agreement}
+This section introduces the agreement between the type system and the
+semantics, where we will present the relation between the binding
+models in the type system and semantics, and show the relation between
+them. 
+
+We will first introduce the agreement between the binding models,
+i.e., show how the type environment and approximated order of program
+points relate to the environment, store, and dependency function. 
+Then we will show the type agreement, i.e., show the conditions for when a type agrees with the semantics.
+As such, the type agreement needs to show when the dependencies agrees and alias if the alias information agrees with the basis.
+ 
+The first agreement we present is the environment agreement, which ensures that that the type environment and approximated order of program points are a good approximation of the binding model in the semantics, i.e., 
+for the environment $env$, store $sto$, dependency function $w$, and the relation of program points over $w$.
+
+Here $env$, $sto$, and $w$ contains information for en evaluation in the semantics, either before or after an evaluation.
+The type environment $\Gamma$ contains the local information for variable bindings and global information for internal variables, and the approximated order of program points $\Pi$ is an approximation of all program points in an occurrence.
+
+\begin{definition}[Environment agreement]\label{def:EnvAgree}
+	Let $(w,\sqsubseteq_w)$ be a pair containing the dependency function and a relation over it, $env$ be an environment, $sto$ be the a store, $\Gamma$ be a type environment, and $\Pi$ be an approximated program point order.
+	We say that:
+	$$(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$$
+	if 
+	\begin{enumerate}
+		\item $\forall x\in dom(env).(\exists x^p\in dom(w))\wedge(x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma))$
+		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow env(x)=v\wedge w(x^p)=(L,V)\wedge\Gamma(x^p)=T.\\(env,v,(w,\sqsubseteq_w),(L,V))\models (\Gamma,T)$
+		\item $\forall \loc\in dom(sto).(\exists \loc^p\in dom(w))\wedge(\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}\Rightarrow\nu x^p\in dom(\Gamma))$
+		\item $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(env,\loc,(w,\sqsubseteq_w),(L,V))\models T$
+		\item if $p_1\sqsubseteq_w p_2$ then $p_1\sqsubseteq_\Pi p_2$
+	\item $\forall \loc^p\in dom(w).\exists \nu x^p\in dom(\Gamma)\Rightarrow\exists p'\in\cat{P}.uf_{\sqsubseteq_w}(\loc,w)\in uf_{\Upsilon_{p'}}(\nu x,\Gamma)$
+	\end{enumerate}
+\end{definition}
+The idea behind the environment agreement is that we need to make sure that semantics and type system talks about the same, i.e., if the dependencies in the semantics is also captured in the type environment, the alias information is captured, 
+that $\Pi$ is a good approximation, in respect to $w$, and the $p$-chains captures the global occurrence.
+As such, the type environment focuses on three areas: \cat{1)} local information variables, \cat{2)} the global information for references, and \cat{3)} the approximated order of program points.
+It should be noted at the agreement only relates the information known by $env$, $sto$, and $w$.
+
+\begin{description}
+	\item[1)] The agreement for local information only relates the information currently known by $env$, and that the information known by $w$ and $\Gamma$ agrees, in respect to \cref{def:TAgree}.
+		This is ensured by \cat{1)} and \cat{2)}.
+
+	\item[2)] We similarly handles agreement for the global information known, which is ensured by \cat{3)} and \cat{4)}.
+		Since $\Gamma$ contains the global information for references, we require that there exists a corresponding internal variable to the currently known locations, by comparing them by program points.
+		We also ensures that the dependencies from a location occurrence agrees with the type of a corresponding internal variable occurrence, in respect to \cref{def:TAgree}.
+
+	\item[3)] We also needs to ensure that $\Pi$ is a good approximation of the order $\sqsubseteq_w$ and the greatest binding function for $p$-chains ensures that we always get the necessary reference occurrences.
+	\cat{5)} ensures that if an order is defined in $\sqsubseteq_w$, then $\Pi$ also agrees on this order.
+
+	For \cat{6)}, we need to ensure that for any location currently known the exists a corresponding internal variable where, getting the greatest binding of this occurrence, $\loc^p$, then there exists a program point $p'$, 
+	such that looking up all greatest bindings for the $p'$-chain, there exists an internal variable occurrence that corresponds to $\loc^p$.
+\end{description}
+\bigskip
+
+With the environment agreement defined, we can present the type agreement.
+As the type can be abstractions and base types, with or without alias information, we have different requirements for handling them, as such we relate each requirement to a value
+Here, the idea is that if the value is a location, then we check that both the set of occurrences agrees with the dependency pair, presented in \cref{def:DepAgree}, 
+and check if the alias information agrees with the semantics, \cref{def:AliasAgree}.
+If the value is not a location, then the type can either be an abstraction type or base type.
+For the base type, we check that the agreement between the set of occurrences and the dependency pair agrees.
+If the type is an abstraction, then we check that $T_2$ agrees with binding model.
+We are only concerned about the return type $T_2$ for abstractions, since if the argument parameter is used in the body of the abstraction, then the dependencies would already be part of the return type.
+
+\begin{definition}[Type agreement]\label{def:TAgree}
+	Let $env$ be an environment, $w$ be a dependency function, $\sqsubseteq_w$ be a relation over $w$, $(L,V)$ be a dependency pair, and $T$ be a type.
+	We say that:
+	$$(env,v,(w,\sqsubseteq_w),(L,V))\models(\Gamma,T)$$
+	iff
+	\begin{itemize}
+		\item $v\neq\loc$ and $T=T_1\rightarrow T_2$:
+		\begin{itemize}
+			\item $(env,v,(w,\sqsubseteq_w),(L,V))\models(\Gamma,T_2)$
+		\end{itemize}
+
+		\item $v\neq\loc$ and $T=(\delta,\kappa)$:
+		\begin{itemize}
+			\item $(env,(L,V))\models\delta$
+		\end{itemize}
+
+		\item $v=\loc$ then $T=(\delta,\kappa)$ where:
+		\begin{itemize}
+			\item $(env,(L,V))\models\delta$
+			\item $(env,(w,\sqsubseteq_w),v)\models(\Gamma,\kappa)$
+		\end{itemize}
+	\end{itemize}
+\end{definition}
+
+\begin{definition}[Dependency agreement]\label{def:DepAgree}
+	Let $env$ be an environment, $(L,V)$ be a dependency pair, and $\delta$ be a set of occurrences.
+	We say that:
+	$$(env,(L,V))\models\delta$$
+	if
+	\begin{itemize}
+		\item $V\subseteq\delta$,
+		\item For all $\loc^p\in L$ where $env^{\loc}\neq\emptyset$, we then have $\{x\in dom(env)\mid env(x)=\loc\}\subseteq \kappa_i^0$ for a $\kappa_i^0\in\delta$
+		\item For all $\loc^p\in L$ where $env^{\loc}=\emptyset$ then there exists a $\kappa_i^0\in\delta$ such that $\kappa_i^0\subseteq\cat{IVar}$
+	\end{itemize}
+\end{definition}
+
+The dependency agreement, defined in \cref{def:DepAgree}, ensures that $\delta$ at leas contains all information from the dependency pair.
+
+
+\begin{definition}[Alias agreement]\label{def:AliasAgree}
+	Let $env$ be an environment, $w$ be a pair of a dependency function, $\sqsubseteq_w$ be a relation over $w$, $\loc$ be a location, and $\kappa$ be an alias set.
+	We say that:
+	$$(env,(w,\sqsubseteq_w),\loc)\models(\Gamma,\kappa)$$
+	if
+	\begin{itemize}
+		\item $\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa$
+		\item $env^{-1}(\loc)\neq\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
+			(env^{-1}(\loc)\subseteq\kappa^0_i)\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\\\nu x\in\kappa^0_i\wedge\nu x\in\kappa)$
+		\item $env^{-1}(\loc)=\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
+			(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i\wedge\nu x\in\kappa)$
+	\end{itemize}
+\end{definition}
+
+The alias agreement, defined in \cref{def:AliasAgree}, ensures that the alias information in $\kappa$ is also known the environment.
+To do this, we ensure that if there exists alias information in the environment $env$, then there exists an alias base $\kappa^0_i\in\kappa^0$ such that the currently know alias information known in 
+in $env$ is a subset of $\kappa^0_i$, and that there exists a $\nu x\in\kappa$, such that $\nu x\in \kappa^0_i$.
+If there is no currently known alias information, we simply check that there exists a corresponding internal variable, that is part of an alias base.
+\end{document}
+
+\subsection{Properties}
+Before we present the soundness proof, we will first present some properties about the semantics and type system.
+The first property we present is for the dependency function,since the dependency function is global, and as such they can contain side effects after an evaluation.
+This property states that if any new variable bindings is introduced to the dependency function, by evaluating an occurrence $e^p$, those variables are not free in $e^p$.
+
+\begin{lemma}[History]\label{lemma:His}
+	Suppose $e^p$ is an occurrence, that
+	$$env\vdash\left\langle e^{p},sto,(w,\sqsubseteq_w),p'\right\rangle\rightarrow\left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p''\right\rangle$$
+		and $x^{p_1}\in dom(w')\backslash dom(w)$.
+		Then $x\notin fv(e^{p})$
+\end{lemma}
+The proof for \cref{lemma:His} can be found in \cref{app:HisProof}.
+
+%\subfile{HisProof/index.tex}
+
+The second property is the strengthening of the type environment, which states that if there is a binding the type environment, used to type an occurrence $e^p$, and the variables is not free in $e^p$ then the binding can be removed.
+
+\begin{lemma}[Strengthening]\label{lemma:Strength}
+	If $\Gamma[x^{p'}:T'],\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma,\Pi\vdash e^{p}:T$
+\end{lemma}
+The proof for \cref{lemma:Strength} can be found in \cref{app:StrProof}.
+%\subfile{StrProof/index.tex}
+
+With history, \cref{lemma:His}, and strengthening, \cref{lemma:Strength}, defined we can then present the soundness theorem.
+This theorem compares the semantics, for an occurrence, to a type rule that concludes this occurrence.
+Since we are interested in, if the type system is a sound approximation of the semantics, we need to make sure that an evaluation of an occurrence, and the type for the occurrence agrees.
+As such, we assume that the type environment and approximated order of program points are in an agreement with the binding models in the semantics, and we also assume that the environment is well-typed.
+
+Based on these assumptions, we then need to make sure that, after an evaluation, we are still in agreement, we can type the value, and the type is in agreement with the semantics.
+
+\begin{theorem}[Soundness of type system]
+	Suppose $e^{p'}$ is an occurrence where
+	\begin{itemize}
+		\item $env\vdash\left\langle e^{p'},sto,(w,\sqsubseteq_w),p\right\rangle\rightarrow\left\langle v,sto',(w',\sqsubseteq_w'),(L,V),p''\right\rangle$,
+		\item $\Gamma,\Pi\vdash e^{p'} : T$
+		\item $\Gamma,\Pi\vdash env$
+		\item $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$
+	\end{itemize}
+	Then we have that:
+	\begin{itemize}
+		\item $\Gamma,\Pi\vdash v:T$
+		\item $(env,sto',(w',\sqsubseteq_w'))\models(\Gamma,\Pi)$
+		\item $(env,(w',\sqsubseteq_w'),v,(L,V))\models(\Gamma,T)$
+	\end{itemize}
+\end{theorem}
+\begin{proof}
+	The proof proceeds by induction on the height of the derivation tree for 
+	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
+	We will only show the proof of four rules here, for \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref-write}, the full proof can be found in \cref{app:SoundnessProof}.
+
+	% \begin{description}
+	% 	\input{sections/Proof/SoundProof/var.tex}
+	% 	\input{sections/Proof/SoundProof/case.tex}
+	% 	\input{sections/Proof/SoundProof/refread.tex}
+	% \end{description}
+\end{proof}
+
+%\subfile{SoundProof/index.tex}
+\end{document}
+
 \end{document}
 
 \end{document}
