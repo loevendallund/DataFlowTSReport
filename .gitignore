@@ -4,3 +4,5 @@ build/*
 *.out
 *.gz
 *.pdf
+pepm2024.bbl
+pepm2024.blg

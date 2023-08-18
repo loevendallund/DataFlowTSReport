@@ -840,7 +840,6 @@ As such, we know that all bindings $x$ in $env$ also have a type in $\Gamma$ fro
 	\caption{Type rules for values}
 	\label{fig:ValTypeRules}
 \end{figure}
-\end{document}
 
 \subsection{Agreement}
 This section introduces the agreement between the type system and the
@@ -961,7 +960,6 @@ The alias agreement, defined in \cref{def:AliasAgree}, ensures that the alias in
 To do this, we ensure that if there exists alias information in the environment $env$, then there exists an alias base $\kappa^0_i\in\kappa^0$ such that the currently know alias information known in 
 in $env$ is a subset of $\kappa^0_i$, and that there exists a $\nu x\in\kappa$, such that $\nu x\in \kappa^0_i$.
 If there is no currently known alias information, we simply check that there exists a corresponding internal variable, that is part of an alias base.
-\end{document}
 
 \subsection{Properties}
 Before we present the soundness proof, we will first present some properties about the semantics and type system.
@@ -986,12 +984,22 @@ The second property is the strengthening of the type environment, which states t
 The proof for \cref{lemma:Strength} can be found in \cref{app:StrProof}.
 %\subfile{StrProof/index.tex}
 
-With history, \cref{lemma:His}, and strengthening, \cref{lemma:Strength}, defined we can then present the soundness theorem.
-This theorem compares the semantics, for an occurrence, to a type rule that concludes this occurrence.
-Since we are interested in, if the type system is a sound approximation of the semantics, we need to make sure that an evaluation of an occurrence, and the type for the occurrence agrees.
-As such, we assume that the type environment and approximated order of program points are in an agreement with the binding models in the semantics, and we also assume that the environment is well-typed.
+With history, \cref{lemma:His}, and strengthening,
+\cref{lemma:Strength}, defined we can how present the soundness
+theorem for our type system.
 
-Based on these assumptions, we then need to make sure that, after an evaluation, we are still in agreement, we can type the value, and the type is in agreement with the semantics.
+This theorem compares the semantics to the type system and shows that
+it is a sound approximation of the type system.
+
+Here we need to make sure that an
+evaluation of an occurrence, and the type for the occurrence agrees. 
+As such, we assume that the type environment and approximated order of
+program points are in an agreement with the binding models in the
+semantics, and we also assume that the environment is well-typed. 
+
+Based on these assumptions, we then need to make sure that, after an
+evaluation, we are still in agreement, we can type the value, and the
+type is in agreement with the semantics. 
 
 \begin{theorem}[Soundness of type system]
 	Suppose $e^{p'}$ is an occurrence where
@@ -1020,12 +1028,112 @@ Based on these assumptions, we then need to make sure that, after an evaluation,
 	% \end{description}
 \end{proof}
 
-%\subfile{SoundProof/index.tex}
+% \subfile{SoundProof/index.tex}
+
+\section{Conclusion}\label{sec:Conc}
+
+We have introduced a type system for local data-flow analysis for a
+subset of ReScript. 
+
+In the type system, we have shown how to handle data-flow analysis for
+different language constructs, for pattern matching, local
+declarations, and referencing. 
+As pattern matching introduces branches to the language, we showed a
+sound over-approximation of how to handle these branches. 
+Additionally, since we also have mutability, through referencing, the approximation should also, in case of reading from a reference, get all places where a reference binding could exist in the type environment.
+Since some branches could write to a reference, while others do not, it was important to consider each branch separately when reading from references.
+
+\subsection{Discussion}
+
+The type system we have presented is for a small language without many
+constructs. 
+However, some interesting constructs were introduced to the language,
+such as mutability and pattern matching which introduces some
+challenges when trying to make a good approximation of data-flow. 
+
+The challenges from having both pattern matching and mutability introduced challenges, as each branch could not simply be thought of as locally, since reference operations introduce side effects.
+To references, we represent them as internal variables, i.e., variables that do not exist in the syntax, and treating them as global information.
+To handle the problem of branching, when reading from a reference, we look at each branch independently to find the information necessary.
+\bigskip
+
+Since we focused on a functional language, that is based on
+expressions, we focused the data-flow analysis on the flow of
+variables, i.e., which variables are used to evaluate an occurrence.
+As the language is primarily a series of declaration of functions,
+variables, and references, this allows for analyzing where variables
+are used on which are useful evaluating an occurrence.
+
+Additionally by representing referencing as internal variables, it
+allows for understanding of which references are used and where they
+are used in the occurrence.  This information can be used by compilers
+to make sure that references can be safely cleaned up, after the last
+place they were used.  The alias information also implies which
+aliases were used in the occurrence.
+
+However, the type system introduced contains some restrictions, also
+called slack, for which occurrences it accepts.  As the type system
+does not allow for type polymorphism, the use cases for abstractions
+are restricted.  In one place, where abstractions are quite limited is
+when binding them to a local declaration, this local declaration
+cannot be used at multiple places, as this would mean it would contain
+occurrences at multiple program points.
+
+Another area of the type system contains slack, is for references as abstractions cannot be bound to them.
+Here, another issue occurs as the environment only contains local information, and an abstraction thus only knows about the variables known when it was declared.
+As the type system is currently defined, the type environment should be bound with the abstraction, but the current type system does not allow this, as the type environment both includes local and global information.
+
+
+\subsection{Future work}\label{sec:FW}
+
+\paragraph{Implementation of a type checker}
+Implementing a type checker for the type system presented here would allow for testing how well the information is used.
+It would also allow for comparing how well it performs, compared to other data-flow analysis techniques.
+
+\paragraph{Polymorphism}
+
+A next step is that of introducing polymorphism. Polymorphism for the
+base type $(\delta,\kappa)$ would allow for abstractions to be used
+multiple times in an occurrence ad the input and output type would not
+be restricted from only allowing the exact same input type.
+
+Consider the following occurrence.
+
+\begin{lstlisting}[language=Caml, mathescape=true]
+(let x ($\lambda$ y.y$^1$)$^2$ (x$^3$ (x$^4$ 1$^5$)$^6$)$^7$)$^8$
+\end{lstlisting}
+
+If polymorphism is introduced, occurrences like this could be defined,
+since when typing the applications, the type of the argument changes,
+since the occurrence $x^4$ is present in the second application. 
+
+
+\paragraph{Extending references}
+References are defined currently in the type system, they cannot be bound to abstractions.
+However, this would also introduce complications, as abstractions need the information known at the time they were declared.
+Another complication would be that if different references had different types, e.g., if it had an abstraction type at one point and a base type at another point.
+Here, either we should require references to always have the same type, e.g., with base type polymorphism.
+Consider the following occurrence:
+\begin{lstlisting}[language=Caml, mathescape=true]
+((!(case 1 (1$^1$) (let z 5$^2$ (ref ($\lambda$ y.(PLUS z$^3$ y$^4$)$^5$)$^6$))$^7$)$^8$)$^9$ 5)$^{10}$
+\end{lstlisting}
+This occurrence would create a reference to a local abstraction which depends on the locally declared variable $z$ before reading from the reference and applying the constant to it.
+In the semantics, the environment would be added to the abstraction closure, and when evaluating the body of the abstraction, in an application, it would use the environment in the closure.
+
+\paragraph{Type inference}
+Another area is to make a type inference algorithm, which can find the type information.
+To make type inference for the type system would need to find an approximated order of program points, find a proper $\kappa_0$ and type for abstractions, that is, find all the places where the parameter should be bound.
+
+\paragraph{Extending with more language constructs}
+It would also be interesting to introduce more language constructs, as the language presented only contains a small amount of constructs, such as mutability and pattern matching.
+Some interesting constructs to add could be records, constructors and deconstructors, modules, or lazy evaluation.
+Here, lazy evaluation could take multiple forms, either by introducing it as a core part of the language, where every binding is lazy evaluated, or add special constructs for lazy evaluation.
+Modules, on the other hand, would allow for wrapping an occurrence, or multiple occurrences into a module, which could then be used in multiple places.
+
+\bibliography{bib}
+\bibliographystyle{plain}
 \end{document}
 
-\end{document}
 
-\end{document}
 
 %%% Local Variables:
 %%% mode: latex
