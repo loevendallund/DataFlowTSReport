@@ -1,0 +1,16 @@
+PLAN:
+
+* Gennemlæse artikel [begge]
+
+** Overveje bedre notation (uf!) [Hans]
+
+** Endnu bedre sprog [Hans]
+** Hvad kan fjernes/forkortes?
+** Kan afsnit 4.2 om enighed præsenteres enklere? [Hans]
+** Hvad er fordelene ved dette system? [begge!!]
+*** Kan kombineres med andre typesystemer (fordi det er et typesystem!)
+*** 
+
+* Approksimere programpunkter – kan vi få det med? [Nicky]
+* Skrive et afsnit om implementationen (kort!) [Nicky]
+* Valg af eksempler (samme eksempler bliver fulgt til dørs i implementation) [begge]
