@@ -13,4 +13,5 @@ PLAN:
 
 * Approksimere programpunkter – kan vi få det med? [Nicky]
 * Skrive et afsnit om implementationen (kort!) [Nicky]
+** Sikre at forening og "kantet forening" er enige! [Nicky]
 * Valg af eksempler (samme eksempler bliver fulgt til dørs i implementation) [begge]
