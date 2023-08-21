@@ -972,7 +972,7 @@ This property states that if any new variable bindings is introduced to the depe
 		and $x^{p_1}\in dom(w')\backslash dom(w)$.
 		Then $x\notin fv(e^{p})$
 \end{lemma}
-The proof for \cref{lemma:His} can be found in \cref{app:HisProof}.
+%The proof for \cref{lemma:His} can be found in \cref{app:HisProof}.
 
 %\subfile{HisProof/index.tex}
 
@@ -981,7 +981,7 @@ The second property is the strengthening of the type environment, which states t
 \begin{lemma}[Strengthening]\label{lemma:Strength}
 	If $\Gamma[x^{p'}:T'],\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma,\Pi\vdash e^{p}:T$
 \end{lemma}
-The proof for \cref{lemma:Strength} can be found in \cref{app:StrProof}.
+%The proof for \cref{lemma:Strength} can be found in \cref{app:StrProof}.
 %\subfile{StrProof/index.tex}
 
 With history, \cref{lemma:His}, and strengthening,
@@ -1019,7 +1019,7 @@ type is in agreement with the semantics.
 \begin{proof}
 	The proof proceeds by induction on the height of the derivation tree for 
 	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
-	We will only show the proof of four rules here, for \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref-write}, the full proof can be found in \cref{app:SoundnessProof}.
+	We will only show the proof of four rules here, for \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref-write}.% , the full proof can be found in \cref{app:SoundnessProof}.
 
 	% \begin{description}
 	% 	\input{sections/Proof/SoundProof/var.tex}
