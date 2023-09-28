@@ -10,9 +10,36 @@
 %\input{frontmatter/acm.tex}
 
 \begin{document}
-	%\subfile{frontmatter/resume.tex}
-   \input{frontmatter/titlepage.tex}
-	
+\title[A type system for data flow analysis]{A type system for data
+  flow and alias analysis in ReScript}
+
+\author{Nicky Ask Lund} 
+\email{nlund18@student.aau.dk} 
+\affiliation{%
+	\institution{Aalborg University}
+	\department{Department of Computer Science}
+	\city{Aalborg}
+	\country{Denmark}
+}
+
+\author{Hans Hüttel} 
+\email{hans.huttel@di.ku.dk} 
+\affiliation{%
+	\institution{University of Copenhagen}
+	\department{Department of Computer Science}
+	\city{Copenhagen}
+	\country{Denmark}
+}
+
+\date{August 2023}
+
+\keywords{Data-flow analysis, Alias analysis, Program analysis, Programming languages, Type systems}
+
+\input{frontmatter/abstract.tex}
+
+\maketitle
+\renewcommand{\shortauthors}{}
+
 \section{Introduction}
 
 Data-flow analysis has been studied for decades in order to better
@@ -66,39 +93,47 @@ dead-code, exception, and termination analysis, but the tool is only
 experimental.\cite{reanalyze} 
 
 We present a type system for data-flow analysis for bindings and alias
-analysis in a subset of ReScript that functional and imperative
-features. Our type system provides the data information used at each
-program point and the alias information used.  Since the analysis we
-present focus collecting dependencies that are used to evaluate a part
-of a program, we present a local analysis of programs.
+analysis in a subset of ReScript that incorporates both functional and
+imperative features. The goal of the system is that it for every
+location and variable occurrence will give us information about which
+other, previous occurrence its value depends upon. Our type system
+provides the data information used at each program point and the alias
+information used.  Since the analysis we present focuses on collecting
+dependencies that are used to evaluate a part of a program, this is a
+local analysis.
 
-The type system is sound.
+We show that the the type system is sound in the sense that it
+correctly overapproximates the set of occurrences on which any given
+occurrence depends. Moreover, we present an implementation in Rust of
+a type checker based on our system.
 
 \section{A fragment of ReScript}\label{sec:lang}
 
-The fragment of ReScript that we study in this paper is a
-$\lambda$-calculus with bindings, pattern matching and mutability. In
-this section we describe the syntax of our fragment and give a
-big-step semantics that is tailored to keep track of dependencies.
+The fragment of ReScript that we study here is a $\lambda$-calculus
+with bindings, pattern matching and mutability. In this section we
+describe the syntax of our fragment and give a big-step semantics that
+is tailored to keep track of dependencies.
  
 \subsection{Syntax}
 
-As the purpose of the dependency analysis is to analyse each
-subexpression of a program and differentiate them, we label every
-subexpression of a ReScript program. These \emph{program points} are
-used for tracking the information flow. We call a labelled expression
-$e^p$ where $p$ is a program point an \emph{occurrence}.
-
-The syntactic categories for the language are
+The syntactic categories in our version of ReScript are
 %
 \begin{align*}
-	p\in &\;\cat{P} &-\;&\mbox{Program points} \\
 	e\in &\;\cat{Exp} &-\;&\mbox{Expressions} \\
 	o\in &\;\cat{Occ} &-\;&\mbox{Occurrences} \\
 	c\in &\;\cat{Con} &-\;&\mbox{Constants} \\
 	x,\;f\in &\;\cat{Var} &-\;&\mbox{Variables} \\
 	\loc\in &\;\cat{Loc} &-\;&\mbox{Constants}
 \end{align*}
+
+As the purpose of the dependency analysis is to analyse how the values
+of subexpressions within a program depend upon one another, we label
+every subexpression of a ReScript progra with a unique \emph{program
+  points} taken from a countably infinite set $\cat{P}$. We call a
+labelled expression $e^p$ where $p \in \cat{P}$ an
+\emph{occurrence}. We let $u$ range over $\cat{Var} \cup
+\cat{Loc}$. We call occurrences $u^p$ \emph{elements} in what follows and $u^p$
+is an element, we call any other occurrence $u^q$ a \emph{$u$-occurrence}.
 
 When given a syntactic category $\mathbf{C}$, we let $\mathbf{C}^{P}$
 denote the pair $\mathbf{C}\times\cat{P}$, so that e.g.
@@ -122,12 +157,11 @@ The formation rules are shown below.
 %
 $\lambda\;x.o$ denotes an \emph{abstraction} with a parameter $x$ and body $o$.
 \emph{Constants} $c$ are either natural numbers $n$, boolean values $b$, or functional constants.
-		We introduce a function $apply$, that for each functional constant $c$ returns the result of applying $c$ to its arguments.
 
 \emph{Local declarations} $\mbox{let} \; x \; o_1 \; o_2$ and
-$\mbox{let rec} \; f \; o_1 \; o_2$ are immutable bindings that bind
-the variables $x$ to the value $o_1$ and evaluate to $o_2$. The latter
-form is recursive; $x$ is allowed to appear inside $o_1$. Mutability
+$\mbox{let rec} \; f \; o_1 \; o_2$ are immutable bindings that
+associate the variable $x$ with the value $o_1$ within $o_2$. The latter
+form is recursive; $x$ can then appear inside $o_1$. Mutability
 in ReScript is introduced using the \emph{reference} construct
 $\mbox{ref\;o}$. This construct creates a reference in the form of a
 location and allows for binding locations to local declarations. We
@@ -185,13 +219,13 @@ and we let $v$ range over \cat{Values}.
 	The set of all environments, \cat{Env}, is the set of partial functions from variables to values, given as:
 	$$\cat{Env}=\cat{Var}\rightharpoonup\cat{Values}$$
 \end{definition}
-Where $env\in\cat{Env}$ denotes an arbitrary environment in \cat{Env}.
+%
+Here $env\in\cat{Env}$ denotes an arbitrary environment in \cat{Env}.
 
-Later, we need to find the set of variables bound to any given
-values. 
+The set of variables bound to any given value $v$ in $env$ is defined by 
 \begin{definition}
   Let $v$ be a value and $env\in\cat{Env}$ be an environment. The
-  inverse function $env^{-1} : \cat{Values} \to \cat{2}^{\cat{var}}$
+  inverse $env^{-1} : \cat{Values} \to \cat{2}^{\cat{var}}$
   is defined by
   %
 	\[ env^{-1}(v)=\{x\in dom(env)\mid env(x)=v\} \]
@@ -234,11 +268,11 @@ $u^p\in\cat{Loc}^P\cup\cat{Var}^P$,
 %
 should be read as: a lookup of an occurrence $u^p$, a variable or
 location occurrence, returns a pair of location and variable
-occurrences. 
-We also denote the pair, retrieved from the dependency function, which
-we call a dependency pair such that $(L,V)$ contains a set of location
-occurrences $L=\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\}$  
-and a set of variable occurrences $V=\{x_1^{p'_1},\cdots,x_m^{p'_m}\}$.
+occurrences.  We also denote the pair, retrieved from the dependency
+function, which we call a dependency pair such that $(L,V)$ contains a
+set of location occurrences $L$ where
+$L=\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\}$ and a set of variable
+occurrences $V$ where $V=\{x_1^{p'_1},\cdots,x_m^{p'_m}\}$.
 
 \begin{example}[]\label{ex:dep}
 	Consider the occurrence from \cref{ex:write}, where we can
@@ -268,8 +302,12 @@ We there introduce a notion of ordering in the form of a binary relation over pr
 	$$\sqsubseteq\subseteq\cat{P}\times\cat{P}$$
 \end{definition}
 
-Since we are interested in the ordering of the elements in a dependency function $w$, we will define an instantiation of \cref{def:BinRel}.
-Since $w$, is a function from occurrences to a pair of occurrences, we first present a function for getting the program points from a set of occurrences:
+Since we are interested in the ordering of the elements in a
+dependency function $w$, we will define an instantiation of
+\cref{def:BinRel}. 
+Since $w$, is a function from occurrences to a pair of occurrences, we
+first present a function for getting the program points from a set of
+occurrences: 
 
 \begin{definition}[Occurring program points]\label{def:OccPP}
 	Let $O$ be a set of occurrences, then $points(O)$ is given by:
@@ -304,13 +342,13 @@ dependency function and the binary relation are used to define the
 flow of information. As illustrated by \cref{ex:depRel}, we need to
 lookup the greatest of $\sqsubseteq_w$. 
 
-The immediate predecessor of a $u$ wrt. a set of occurrences $S$ is
-the most recent element in $S$ seen before $u$. 
+The immediate predecessor $\uf(u,S)$ of an element $u^p$ wrt. a set of occurrences $S$ is
+the most recent $u$-element in $S$ seen before $u$. 
 
-\begin{definition}[Greatest binding]\label{def:GBind}
-	Let $u$ be an element, either a variable or location, and $S$
-        be a set of occurrences, then $\uf(u,S)$ is given by
-\[ \uf(u,S)=\inf\{u^p\in S\mid u^q\in S.q\sqsubseteq p\} \]
+\begin{definition}[Immediate predecessor]\label{def:GBind}
+  Let $u$ be an element and $S$ be a set of occurrences, then
+  $\uf(u,S)$ is given by
+\[ \uf(u^p,S)=\inf\{u^q\in S\mid q\sqsubseteq p\} \]
 \end{definition}
 
 Based on \cref{def:GBind}, we can present an instantiation of the function for the dependency function $w$ and an order over $w$, $\sqsubseteq_w$:
