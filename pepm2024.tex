@@ -497,7 +497,10 @@ the big-step semantics.
 
 \subsection{An overview of the type system}
 
-The system assigns types, presented in \cref{sec:types}, to occurrences given the basis, which will be presented in \cref{sec:basis}, and using the type assignment, which is presented in \cref{sec:Judge}.
+The system assigns types, presented in \cref{sec:types}, to
+occurrences given the basis, which will be presented in
+\cref{sec:basis}, and using the type assignment, which is presented in
+\cref{sec:Judge}. 
 Since the language contains local information as bindings, and global
 information as locations, the type checker must reflect this.
 
@@ -510,21 +513,25 @@ for internal variables.
 As references are not always bound to variables, as such the reference
 does not contain any alias information, the analysis provides alias
 information used for evaluating an occurrence.  Here, we are going to
-introduce the basis for aliasing, as a partition of all variables and
-internal variables used in an occurrence.  As such, it is possible to
-analyse, from the type information of occurrences, which aliases are
-actually used.
+introduce the basis for aliasing, as a partition of the sets of
+variables and internal variables used in an occurrence.  As such, it
+becomes possible to use the type information of occurrences to
+determine which aliases are actually used.
 
 We also impose some restrictions on the type system, where the first
 restrictions is that references cannot be bound to abstractions.
-Since we do not introduce polymorphism, the use case for abstractions
-are reduced, as an abstraction cannot be used at multiple places.
+Since we do not introduce polymorphism into our type system, an abstraction can only be
+used once. 
 Consider the following occurrence:
 \begin{lstlisting}[language=Caml, mathescape=true]
 (let x ($\lambda$ y.y$^1$)$^2$ (x$^3$ (x$^4$ 1$^5$)$^6$)$^7$)$^8$
 \end{lstlisting}
-To type the occurrences used in both places where we apply the abstractions, we type of the argument in the innermost application is empty, as it applies a constant.
-For the second, and outermost, application, the argument type must contain the occurrence $x^4$, as it were used to evaluate the value for the argument.
+To type the occurrences used in both places where we apply the
+abstractions, we type of the argument in the innermost application is
+empty, as it applies a constant. 
+For the second, and outermost, application, the argument type must
+contain the occurrence $x^4$, as it were used to evaluate the value
+for the argument. 
 
 \subsection{Types}\label{sec:types}
 
@@ -532,11 +539,21 @@ The set of types \cat{Types} is defined by the following formation rules:
 %
 \[ T ::=(\delta,\kappa)\mid T_1 \rightarrow T_2 \]
 %
-Here, we introduce two types, the base type $(\delta,\kappa)$ and the abstraction type $T_1 \rightarrow T_2$.
-The idea is that an occurrence have the abstraction type if it represents an abstraction that takes an argument of type $T_1$ and returns a type of $T_2$.
-The base type represent all other values, where $\delta$ represent the set of occurrences, used to evaluate an occurrence, and $\kappa$ represent the set of alias information.
-Here, if an occurrence have a type containing alias information, then it represent a location, where if the occurrence have a base type with alias information, then the occurrence must represents a reference. 
-If the occurrence have the abstraction type where either $T_1$ or $T_2$ have are base types with alias information, then the abstraction either takes a reference as input or returns a reference.
+Here, we introduce two types, the base type $(\delta,\kappa)$ and the
+abstraction type $T_1 \rightarrow T_2$.
+
+The base type $(\delta,\kappa)$ contains a set $\delta$ that contains
+the set of occurrences upon the value of a occurrence can at most
+depend, and $\kappa$ represents alias information in the form of the
+set of internal variables upon which this occurrence may
+depend. Therefore, if an occurrence has a base type where
+$\kappa/neq \emptyset$, then the occurrence must represent a location.
+
+In order to be able to type functions, we introduce arrow types
+$T_1 \rightarrow T_2$. If an occurrence has the
+abstraction type where either $T_1$ or $T_2$ are base types with alias
+information, then the abstraction either takes a reference as input or
+returns a reference.
 
 \begin{example}[]
 Consider the following occurrence:
@@ -586,26 +603,33 @@ T_1\cup T_2=
 % 	\end{equation*}
 % \end{definition}
 
-\subsection{Basis and type environment}\label{sec:basis}
-Next, we will present the basis and type environment for the type system.
-The basis we are presenting here are assumptions used by the type checker, in addition to the assignment of types which are presented in \cref{sec:Judge}, where we are going to present a type base for aliasing and an approximated order of program points.
+\subsection{The binding model of the type system}\label{sec:basis}
 
-We will also introduce the type environment, which are similar to the environment and store used in the semantics, as the type environment keeps track of the type of variables and internal variables.
-As such, the type environment is also a approximation of the dependency function, as the purpose of the type system is to collect information about which occurrences are used and what alias information is used.
+The semantics will let us find dependency information, and the type 
+system most approximate these semantic notions.
 
-Similar to the lookup of the greatest binding for the dependency function, we are going to introduce an instantiation of the function from \cref{def:GBind} for the type environment in respect to the basis for approximated order of program points.
-\bigskip
-
-We will then introduce the type base for aliasing, as a partition of variables and internal variables used in an occurrence.
+As locations do not appear at the level of the type system, we
+introduce the notion of a type base. This is a partitioning of the
+sets of variables and internal variables. 
 
 \begin{definition}[Type Base for aliasing]
-	For an occurrence $o$, let $var$ be the set of all variables and $ivar$ be the set of all internal variables in $o$.
-	The type base $\kappa^0=\{\kappa^0_1,\cdots,\kappa^0_n\}$ is then a partition of $var\cup ivar$, where $\kappa_i^0\cap\kappa_j^0=\emptyset$ for all $i\neq j$.
+	For an occurrence $o$, let $\cat{Var}_o$ be the set of all
+        variables found in $o$ and $\cat{IVar}_o$ be the set of all
+        internal variables in $o$ found in $o$.
+	The type base $\kappa^0=\{\kappa^0_1,\cdots,\kappa^0_n\}$ is
+        then a partition of $\cat{Var}_o \cup \cat{IVar}_o$, where
+        $\kappa_i^0\cap\kappa_j^0=\emptyset$ for all $i\neq j$. 
 \end{definition}
 
-The idea behind the base for type alias $\kappa_0$ is to make a partition of the variables and internal variables used in an occurrence.
-This partition represents the assumption about which variables are actually an alias to internal variables.
-As such multiple variables can only belong to the same element $\kappa_0^i\in\kappa_0$, if there also exists an internal variable in $\kappa_0^i$.
+This partition represents the assumption about which variables are
+actually an alias to internal variables: If $x \in \kappa^0_1$ and
+$\nu y \in \kappa^0_i$, then $x$ is an alias of $\nu y$.
+
+As such multiple variables can only belong to the same element
+$\kappa_0^i\in\kappa_0$, if there also exists an internal variable in
+$\kappa_0^i$. 
+
+We also assume an ordering of program points at type level.
 
 \begin{definition}[Approximated order of program points]
 	An approximated order of program points $\Pi$ is a pair, such that: 
@@ -617,7 +641,10 @@ As such multiple variables can only belong to the same element $\kappa_0^i\in\ka
 	\end{itemize}
 \end{definition}
 
-The approximated order of program points is an assumption about the order for program points for an occurrence $o$, as such, this approximation should be an approximation of the order that that can be derived from the semantics, presented in \cref{sec:sem}, for $o$.
+The approximated order of program points is an assumption about the
+order for program points for an occurrence $o$, as such, this
+approximation should be an approximation of the order that that can be
+derived from the semantics, presented in \cref{sec:sem}, for $o$. 
 
 \begin{definition}[Partial order of $\Pi$]
 	Let $\Pi=(\cat{P},\sqsubseteq_\Pi)$ be an approximated order of program points.
@@ -625,12 +652,14 @@ The approximated order of program points is an assumption about the order for pr
 \end{definition}
 \bigskip
 
-Next, we will introduce the type environment:
+A type environment tells us the types of occurrences of variables and
+internal variables.
+
 \begin{definition}[Type Environment]
 	A type environment $\Gamma$ is a partial function $\Gamma:\cat{Var}^P\cup\cat{IVar}^P\rightharpoonup\cat{Types}$
 \end{definition}
 
-\begin{definition}[Updating Type Environments]
+\begin{definition}[Updating a type environment]
 	Let $\Gamma$ be a type environment.
 	We write $\Gamma[u^p:T]$, for an occurrence $u^p$, to denote the type environment $\Gamma'$ where:
 	\begin{align*}
@@ -642,15 +671,18 @@ Next, we will introduce the type environment:
 	\end{align*}
 \end{definition}
 
-Similar to the lookup of dependencies in the semantics, we need to similarly define how to lookup in the type environment.
-As the type environment contains both local information, for local declarations, and global information, for references, both cases should be handled.
+The notion of the immediate predecessor of a $u$ at type level is
+relative to a type environment $\Gamma$ and the approximated order
+$\Pi$. Since we do not have locations at the level of the type system,
+$u$ will now be either a variable or an internal variable.
 
-For local information we introduce, similarly to lookup in the dependency function, and instantiation of the function presented in \cref{def:GBind}.
-The lookup is for information in the type environment, over the relation between program points defined by the basis for approximated order of program points.
-
-\begin{definition}[]\label{def:GBindPi}
-	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Pi$ be the approximated order of program points that is a partial order, then $uf_{\sqsubseteq_\Pi}$ is given by:
-	$$uf_{\sqsubseteq_\Pi}(u,\Gamma)=\inf\{u^p\in dom(\Gamma)\mid u^q\in dom(\Gamma).q\sqsubseteq_\Pi p\}$$
+\begin{definition}[Immediate predecessor at type level]\label{def:GBindPi}
+	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or
+        internal variable, $\Gamma$ be a type environment, and $\Pi$
+        be the approximated order of program points that is a partial
+        order, then $uf_{\sqsubseteq_\Pi}$ is given by: 
+	\[ \uf_{\sqsubseteq_\Pi}(u,\Gamma)=\inf\{u^p\in
+          dom(\Gamma)\mid u^q\in dom(\Gamma).q\sqsubseteq_\Pi p\} \]
 \end{definition}
 
 Where the lookup for global information needs to be handled differently as the language contains pattern matching, and as such, the language can contain different path of evaluation (where each pattern in the pattern matching construct introduces a new path).
