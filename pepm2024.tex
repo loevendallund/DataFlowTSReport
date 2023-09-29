@@ -962,8 +962,8 @@ environment, a store, and a dependency function $(env,sto,w)$.
 		\item \label{prop:5} if $p_1\sqsubseteq_w p_2$ then $p_1\sqsubseteq_\Pi p_2$
 	\item \label{prop:6} $\forall \loc^p\in dom(w).\exists \nu
           x^p\in dom(\Gamma)\Rightarrow\exists
-          p'\in\cat{P}.uf_{\sqsubseteq_w}(\loc,w)\in
-          uf_{\Upsilon_{p'}}(\nu x,\Gamma)$ 
+          p'\in\cat{P}.\uf_{\sqsubseteq_w}(\loc,w)\in
+          \uf_{\Upsilon_{p'}}(\nu x,\Gamma)$ 
 	\end{enumerate}
 \end{definition}
 
@@ -1001,20 +1001,20 @@ semantics and the type system speak of the same elements in the same way.%  In
                 internal variable occurrence, in respect to
                 \cref{def:TAgree}. 
 
-	\item We also needs to ensure that $\Pi$ is a good
+	\item We also need to ensure that $\Pi$ is a good
           approximation of the order $\sqsubseteq_w$ and the greatest
           binding function for $p$-chains ensures that we always get
           the necessary reference occurrences. 
-	\eqref{prop:5} ensures that if an order is defined in
-        $\sqsubseteq_w$, then $\Pi$ also agrees on this order. 
+	\eqref{prop:5} ensures that the ordering information
+        $\sqsubseteq_w$ agrees with that of $\Pi$.
 
-	For \eqref{prop:6}, we need to ensure that for any location
-        currently known the exists a corresponding internal variable
+	We finally need to ensure that for any location
+        currently known, there exists a corresponding internal variable
         where, getting the greatest binding of this occurrence,
         $\loc^p$, then there exists a program point $p'$, such that
         looking up all greatest bindings for the $p'$-chain, there
         exists an internal variable occurrence that corresponds to
-        $\loc^p$. 
+        $\loc^p$. This is captured by \eqref{prop:6}.
 \end{itemize}
 
 With the environment agreement defined, we can present the notion of type agreement.
@@ -1064,7 +1064,7 @@ We are only concerned about the return type $T_2$ for abstractions, since if the
 	\end{itemize}
 \end{definition}
 
-The dependency agreement, defined in \cref{def:DepAgree}, ensures that $\delta$ at leas contains all information from the dependency pair.
+The dependency agreement in \cref{def:DepAgree}, ensures that $\delta$ at leas contains all information from the dependency pair.
 
 
 \begin{definition}[Alias agreement]\label{def:AliasAgree}
@@ -1081,7 +1081,7 @@ The dependency agreement, defined in \cref{def:DepAgree}, ensures that $\delta$ 
 	\end{itemize}
 \end{definition}
 
-The alias agreement, defined in \cref{def:AliasAgree}, ensures that the alias information in $\kappa$ is also known the environment.
+The alias agreement in \cref{def:AliasAgree} ensures that the alias information in $\kappa$ is also known the environment.
 To do this, we ensure that if there exists alias information in the environment $env$, then there exists an alias base $\kappa^0_i\in\kappa^0$ such that the currently know alias information known in 
 in $env$ is a subset of $\kappa^0_i$, and that there exists a $\nu x\in\kappa$, such that $\nu x\in \kappa^0_i$.
 If there is no currently known alias information, we simply check that there exists a corresponding internal variable, that is part of an alias base.
