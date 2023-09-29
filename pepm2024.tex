@@ -639,29 +639,19 @@ We also assume an ordering of program points at type level.
 		\item \cat{P} is the set of program points in an occurrence,
 		\item $\sqsubseteq_\Pi\subseteq\cat{P}\times\cat{P}$, where
 	\end{itemize}
-\end{definition}
-
-The approximated order of program points is an assumption about the
-order for program points for an occurrence $o$, as such, this
-approximation should be an approximation of the order that that can be
-derived from the semantics, presented in \cref{sec:sem}, for $o$. 
-
-\begin{definition}[Partial order of $\Pi$]
-	Let $\Pi=(\cat{P},\sqsubseteq_\Pi)$ be an approximated order of program points.
 	We say that $\Pi$ is a partial order if $\sqsubseteq_\Pi$ is a partial order.
 \end{definition}
-\bigskip
 
-A type environment tells us the types of occurrences of variables and
-internal variables.
+A type environment tells us the types of elements.
 
 \begin{definition}[Type Environment]
 	A type environment $\Gamma$ is a partial function $\Gamma:\cat{Var}^P\cup\cat{IVar}^P\rightharpoonup\cat{Types}$
 \end{definition}
 
 \begin{definition}[Updating a type environment]
-	Let $\Gamma$ be a type environment.
-	We write $\Gamma[u^p:T]$, for an occurrence $u^p$, to denote the type environment $\Gamma'$ where:
+	Let $\Gamma$ be a type environment, let $u^p$ be an element
+        and let $T$ be a type.
+	We write $\Gamma[u^p:T]$ to denote the type environment $\Gamma'$ where:
 	\begin{align*}
 		\Gamma'(y^{p'})=
 		\left\{\begin{matrix}
@@ -685,32 +675,42 @@ $u$ will now be either a variable or an internal variable.
           dom(\Gamma)\mid u^q\in dom(\Gamma).q\sqsubseteq_\Pi p\} \]
 \end{definition}
 
-Where the lookup for global information needs to be handled differently as the language contains pattern matching, and as such, the language can contain different path of evaluation (where each pattern in the pattern matching construct introduces a new path).
-To handle the lookup of global information, we will first introduce the notion of $p$-chains as chains of program points with respect to the approximated order of program points, where the maximal program point is $p$.
-The idea of these $p$-chains is to describe the history behind an occurrence $u^p$, and can thus be used to describe what an internal variable depends on.
+We need to be able to explain from which other elements in a
+computation, an element $u^p$ obtained its value at $p$. Since our
+fragment of ReScript contains conditional expressions in the form of
+pattern matching, we need to express the different paths of evaluation
+that may arise -- where each pattern in the pattern matching construct
+introduces a new path).
+
+To this end, we consider chains wrt. our approximate order. 
+A $p$-chain describes the history behind an occurrence $u^p$, and can
+thus be used to describe what an internal variable depends on. 
 
 \begin{definition}[$p$-chains]
 	Let $\Pi$ be an approximated order of program points, that is a partial order, and $p$ be a program point.
-	We then say that a $p$-chain, denoted as $\Pi_p^{*}$, is a maximal chain of with the maximal element $p$ with the respect to the order $\Pi$.
-	As such, any $p$-chain is a total order, where $\Pi_p^{*}$ does not contain any pairs $(p,q)\in\sqsubseteq_\Pi$, where $p\neq q$, then $(p,q)\notin\sqsubseteq_{\Pi_p^{*}}$.
+A $p$-chain, denoted as $\Pi_p^{*}$, is a maximal chain with the
+respect $\sqsubseteq_\Pi$ whose maximal
+element is $p$. We write $\Pi_p^{*}\in\Pi$, if $\Pi_p^{*}$ is a
+$\Pi$-chain.
+
+For any $p$, we let $\Upsilon_p$ denote the set of all $p$-chains in
+$\Pi$.
 \end{definition}
 
-We also denote $\Pi_p^{*}\in\Pi$, if the $p$-chain $\Pi_p^{*}$ can be be derived from $\Pi$.
-Since there can exists multiple paths in an occurrence, we define the set of all $p$-chains as follows:
+As such, any $p$-chain is a total order, where $\Pi_p^{*}$ does not
+contain any pairs $(p,q)\in\sqsubseteq_\Pi$, where $p\neq q$, then
+$(p,q)\notin\sqsubseteq_{\Pi_p^{*}}$.
 
-\begin{definition}[]
-	Let $\Pi$ be an approximated order of program points and $p$ be a program point.
-	We say that $\Upsilon_p$ is the set of all $p$-chains in $\Pi$.
-\end{definition}
-
-Since $\Upsilon_p$ contains all $p$-chains in an approximated order of program points $\Pi$, with $p$ as the maximal element, we can then define the function to lookup all greatest element less than or equal to $p$.
+We can now define what it means to be an immediate predecessor
+wrt. the set of $p$-chains. This immediate predecesor is found as the
+union of the immediate predecessors of $u$.
 
 \begin{definition}[]\label{def:GBindUps}
-	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Upsilon_p$ be a set of $p$-chains, then $uf_{\Upsilon_p}$ is given by:
-	$$uf_{\Upsilon_p}(u,\Gamma)=\bigcup_{\Pi_p^{*}\in\Upsilon_p}uf_{\Pi_p^{*}}(u,\Gamma)$$
+	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Upsilon_p$ be a set of $p$-chains, then $\uf_{\Upsilon_p}$ is given by:
+	$$\uf_{\Upsilon_p}(u,\Gamma)=\bigcup_{\Pi_p^{*}\in\Upsilon_p}\uf_{\Pi_p^{*}}(u,\Gamma)$$
 \end{definition}
 
-The function, defined in \cref{def:GBindUps}, takes the union of the greatest binding, for an element, for each $p$-chain using the function defined in \cref{def:GBindPi}.
+
 
 \subsection{The type system}\label{sec:Judge}
 We will now present the judgement and type rules for the language, that is, how we assign types to occurrences.
