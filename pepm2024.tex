@@ -825,35 +825,19 @@ A highlight of type rules can be found in \cref{fig:TypeSys}.
 
 \section{Soundness}\label{sec:Soundness}
 
-We will now show the soundness of the type system, i.e., the type of
+The type system is sound in that the type of
 an occurrence correspond to the dependencies and the alias information
 from the semantics. 
-To show that the type system is sound, we will first introduce the
-type rules for values and the relation between the semantics and the
+To show this, we will first introduce the
+type rules for values and then describe  relation between the semantics and the
 type system. 
-After that, we will present some properties in the semantics and type system that are used in the soundness proof.
-And lastly, we will show the soundness of the type system. 
 
 \subsection{Type rules for values}
-For the sake of proving the type system, we present type rules for the values presented int \cref{sec:EnvSto}, where the type rules is given in \cref{fig:ValTypeRules}.
 
-As the values for closures and recursive closures contains an environment, from where they where declared, as such, before introducing the type rules for values we will present the notion for well-typed environments.
-
-\begin{definition}[Environment judgement]\label{def:TEnv}
-	Let $v_1,\cdots,v_n$ be values such that $\Gamma,\Pi\vdash v_i:T_i$, for $1\leq i\leq n$.
-	Let $env$ be an environment given by $env=[x_1\mapsto v_1,\cdots,x_n\mapsto v_n]$, $\Gamma$ be a type environment, and $\Pi$ be the approximated order of program points.
-	We say that:
-	$$\Gamma,\Pi\vdash env$$
-	iff 
-	\begin{itemize}
-		\item For all $x_i\in dom(env)$ then $\exists x_i^p\in dom(\Gamma)$ where $\Gamma(x_i^p)=T_i$ then 
-			$$\Gamma,\Pi\vdash env(x_i):T_i$$
-	\end{itemize}
-\end{definition}
-
-In \cref{def:TEnv} we show the notion of well-typed environments, which states that: given the type of all values, $T_i$, for all variables, $x_i$, bound in the $env$, 
-then there exists an occurrence of $x$ in $\Gamma$, where the type from looking up for that occurrences is is $T_i$.
-As such, we know that all bindings $x$ in $env$ also have a type in $\Gamma$ from when $x$ were declared.
+In our soundness theorem and its proof, values are mentioned. We
+therefore state a collection of type rules for the values presented
+int \cref{sec:EnvSto}. The type rules are given in
+\cref{fig:ValTypeRules}. We describe the central ones here.
 
 \begin{description}
 	\item[\runa{Constant}] type rule differs from the rule \runa{T-Const}, since most occurrences can evaluate to a constant and as such we know that its type should be a base type.
@@ -874,6 +858,25 @@ As such, we know that all bindings $x$ in $env$ also have a type in $\Gamma$ fro
 		As the unit value is introduced from writing to references, $o=[o_1\;:=\;o_2]^p$, we know that from the type rule \runa{Ref-write} that the dependencies from the occurrence $o$ should also contain the set of occurrences.
 		As such, the \runa{Unit} rule also contains a set of occurrences, $\delta$.
 \end{description}
+
+As closures and recursive closures contain an environment, we also
+need to define what it means to be a well-typed environment $env$
+wrt. a type environment: Every variable bound in $env$ is bound to a
+value that is well-typed wrt. $\Gamma$.
+
+\begin{definition}[Well-typed environments]\label{def:TEnv}
+	Let $v_1,\cdots,v_n$ be values such that $\Gamma,\Pi\vdash v_i:T_i$, for $1\leq i\leq n$.
+	Let $env$ be an environment given by $env=[x_1\mapsto
+        v_1,\cdots,x_n\mapsto v_n]$, $\Gamma$ be a type environment,
+        and $\Pi$ be the approximated order of program points. 
+	We say that:
+	$$\Gamma,\Pi\vdash env$$
+	iff 
+	\begin{itemize}
+		\item For all $x_i\in dom(env)$ then $\exists x_i^p\in dom(\Gamma)$ where $\Gamma(x_i^p)=T_i$ then 
+			$$\Gamma,\Pi\vdash env(x_i):T_i$$
+	\end{itemize}
+\end{definition}
 
 \begin{figure}[H]
 	\setlength\tabcolsep{8pt}
