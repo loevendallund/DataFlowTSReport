@@ -941,22 +941,13 @@ value that is well-typed wrt. $\Gamma$.
 \end{figure}
 
 \subsection{Agreement}
-This section introduces the agreement between the type system and the
-semantics, where we will present the relation between the binding
-models in the type system and semantics, and show the relation between
-them. 
+In this section we define notions of agreement between the type system and the
+semantics.
 
-We will first introduce the agreement between the binding models,
-i.e., show how the type environment and approximated order of program
-points relate to the environment, store, and dependency function. 
-Then we will show the type agreement, i.e., show the conditions for when a type agrees with the semantics.
-As such, the type agreement needs to show when the dependencies agrees and alias if the alias information agrees with the basis.
- 
-The first agreement we present is the environment agreement, which ensures that that the type environment and approximated order of program points are a good approximation of the binding model in the semantics, i.e., 
-for the environment $env$, store $sto$, dependency function $w$, and the relation of program points over $w$.
-
-Here $env$, $sto$, and $w$ contains information for en evaluation in the semantics, either before or after an evaluation.
-The type environment $\Gamma$ contains the local information for variable bindings and global information for internal variables, and the approximated order of program points $\Pi$ is an approximation of all program points in an occurrence.
+First we introduce the agreement between the binding models, i.e.,
+define what it means for a type environment and an approximated order
+of program points $(\Gamma,\Pi)$ to be in agreement with an
+environment, a store, and a dependency function $(env,sto,w)$.
 
 \begin{definition}[Environment agreement]\label{def:EnvAgree}
 	Let $(w,\sqsubseteq_w)$ be a pair containing the dependency function and a relation over it, $env$ be an environment, $sto$ be the a store, $\Gamma$ be a type environment, and $\Pi$ be an approximated program point order.
@@ -964,42 +955,77 @@ The type environment $\Gamma$ contains the local information for variable bindin
 	$$(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$$
 	if 
 	\begin{enumerate}
-		\item $\forall x\in dom(env).(\exists x^p\in dom(w))\wedge(x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma))$
-		\item $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow env(x)=v\wedge w(x^p)=(L,V)\wedge\Gamma(x^p)=T.\\(env,v,(w,\sqsubseteq_w),(L,V))\models (\Gamma,T)$
-		\item $\forall \loc\in dom(sto).(\exists \loc^p\in dom(w))\wedge(\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}\Rightarrow\nu x^p\in dom(\Gamma))$
-		\item $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(env,\loc,(w,\sqsubseteq_w),(L,V))\models T$
-		\item if $p_1\sqsubseteq_w p_2$ then $p_1\sqsubseteq_\Pi p_2$
-	\item $\forall \loc^p\in dom(w).\exists \nu x^p\in dom(\Gamma)\Rightarrow\exists p'\in\cat{P}.uf_{\sqsubseteq_w}(\loc,w)\in uf_{\Upsilon_{p'}}(\nu x,\Gamma)$
+		\item \label{prop:1} $\forall x\in dom(env).(\exists x^p\in dom(w))\wedge(x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma))$
+		\item \label{prop:2} $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow env(x)=v\wedge w(x^p)=(L,V)\wedge\Gamma(x^p)=T.\\(env,v,(w,\sqsubseteq_w),(L,V))\models (\Gamma,T)$
+		\item \label{prop:3} $\forall \loc\in dom(sto).(\exists \loc^p\in dom(w))\wedge(\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}\Rightarrow\nu x^p\in dom(\Gamma))$
+		\item \label{prop:4} $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(env,\loc,(w,\sqsubseteq_w),(L,V))\models T$
+		\item \label{prop:5} if $p_1\sqsubseteq_w p_2$ then $p_1\sqsubseteq_\Pi p_2$
+	\item \label{prop:6} $\forall \loc^p\in dom(w).\exists \nu
+          x^p\in dom(\Gamma)\Rightarrow\exists
+          p'\in\cat{P}.uf_{\sqsubseteq_w}(\loc,w)\in
+          uf_{\Upsilon_{p'}}(\nu x,\Gamma)$ 
 	\end{enumerate}
 \end{definition}
-The idea behind the environment agreement is that we need to make sure that semantics and type system talks about the same, i.e., if the dependencies in the semantics is also captured in the type environment, the alias information is captured, 
-that $\Pi$ is a good approximation, in respect to $w$, and the $p$-chains captures the global occurrence.
-As such, the type environment focuses on three areas: \cat{1)} local information variables, \cat{2)} the global information for references, and \cat{3)} the approximated order of program points.
-It should be noted at the agreement only relates the information known by $env$, $sto$, and $w$.
 
-\begin{description}
-	\item[1)] The agreement for local information only relates the information currently known by $env$, and that the information known by $w$ and $\Gamma$ agrees, in respect to \cref{def:TAgree}.
-		This is ensured by \cat{1)} and \cat{2)}.
+This definition of agreement will ensure that the bindings in the
+semantics and the type system speak of the same elements in the same way.%  In
+% particular, the variables mentioned in the environment $env$ and in
+% $w$ have dependency information recorded in $\Gamma$ \eqref{prop:1}.
+% It will also ensure that variables mentioned in $w$ have values that
+% are in agreement with the type information \eqref{prop:2} -- this
+% notion of value/type agreement is defined later.
 
-	\item[2)] We similarly handles agreement for the global information known, which is ensured by \cat{3)} and \cat{4)}.
-		Since $\Gamma$ contains the global information for references, we require that there exists a corresponding internal variable to the currently known locations, by comparing them by program points.
-		We also ensures that the dependencies from a location occurrence agrees with the type of a corresponding internal variable occurrence, in respect to \cref{def:TAgree}.
 
-	\item[3)] We also needs to ensure that $\Pi$ is a good approximation of the order $\sqsubseteq_w$ and the greatest binding function for $p$-chains ensures that we always get the necessary reference occurrences.
-	\cat{5)} ensures that if an order is defined in $\sqsubseteq_w$, then $\Pi$ also agrees on this order.
+% i.e., if the dependencies in the semantics is also captured in the
+% type environment, the alias information is captured, that $\Pi$ is a
+% good approximation, in respect to $w$, and the $p$-chains captures the
+% global occurrence.  As such, the type environment focuses on three
+% areas: \cat{1)} local information variables, \cat{2)} the global
+% information for references, and \cat{3)} the approximated order of
+% program points.  It should be noted at the agreement only relates the
+% information known by $env$, $sto$, and $w$.
 
-	For \cat{6)}, we need to ensure that for any location currently known the exists a corresponding internal variable where, getting the greatest binding of this occurrence, $\loc^p$, then there exists a program point $p'$, 
-	such that looking up all greatest bindings for the $p'$-chain, there exists an internal variable occurrence that corresponds to $\loc^p$.
-\end{description}
-\bigskip
+\begin{itemize}
+	\item The agreement for local information only relates the information currently known by $env$, and that the information known by $w$ and $\Gamma$ agrees, in respect to \cref{def:TAgree}.
+		This is ensured by \eqref{prop:1} and \eqref{prop:2}.
 
-With the environment agreement defined, we can present the type agreement.
-As the type can be abstractions and base types, with or without alias information, we have different requirements for handling them, as such we relate each requirement to a value
-Here, the idea is that if the value is a location, then we check that both the set of occurrences agrees with the dependency pair, presented in \cref{def:DepAgree}, 
+	\item We similarly handle agreement for the global information
+          known, which is ensured by \eqref{prop:3} and
+          \eqref{prop:4}. 
+		Since $\Gamma$ contains the global information for
+                references, we require that there exists a
+                corresponding internal variable to the currently known
+                locations, by comparing them by program points. 
+		We also ensure that the dependencies from a location
+                occurrence agrees with the type of a corresponding
+                internal variable occurrence, in respect to
+                \cref{def:TAgree}. 
+
+	\item We also needs to ensure that $\Pi$ is a good
+          approximation of the order $\sqsubseteq_w$ and the greatest
+          binding function for $p$-chains ensures that we always get
+          the necessary reference occurrences. 
+	\eqref{prop:5} ensures that if an order is defined in
+        $\sqsubseteq_w$, then $\Pi$ also agrees on this order. 
+
+	For \eqref{prop:6}, we need to ensure that for any location
+        currently known the exists a corresponding internal variable
+        where, getting the greatest binding of this occurrence,
+        $\loc^p$, then there exists a program point $p'$, such that
+        looking up all greatest bindings for the $p'$-chain, there
+        exists an internal variable occurrence that corresponds to
+        $\loc^p$. 
+\end{itemize}
+
+With the environment agreement defined, we can present the notion of type agreement.
+ 
+If a value $v$ is a location, then we check that both the set of occurrences agrees with the dependency pair, presented in \cref{def:DepAgree}, 
 and check if the alias information agrees with the semantics, \cref{def:AliasAgree}.
-If the value is not a location, then the type can either be an abstraction type or base type.
+If the value $v$ is not a location, then its type can either be an
+abstraction type or a base type.
 For the base type, we check that the agreement between the set of occurrences and the dependency pair agrees.
-If the type is an abstraction, then we check that $T_2$ agrees with binding model.
+If the type is an abstraction, then we check that $T_2$ agrees with
+the binding model.
 We are only concerned about the return type $T_2$ for abstractions, since if the argument parameter is used in the body of the abstraction, then the dependencies would already be part of the return type.
 
 \begin{definition}[Type agreement]\label{def:TAgree}
