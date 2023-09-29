@@ -944,7 +944,95 @@ value that is well-typed wrt. $\Gamma$.
 In this section we define notions of agreement between the type system and the
 semantics.
 
-First we introduce the agreement between the binding models, i.e.,
+\subsubsection{Agreement of dependencies and aliases}
+
+Types contain sets of occurrences, and in order to define agreement
+between types and values, we must first define dependency
+agreement. This notion will ensure that a set of occurrences $\delta$
+contains all information from a dependency pair $(L,V)$ wrt. a
+semantic environment $env$.
+
+\begin{definition}[Dependency agreement]\label{def:DepAgree}
+	Let $env$ be an environment, $(L,V)$ be a dependency pair, and $\delta$ be a set of occurrences.
+	We say that:
+	$$(env,(L,V))\models\delta$$
+	if
+	\begin{itemize}
+		\item $V\subseteq\delta$,
+		\item For all $\loc^p\in L$ where
+                  $env^{\loc}\neq\emptyset$, we then have $env^{-1} \loc \subseteq \kappa_i^0$ for some $\kappa_i^0\in\delta$
+		\item For all $\loc^p\in L$ where $env^{\loc}=\emptyset$ then there exists a $\kappa_i^0\in\delta$ such that $\kappa_i^0\subseteq\cat{IVar}$
+	\end{itemize}
+      \end{definition}
+
+      \begin{definition}[Alias agreement]\label{def:AliasAgree}
+	Let $env$ be an environment, $w$ be a pair of a dependency function, $\sqsubseteq_w$ be a relation over $w$, $\loc$ be a location, and $\kappa$ be an alias set.
+	We say that:
+	$$(env,(w,\sqsubseteq_w),\loc)\models(\Gamma,\kappa)$$
+	if
+	\begin{itemize}
+		\item $\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa$
+		\item $env^{-1}(\loc)\neq\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
+			(env^{-1}(\loc)\subseteq\kappa^0_i)\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\\\nu x\in\kappa^0_i\wedge\nu x\in\kappa)$
+		\item $env^{-1}(\loc)=\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
+			(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i\wedge\nu x\in\kappa)$
+	\end{itemize}
+\end{definition}
+
+Types can also contain alias information $\kappa$, so next we define
+what it means for the information in $\kappa$ to be known to a semantic environment.
+To do this, we ensure that if there exists alias information in the
+environment $env$, then there exists an alias base
+$\kappa^0_i\in\kappa^0$ such that the currently know alias information
+known in in $env$ is a subset of $\kappa^0_i$, and that there exists a
+$\nu x\in\kappa$, such that $\nu x\in \kappa^0_i$. 
+If there is no currently known alias information, we simply check that
+there exists a corresponding internal variable, that is part of an
+alias base.
+
+\subsubsection{Agreement between values and types}
+
+Next, we define what it means for a value $v$ to agree with a type $T$.
+ 
+If a value $v$ is a location, then we check that both the set of occurrences agrees with the dependency pair, presented in \cref{def:DepAgree}, 
+and check if the alias information agrees with the semantics, \cref{def:AliasAgree}.
+If the value $v$ is not a location, then its type can either be an
+abstraction type or a base type.
+For the base type, we check that the agreement between the set of occurrences and the dependency pair agrees.
+If the type is an abstraction, then we check that $T_2$ agrees with 
+the binding model. 
+We are only concerned about the return type $T_2$ for abstractions,
+since if the argument parameter is used in the body of the
+abstraction, then the dependencies would already be part of the return
+type. 
+
+\begin{definition}[Type agreement]\label{def:TAgree}
+	Let $env$ be an environment, $w$ be a dependency function, $\sqsubseteq_w$ be a relation over $w$, $(L,V)$ be a dependency pair, and $T$ be a type.
+	We say that:
+	$$(env,v,(w,\sqsubseteq_w),(L,V))\models(\Gamma,T)$$
+	iff
+	\begin{itemize}
+		\item $v\neq\loc$ and $T=T_1\rightarrow T_2$:
+		\begin{itemize}
+			\item $(env,v,(w,\sqsubseteq_w),(L,V))\models(\Gamma,T_2)$
+		\end{itemize}
+
+		\item $v\neq\loc$ and $T=(\delta,\kappa)$:
+		\begin{itemize}
+			\item $(env,(L,V))\models\delta$
+		\end{itemize}
+
+		\item $v=\loc$ then $T=(\delta,\kappa)$ where:
+		\begin{itemize}
+			\item $(env,(L,V))\models\delta$
+			\item $(env,(w,\sqsubseteq_w),v)\models(\Gamma,\kappa)$
+		\end{itemize}
+	\end{itemize}
+\end{definition}
+
+\subsubsection{Agreements between bindings}
+
+We are now finally able to define agreement between the binding models, i.e.,
 define what it means for a type environment and an approximated order
 of program points $(\Gamma,\Pi)$ to be in agreement with an
 environment, a store, and a dependency function $(env,sto,w)$.
@@ -996,10 +1084,9 @@ semantics and the type system speak of the same elements in the same way.%  In
                 references, we require that there exists a
                 corresponding internal variable to the currently known
                 locations, by comparing them by program points. 
-		We also ensure that the dependencies from a location
+		We also ensure that the dependency information for a location
                 occurrence agrees with the type of a corresponding
-                internal variable occurrence, in respect to
-                \cref{def:TAgree}. 
+                internal variable occurrence as given by \cref{def:TAgree}. 
 
 	\item We also need to ensure that $\Pi$ is a good
           approximation of the order $\sqsubseteq_w$ and the greatest
@@ -1008,8 +1095,8 @@ semantics and the type system speak of the same elements in the same way.%  In
 	\eqref{prop:5} ensures that the ordering information
         $\sqsubseteq_w$ agrees with that of $\Pi$.
 
-	We finally need to ensure that for any location
-        currently known, there exists a corresponding internal variable
+	We finally need to ensure that for every location
+        known, there exists a corresponding internal variable
         where, getting the greatest binding of this occurrence,
         $\loc^p$, then there exists a program point $p'$, such that
         looking up all greatest bindings for the $p'$-chain, there
@@ -1017,79 +1104,17 @@ semantics and the type system speak of the same elements in the same way.%  In
         $\loc^p$. This is captured by \eqref{prop:6}.
 \end{itemize}
 
-With the environment agreement defined, we can present the notion of type agreement.
- 
-If a value $v$ is a location, then we check that both the set of occurrences agrees with the dependency pair, presented in \cref{def:DepAgree}, 
-and check if the alias information agrees with the semantics, \cref{def:AliasAgree}.
-If the value $v$ is not a location, then its type can either be an
-abstraction type or a base type.
-For the base type, we check that the agreement between the set of occurrences and the dependency pair agrees.
-If the type is an abstraction, then we check that $T_2$ agrees with
-the binding model.
-We are only concerned about the return type $T_2$ for abstractions, since if the argument parameter is used in the body of the abstraction, then the dependencies would already be part of the return type.
+\subsection{Properties of the type system}
 
-\begin{definition}[Type agreement]\label{def:TAgree}
-	Let $env$ be an environment, $w$ be a dependency function, $\sqsubseteq_w$ be a relation over $w$, $(L,V)$ be a dependency pair, and $T$ be a type.
-	We say that:
-	$$(env,v,(w,\sqsubseteq_w),(L,V))\models(\Gamma,T)$$
-	iff
-	\begin{itemize}
-		\item $v\neq\loc$ and $T=T_1\rightarrow T_2$:
-		\begin{itemize}
-			\item $(env,v,(w,\sqsubseteq_w),(L,V))\models(\Gamma,T_2)$
-		\end{itemize}
+The soundness proof that follows makes use of certain properties of
+the semantics and type system.
 
-		\item $v\neq\loc$ and $T=(\delta,\kappa)$:
-		\begin{itemize}
-			\item $(env,(L,V))\models\delta$
-		\end{itemize}
-
-		\item $v=\loc$ then $T=(\delta,\kappa)$ where:
-		\begin{itemize}
-			\item $(env,(L,V))\models\delta$
-			\item $(env,(w,\sqsubseteq_w),v)\models(\Gamma,\kappa)$
-		\end{itemize}
-	\end{itemize}
-\end{definition}
-
-\begin{definition}[Dependency agreement]\label{def:DepAgree}
-	Let $env$ be an environment, $(L,V)$ be a dependency pair, and $\delta$ be a set of occurrences.
-	We say that:
-	$$(env,(L,V))\models\delta$$
-	if
-	\begin{itemize}
-		\item $V\subseteq\delta$,
-		\item For all $\loc^p\in L$ where $env^{\loc}\neq\emptyset$, we then have $\{x\in dom(env)\mid env(x)=\loc\}\subseteq \kappa_i^0$ for a $\kappa_i^0\in\delta$
-		\item For all $\loc^p\in L$ where $env^{\loc}=\emptyset$ then there exists a $\kappa_i^0\in\delta$ such that $\kappa_i^0\subseteq\cat{IVar}$
-	\end{itemize}
-\end{definition}
-
-The dependency agreement in \cref{def:DepAgree}, ensures that $\delta$ at leas contains all information from the dependency pair.
-
-
-\begin{definition}[Alias agreement]\label{def:AliasAgree}
-	Let $env$ be an environment, $w$ be a pair of a dependency function, $\sqsubseteq_w$ be a relation over $w$, $\loc$ be a location, and $\kappa$ be an alias set.
-	We say that:
-	$$(env,(w,\sqsubseteq_w),\loc)\models(\Gamma,\kappa)$$
-	if
-	\begin{itemize}
-		\item $\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa$
-		\item $env^{-1}(\loc)\neq\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
-			(env^{-1}(\loc)\subseteq\kappa^0_i)\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\\\nu x\in\kappa^0_i\wedge\nu x\in\kappa)$
-		\item $env^{-1}(\loc)=\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
-			(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i\wedge\nu x\in\kappa)$
-	\end{itemize}
-\end{definition}
-
-The alias agreement in \cref{def:AliasAgree} ensures that the alias information in $\kappa$ is also known the environment.
-To do this, we ensure that if there exists alias information in the environment $env$, then there exists an alias base $\kappa^0_i\in\kappa^0$ such that the currently know alias information known in 
-in $env$ is a subset of $\kappa^0_i$, and that there exists a $\nu x\in\kappa$, such that $\nu x\in \kappa^0_i$.
-If there is no currently known alias information, we simply check that there exists a corresponding internal variable, that is part of an alias base.
-
-\subsection{Properties}
-Before we present the soundness proof, we will first present some properties about the semantics and type system.
-The first property we present is for the dependency function,since the dependency function is global, and as such they can contain side effects after an evaluation.
-This property states that if any new variable bindings is introduced to the dependency function, by evaluating an occurrence $e^p$, those variables are not free in $e^p$.
+The first property we present is for the dependency function, since
+the dependency function is global, and as such can contain information
+that arises from the side effects on an evaluation. The property
+states that if any new variable bindings are introduced to the
+dependency function by evaluating an occurrence $e^p$, those
+variables are not free in $e^p$.
 
 \begin{lemma}[History]\label{lemma:His}
 	Suppose $e^p$ is an occurrence, that
@@ -1109,12 +1134,11 @@ The second property is the strengthening of the type environment, which states t
 %The proof for \cref{lemma:Strength} can be found in \cref{app:StrProof}.
 %\subfile{StrProof/index.tex}
 
-With history, \cref{lemma:His}, and strengthening,
-\cref{lemma:Strength}, defined we can how present the soundness
-theorem for our type system.
+\section{The soundness theorem}
 
-This theorem compares the semantics to the type system and shows that
-it is a sound approximation of the type system.
+We can now present the soundness theorem for our type system. The
+theorem compares the semantics to the type system and shows that it is
+a sound approximation of the type system.
 
 Here we need to make sure that an
 evaluation of an occurrence, and the type for the occurrence agrees. 
@@ -1141,10 +1165,10 @@ type is in agreement with the semantics.
 		\item $(env,(w',\sqsubseteq_w'),v,(L,V))\models(\Gamma,T)$
 	\end{itemize}
 \end{theorem}
-\begin{proof}
+\begin{proof}(Outline)
 	The proof proceeds by induction on the height of the derivation tree for 
 	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
-	We will only show the proof of four rules here, for \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref-write}.% , the full proof can be found in \cref{app:SoundnessProof}.
+	%We will only show the proof of four rules here, for \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref-write}.% , the full proof can be found in \cref{app:SoundnessProof}.
 
 	% \begin{description}
 	% 	\input{sections/Proof/SoundProof/var.tex}
