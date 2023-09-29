@@ -840,23 +840,49 @@ int \cref{sec:EnvSto}. The type rules are given in
 \cref{fig:ValTypeRules}. We describe the central ones here.
 
 \begin{description}
-	\item[\runa{Constant}] type rule differs from the rule \runa{T-Const}, since most occurrences can evaluate to a constant and as such we know that its type should be a base type.
-		Since constants can depend on other occurrences, we know that $\delta$ can be non-empty, but since constants are not locations, we also know that it cannot contain alias information, and as such $\kappa$ should be empty.
+\item[\runa{Constant}] differs from the rule \runa{T-Const}, since
+  most occurrences can evaluate to a constant and as such we know that
+  its type should be a base type. Constants can depend on other
+  occurrences; we know that $\delta$ can be non-empty, but since
+  constants are not locations, we also know that it cannot contain
+  alias information, and as such $\kappa$ should be empty.
 
-	\item[\runa{Location}] type rule represents locations, where we know that it must be a base type.
-		Since locations can depend on other occurrences, we know that $\delta$ can be non-empty.
-		As locations can contains alias information, and that a location is considered to always be an alias to itself, we know that $\kappa$ can never be empty, as it should always contain an internal variable. 
+\item[\runa{Location}] types locations, and their type must be a base
+  type. Since locations can depend on other occurrences, we know that
+  $\delta$ can be non-empty.  As locations can contains alias
+  information, and that a location is considered to always be an alias
+  to itself, we know that $\kappa$ can never be empty, as it should
+  always contain an internal variable.
 
-	\item[\runa{Closure}] type rule represents abstraction, and as such we know that it should have the abstraction type, $T_1\rightarrow T_2$, where we need to make an assumption about the argument type $T_1$.
-		Since a closure contains the parameter, body, and the environment for an abstraction from when it were declared, we also need to handle those part in the type rule.
-		The components of the closure is handled in the premises, where the environment must be well-typed.
-		We also type the body of the abstraction, where we know that we need to update the type environment with the type $T_1$ for its parameter, Where we type the body with $T_2$.
+	\item[\runa{Closure}] type rule represents abstraction, and as
+          such we know that it should have the abstraction type,
+          $T_1\rightarrow T_2$, where we need to make an assumption
+          about the argument type $T_1$. 
+		Since a closure contains the parameter, body, and the
+                environment for an abstraction from when it were
+                declared, we also need to handle those part in the
+                type rule.
+                
+		The components of the closure are handled in the
+                premises, where the environment must be well-typed.
+                We also type the body of the abstraction in a type
+                environment updated with the type $T_1$ of its
+                parameter.
 
-	\item[\runa{Recursive closure}] type rules is similar to the \runa{Closure} rule, but since this is a recursive closure, we additionally need to update the type environment with the name of the recursive binding to the type of the abstraction.
+	\item[\runa{RClosure}] is similar to the
+          \runa{Closure} rule, but since this is a recursive closure,
+          we also update the type environment with the
+          name of the recursive binding to the type of the
+          abstraction. 
 
-	\item[\runa{Unit}] type rule simply have the base type, as it is not an abstraction and it also cannot have alias information.
-		As the unit value is introduced from writing to references, $o=[o_1\;:=\;o_2]^p$, we know that from the type rule \runa{Ref-write} that the dependencies from the occurrence $o$ should also contain the set of occurrences.
-		As such, the \runa{Unit} rule also contains a set of occurrences, $\delta$.
+	\item[\runa{Unit}] simply assigns the base type, as this is
+          not an abstraction and it also cannot have alias
+          information. As the unit value is introduced from writing to
+          references, $o=[o_1\;:=\;o_2]^p$, we know that from the type
+          rule \runa{Ref-write} that the dependencies from the
+          occurrence $o$ should also contain the set of occurrences. 
+		As such, the \runa{Unit} rule also contains a set of
+                occurrences, $\delta$. 
 \end{description}
 
 As closures and recursive closures contain an environment, we also
@@ -878,19 +904,19 @@ value that is well-typed wrt. $\Gamma$.
 	\end{itemize}
 \end{definition}
 
-\begin{figure}[H]
+\begin{figure}
 	\setlength\tabcolsep{8pt}
-	\begin{tabular}{l}
-		\runa{Constant}\\[0.2cm]
+	\begin{tabular}{ll}
+		\runa{Constant} &
 			\inference[]{}
 				{\Gamma,\Pi\vdash  c:(\delta, \emptyset)}\\[1cm]
 
-		\runa{Location}\\[0.2cm]
+		\runa{Location} &
 			\inference[]{}
 				{\Gamma,\Pi\vdash  \loc:(\delta, \kappa)}\\
 				Where $\kappa\neq\emptyset$\\[1cm]
 
-		\runa{Closure}\\[0.2cm]
+		\runa{Closure} &
 			\inference[]
 				{
 					\Gamma,\Pi\vdash env \\
@@ -898,7 +924,7 @@ value that is well-typed wrt. $\Gamma$.
 				}
 				{\Gamma,\Pi\vdash \left\langle x^{p}, e^{p'}, env \right\rangle^{p''}:T_1\rightarrow T_2}\\[1cm]
 
-		\runa{Recursive closure}\\[0.2cm]
+		\runa{RClosure} &
 			\inference[]
 				{
 					\Gamma,\Pi\vdash env \\
@@ -906,7 +932,7 @@ value that is well-typed wrt. $\Gamma$.
 				}
 				{\Gamma,\Pi\vdash \left\langle x^{p}, f^{p'}, e^{p''}, env \right\rangle^{p_3}:T_1\rightarrow T_2}\\[1cm]
 
-		\runa{Unit}\\[0.2cm]
+		\runa{Unit} &
 			\inference[]{}
 				{\Gamma,\Pi\vdash  ():(\delta,\emptyset)}\\[0.5cm]
 	\end{tabular}
