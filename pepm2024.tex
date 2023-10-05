@@ -353,21 +353,27 @@ occurrences $S$ is the most recent $u$-element in $S$ seen before $u$.
 \[ \uf(u^p,S)=\inf\{u^q\in S\mid q\sqleq p\} \]
 \end{definition}
 
-Based on \cref{def:GBind}, we can present an instantiation of the function for the dependency function $w$ and an order over $w$, $\sqleq_w$:
+Based on \cref{def:GBind}, we can present an instantiation of the
+function for the dependency function $w$ and an order over $w$,
+$\sqleq_w$: 
 
 \begin{definition}
-	Let $w$ be a dependency function, $\sqleq_w$ be an order over $w$, $u$ be an element, that is either a variable or location, then $\uf_{\sqleq_w}$ is given by:
+  Let $w$ be a dependency function, $\sqleq_w$ be the induced order,
+  and $u$ be an element, then $\uf_{\sqleq_w}$ is given by:
 	$$\uf_{\sqleq_w}(u,w)=\inf\{u^p\in dom(w)\mid u^q\in dom(w).q\sqleq_w p\}$$
 \end{definition}
 
 
 \begin{example}\label{ex:deplookup}
-	As a continuation of \cref{ex:depRel}, we can now lookup the greatest element for an element, e.g., a variable or location.
-	As we were interested in finding the greatest bindings a location is bound to in $w_ex$, we can now use the function $\uf_{\sqleq_w}$:
-	$$\uf_{\sqleq_{w_ex}}(\loc,w_ex)=\inf\{\loc^p\in dom(w)\mid \loc^q\in dom(w). q\sqleq_{w_ex} p\}$$
-	Where the set we get for $\loc$ are as follows: $\{\loc^2,\loc^8\}$.
-	From this, we find the greatest element:
-	$$\loc^7=\inf\{\loc^2,\loc^8\}$$
+  As a continuation of \cref{ex:depRel}, we can now find the greatest
+  element for an element, e.g., a variable or location.  As we were
+  interested in finding the greatest bindings a location is bound to
+  in $w_ex$, we use the function $\uf_{\sqleq_w}$:
+	\[ \uf_{\sqleq_{w_ex}}(\loc,w_ex)=\inf\{\loc^p\in dom(w)\mid
+          \loc^q\in dom(w). q\sqleq_{w_ex} p\} \]
+where the set we get for $\loc$ is 
+$\{\loc^2,\loc^8\}$. From this, we find the greatest element: 
+	\[ \loc^7=\inf\{\loc^2,\loc^8\} \]
 	As we can see, from the $\uf_{w_ex}$ function, we got $\loc^8$ which were the occurrence we wanted.
 \end{example}
 
@@ -381,7 +387,7 @@ are of the form
 env\vdash\left\langle e^{p'},sto,(w,\sqleq_w),p\right\rangle\rightarrow\left\langle v,sto',(w',\sqleq_w'),(L,V),p''\right\rangle
 \end{align*}
 %
-This should be read as: given the store $sto$, a dependency function
+This should be read as: Given the store $sto$, a dependency function
 $w$, a relation over $w$, and the previous program point $p$, the
 occurrence $e^{p'}$ evaluates to a value $v$, an updated store $sto'$,
 an updated dependency function $w'$, a relation over $w'$, the
