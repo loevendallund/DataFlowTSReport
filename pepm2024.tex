@@ -823,6 +823,14 @@ A highlight of type rules can be found in \cref{fig:TypeSys}.
 % \subfile{../examples/DFAbsT.tex}
 % \end{landscape}
 
+\subsection{Approximation of $\Pi$}
+We will new present a way to approximate the order of program points $\Pi$.
+This approximation is directed by the type rules, as the typing rules direct an order.
+
+The approximation is done by exploring the type tree out to a leaf and back track from there.
+In the case of rules with multiple paths to explore, the path that will be typed first will also be explored first.
+When back tracking to rule that had multple paths the next path will be explored until no more paths exists for the rule and that rule is then considered to have happend after the paths already explored.
+
 \section{Soundness}\label{sec:Soundness}
 
 The type system is sound in that the type of
@@ -1178,6 +1186,44 @@ type is in agreement with the semantics.
 \end{proof}
 
 % \subfile{SoundProof/index.tex}
+
+\section{Implementation}
+This seciton will give a short introduction to the implementation of the type system.
+The implementation was made as a type checker and implemented in the Rust programming language, which can be found at (link to implementation
+Additionally an intepreter and the approximation of $\Pi$ were also implemented.
+
+The implementation follows the type rules found in (ref to type rules), and only diverge in how abstractions and applications are handled.
+This diverge were done, since the implementation needed to handle the assumption made by abstractions.
+This assumption were handled by switching the order in how the application rule is type checked, by first check $o_2$, i.e., the input parameter for the abstraction and using this as the assumption for the function.
+As such, the current implementation can only type check occurrences, where all abstractions are used.
+
+As an example, for how this assumption is made, consider the $check_app$ function, in the following listing:
+
+\begin{lstlisting}[language=Python]
+fn check_app(&mut self) -> Type {
+  let _tc2: TypeChecker = 
+    self.dive(self.occ.clone().expr.RHS);
+  let t2: Type = 
+    _tc2.clone().check();
+  self.gamma.extend(_tc2.gamma);
+
+  self.assumption.push(
+    (_tc2.occ.label , t2.clone())
+  );
+
+  let mut _tc1: TypeChecker = 
+    self.dive(self.occ.clone().expr.LHS);
+  let t1: Type = _tc1.check();
+  self.gamma.extend(_tc1.gamma);
+
+  ...}
+\end{lstlisting}
+
+In this code example, it is visible the we first check the $o_2$, or right hand occurrence of the application rule, first and the adds it to the list $assumption$.
+$assumption$ is then used when type checking $o_1$, or right hand side of the application rule.
+
+The rest of the function is abbrevated by $\ldots$, which follows the rest of the type rule for application, by checking that the type of $o_1$ is an abstraction and $T_1$ in the type is the same as the type of $o_2$.
+Lastly the function returns $T_2$, retrieved from type checking $o_1$.
 
 \section{Conclusion}\label{sec:Conc}
 
