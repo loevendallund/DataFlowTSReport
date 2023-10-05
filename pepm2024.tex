@@ -498,31 +498,32 @@ the big-step semantics.
 \subsection{An overview of the type system}
 
 The system assigns types, presented in \cref{sec:types}, to
-occurrences given the basis, which will be presented in
-\cref{sec:basis}, and using the type assignment, which is presented in
-\cref{sec:Judge}. 
+occurrences given a type environment (presented in
+\cref{sec:Judge}) and a so-called basis (presented in
+\cref{sec:basis}).
+
 Since the language contains local information as bindings, and global
-information as locations, the type checker must reflect this.
+information as locations, the type system must be able to describe
+this.
 
-Since locations are a semantic notation, we introduce a notion of
-\emph{internal} variables to represent them in the type
-system. Internal variables are denoted by
-$\nu x,\; \nu y\in\cat{IVar}$ and \cat{IVar} is the syntactic category
-for internal variables.
+Locations are a notion of the semantics and are used to represent
+references. But since references need not be bound to variables, we
+must find a way to represent this information in the type system,
+where we do not have semantic notions at our disposal. In the system
+we therefore use a notion of \emph{internal} variables to represent
+them. Internal variables are denoted by $\nu x,\; \nu y\in\cat{IVar}$
+and \cat{IVar} is the syntactic category for internal variables. The
+concept of "being an alias for'' we capture by means of a partition of
+the set $\cat{IVar} \cup \cat{Var}$. In such a partition, we think of
+variables and internal variables in the same set within the partition
+as sharing a location.
 
-As references are not always bound to variables, as such the reference
-does not contain any alias information, the analysis provides alias
-information used for evaluating an occurrence.  Here, we are going to
-introduce the basis for aliasing, as a partition of the sets of
-variables and internal variables used in an occurrence.  As such, it
-becomes possible to use the type information of occurrences to
-determine which aliases are actually used.
+We also impose the constraint on the type system that references
+cannot be bound to abstractions.  Since we do not introduce
+polymorphism into our type system, every abstraction is affine -- it
+can be used at most once.
 
-We also impose some restrictions on the type system, where the first
-restrictions is that references cannot be bound to abstractions.
-Since we do not introduce polymorphism into our type system, an abstraction can only be
-used once. 
-Consider the following occurrence:
+To see the need for this assumption, consider the occurrence
 \begin{lstlisting}[language=Caml, mathescape=true]
 (let x ($\lambda$ y.y$^1$)$^2$ (x$^3$ (x$^4$ 1$^5$)$^6$)$^7$)$^8$
 \end{lstlisting}
