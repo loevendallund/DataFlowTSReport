@@ -61,13 +61,12 @@ have also been presented, such as graph-free approaches
 \cite{HorspoolR.Niegel2002AGAt} and type systems with refinement types
 \cite{PavlinovicZvonimir2021Dfrt}.
 
-As type system have been used to provide a semantic analysis of
-programs usually used to characterize specific type of run-time
-errors. Type systems are implemented as either static or dynamic
-analysis, i.e., on compile time or run-time.  Type systems are widely
-used, from weakly typed languages such as JavaScript, to strongly
-typed languages commonly found in functional languages such as Haskell
-and Ocaml.
+Type systems have often been used to provide a semantic analysis of
+programs in order to characterize specific run-time errors. In what
+follows, we will use a type system in the setting of control flow
+analysis. An advantage of this approach is that we will then become
+able to combine data flow analysis with more widely known forms of
+type-based analyses.
 
 A complication arises in imperative languages that admit
 references. Here one must take into account aliasing, i.e., multiple
@@ -92,15 +91,15 @@ JavaScript.  ReScript introduces an analysis tool for
 dead-code, exception, and termination analysis, but the tool is only
 experimental.\cite{reanalyze} 
 
-We present a type system for data-flow analysis for bindings and alias
-analysis in a subset of ReScript that incorporates both functional and
-imperative features. The goal of the system is that it for every
-location and variable occurrence will give us information about which
-other, previous occurrence its value depends upon. Our type system
-provides the data information used at each program point and the alias
-information used.  Since the analysis we present focuses on collecting
-dependencies that are used to evaluate a part of a program, this is a
-local analysis.
+In this paper we present a type system for data-flow analysis for
+binding and alias analysis in a subset of ReScript that incorporates
+both functional and imperative features. The goal of the system is
+that it for every location and variable occurrence will give us
+information about which other, previous occurrence its value depends
+upon. Our type system provides the data information used at each
+program point and the alias information used.  Since the analysis we
+present focuses on collecting dependencies that are used to evaluate a
+part of a program, this is a local analysis.
 
 We show that the the type system is sound in the sense that it
 correctly overapproximates the set of occurrences on which any given
@@ -528,7 +527,7 @@ To see the need for this assumption, consider the occurrence
 (let x ($\lambda$ y.y$^1$)$^2$ (x$^3$ (x$^4$ 1$^5$)$^6$)$^7$)$^8$
 \end{lstlisting}
 To type the occurrences used in both places where we apply the
-abstractions, we type of the argument in the innermost application is
+abstractions, the type of the argument in the innermost application is
 empty, as it applies a constant. 
 For the second, and outermost, application, the argument type must
 contain the occurrence $x^4$, as it were used to evaluate the value
@@ -543,7 +542,7 @@ The set of types \cat{Types} is defined by the following formation rules:
 Here, we introduce two types, the base type $(\delta,\kappa)$ and the
 abstraction type $T_1 \rightarrow T_2$.
 
-The base type $(\delta,\kappa)$ contains a set $\delta$ that contains
+The base type $(\delta,\kappa)$ contains a set $\delta$ that is
 the set of occurrences upon the value of a occurrence can at most
 depend, and $\kappa$ represents alias information in the form of the
 set of internal variables upon which this occurrence may
