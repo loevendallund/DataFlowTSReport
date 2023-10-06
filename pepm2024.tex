@@ -9,8 +9,11 @@
                           #3 \end{tabular}}
 
 \newcommand{\sqleq}{\ensuremath{\sqsubseteq\xspace}}
-\newcommand{\setof}[2]{\ensuremath{\{ #1 \mid #2\}}}
-                      
+\newcommand{\set}[1]{\ensuremath{\{ #1 \}}}
+\newcommand{\setof}[2]{\set{ #1 \mid #2}}
+\newcommand{\refc}{\ensuremath{\textrm{ref}\xspace}}
+\newcommand{\points}{\ensuremath{\textsf{points}}}
+
 %\input{frontmatter/acm.tex}
 
 \begin{document}
@@ -147,14 +150,13 @@ labelled expressions, we have that $\cat{Occ}=\cat{Exp}^\cat{P}$.
 The formation rules are shown below.
 %
 \begin{align*}
-  \text{Occurrences} \; o &::= e^p \mid (e^{p_1}_1, \ldots,
-                                 e^{p_n}_n) \\[5mm]
+  \text{Occurrences} \; o &::= e^p \\[5mm]
 \text{Expressions} \; e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o\\
 			& \mid c \; o_1 \; o_2\\
 			& \mid \mbox{let} \; x \; o_1 \; o_2 \\
 			& \mid \mbox{let rec} \; x \; o_1 \; o_2 \\
 			& \mid \mbox{case} \; o_1 \; \vec{\pi} \; \vec{o}\\
-			& \mid \mbox{ref} \; o \mid o_1 := o_2 \mid \; !o\\[5mm]
+			& \mid \refc \; o \mid o_1 := o_2 \mid \; !o\\[5mm]
   \text{Patterns} \; \pi &::= n \mid b \mid x \mid \_  \mid
                                 (s_1,\cdots,s_n)\\
 \end{align*}
@@ -226,7 +228,8 @@ and we let $v$ range over \cat{Values}.
 %
 Here $env\in\cat{Env}$ denotes an arbitrary environment in \cat{Env}.
 
-The set of variables bound to any given value $v$ in $env$ is defined by 
+The set of variables bound to any given value $v$ in $env$ is defined
+as follows. 
 \begin{definition}
   Let $v$ be a value and $env\in\cat{Env}$ be an environment. The
   inverse $env^{-1} : \cat{Values} \to \cat{2}^{\cat{var}}$
@@ -316,8 +319,9 @@ program points.% :
 % \cref{def:BinRel}. 
 
 \begin{definition}[Occurring program points]\label{def:OccPP}
-	Let $O$ be a set of occurrences, then $points(O)$ is given by:
-	$$points(O)=\{p\in\cat{P}\mid\exists e^p\in O\}$$
+	Let $O$ be a set of occurrences, then $\points(O)$ is given by:
+	\[ \points(O)=\{p\in\cat{P}\mid\exists e^p\in O\} \]
+        For a pair $(L,V)$ we let $\points(L,V) = \points(L) \cup \points(V)$.
 \end{definition}
 
 Any dependency function induces an ordering on program points as follows.
@@ -325,8 +329,8 @@ Any dependency function induces an ordering on program points as follows.
 \begin{definition}[]\label{def:RelPoint}
 	Let $w\in\cat{W}$ be a dependency function.
 	Then the induced order $\sqleq_w$ is given by
-	 \[ \sqleq_w= \{(p,p')\mid p \in points(dom(w), p' \in
-           points(ran(w)) \} \]
+	 \[ \sqleq_w= \{(p,p')\mid p \in \points(dom(w), p' \in
+           \points(w(p)) \} \]
          	We say that $w$ is a partial order if $\sqleq_w$ is a partial order.
 \end{definition}
 
@@ -408,7 +412,7 @@ A selection of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}.
 		The \runa{Let} rule evaluate $e_1^{p_1}$, to get the value $v$, that $x$ will be bound to in the environment for $e_2^{p_2}$, and the dependencies used to evaluate $e_1^{p_1}$ is bound in the dependency function.
 		As we reach the program point $p_1$ after evaluating $e_1^{p_1}$, and it is also the program point before evaluating $e_2^{p_2}$, the binding of $x$ in $w$ is to the program points $p_1$.	
 
-	\item[\runa{Ref}] rule, for the occurrence $[\mbox{ref}\;e^{p'}]^{p''}$, creates a new location and binds it in the store $sto$, to the value evaluated from $e^{p'}$.
+	\item[\runa{Ref}] rule, for the occurrence $[\refc\;e^{p'}]^{p''}$, creates a new location and binds it in the store $sto$, to the value evaluated from $e^{p'}$.
 		The \runa{Ref} rule also binds the dependencies, from evaluating the body $e^{p'}$, in the dependency function $w$ at the program point $p''$.
 		As the \runa{Ref} rule creates a location (where we get the location from the $next$ pointer), and binds it in $sto$.
 		The environment is not updated as \runa{Ref} does not in itself give any alias information.
@@ -446,7 +450,7 @@ A selection of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}.
           \runa{Ref}\\
 	\inference[]
 	{env \vdash \left\langle e^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqleq_w'),(L,V),p' \right\rangle}
-	{env\vdash \left\langle \left[\mbox{ref}\;e^{p'}\right]^{p''},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle \loc,sto'',(w'',\sqleq_w'),(\emptyset,\emptyset),p'' \right\rangle}\\[6mm]
+	{env\vdash \left\langle \left[\refc\;e^{p'}\right]^{p''},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle \loc,sto'',(w'',\sqleq_w'),(\emptyset,\emptyset),p'' \right\rangle}\\[6mm]
 	where $\loc=next$, $sto''=sto'[next\mapsto new(\loc),\loc\mapsto v]$, and\\
           $w''=w'[\loc^{p'}\mapsto (L,V)]$ \\[4mm]
  \runa{Ref-read}\\
@@ -570,7 +574,7 @@ Consider the following occurrence:
 (let x (3$^1$)$^2$ (let y (ref x$^3$)$^4$ (!y)))
 \end{lstlisting}
 Here, we can type $x$ with $(\emptyset,\emptyset)$ as $x$ is bound to a constant and there a no variables or internal variables used.
-$y$ can then be given the type $(\emptyset,\{x,\nu y\})$, as the reference construct $ref$ creates a new reference, which $y$ is then an alias to, e.g., $y$ is bound to a location.
+$y$ can then be given the type $(\set{x},\{x,\nu y\})$, as the reference construct \refc creates a new reference, which $y$ is then an alias to, e.g., $y$ is bound to a location.
 Her $\nu y$ represents the reference from $ref$, and can thus be given the type $(\{x^3\},\emptyset)$, where $\nu y$ is bound to a constant, because of $x$, but the occurrence $x^3$ were used, so it should be part of the set of occurrences $\delta$.
 \end{example}
 
@@ -641,12 +645,12 @@ $\kappa_0^i$.
 We also assume an ordering of program points at type level.
 
 \begin{definition}[Approximated order of program points]
-	An approximated order of program points $\Pi$ is a pair, such that: 
-	$$\Pi=(\cat{P},\sqleq_\Pi)$$
+	An approximated order of program points $\Pi$ is a pair
+	\[ \Pi=(\cat{P},\sqleq_\Pi) \]
 	where
 	\begin{itemize}
 		\item \cat{P} is the set of program points in an occurrence,
-		\item $\sqleq_\Pi\subseteq\cat{P}\times\cat{P}$, where
+		\item $\sqleq_\Pi\subseteq\cat{P}\times\cat{P}$
 	\end{itemize}
 	We say that $\Pi$ is a partial order if $\sqleq_\Pi$ is a partial order.
 \end{definition}
@@ -679,7 +683,7 @@ $u$ will now be either a variable or an internal variable.
 	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or
         internal variable, $\Gamma$ be a type environment, and $\Pi$
         be the approximated order of program points that is a partial
-        order, then $uf_{\sqleq_\Pi}$ is given by: 
+        order, then $\uf_{\sqleq_\Pi}$ is given by: 
 	\[ \uf_{\sqleq_\Pi}(u,\Gamma)=\inf\{u^p\in
           dom(\Gamma)\mid u^q\in dom(\Gamma).q\sqleq_\Pi p\} \]
 \end{definition}
@@ -697,18 +701,17 @@ thus be used to describe what an internal variable depends on.
 
 \begin{definition}[$p$-chains]
 	Let $\Pi$ be an approximated order of program points, that is a partial order, and $p$ be a program point.
-A $p$-chain, denoted as $\Pi_p^{*}$, is a maximal chain with the
-respect $\sqleq_\Pi$ whose maximal
-element is $p$. We write $\Pi_p^{*}\in\Pi$, if $\Pi_p^{*}$ is a
-$\Pi$-chain.
+A $p$-chain, denoted as $\Pi_p^{*}$, is a maximal chain
+wrt. $\sqleq_\Pi$ whose maximal element is $p$. We write
+$\Pi_p^{*}\in\Pi$, if $\Pi_p^{*}$ is a $\Pi$-chain.
 
 For any $p$, we let $\Upsilon_p$ denote the set of all $p$-chains in
 $\Pi$.
 \end{definition}
 
-As such, any $p$-chain is a total order, where $\Pi_p^{*}$ does not
-contain any pairs $(p,q)\in\sqleq_\Pi$, where $p\neq q$, then
-$(p,q)\notin\sqleq_{\Pi_p^{*}}$.
+% A $p$-chain is a total order, where $\Pi_p^{*}$ does not
+% contain any pairs $(p,q)\in\sqleq_\Pi$, where $p\neq q$, then
+% $(p,q)\notin\sqleq_{\Pi_p^{*}}$.
 
 We can now define what it means to be an immediate predecessor
 wrt. the set of $p$-chains. This immediate predecesor is found as the
@@ -716,7 +719,8 @@ union of the immediate predecessors of $u$.
 
 \begin{definition}[]\label{def:GBindUps}
 	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Upsilon_p$ be a set of $p$-chains, then $\uf_{\Upsilon_p}$ is given by:
-	$$\uf_{\Upsilon_p}(u,\Gamma)=\bigcup_{\Pi_p^{*}\in\Upsilon_p}\uf_{\Pi_p^{*}}(u,\Gamma)$$
+\[
+  \uf_{\Upsilon_p}(u,\Gamma)=\bigcup_{\Pi_p^{*}\in\Upsilon_p}\uf_{\Pi_p^{*}}(u,\Gamma) \]
 \end{definition}
 
 
