@@ -836,14 +836,6 @@ A highlight of type rules can be found in \cref{fig:TypeSys}.
 % \subfile{../examples/DFAbsT.tex}
 % \end{landscape}
 
-\subsection{Approximation of $\Pi$}
-We will new present a way to approximate the order of program points $\Pi$.
-This approximation is directed by the type rules, as the typing rules direct an order.
-
-The approximation is done by exploring the type tree out to a leaf and back track from there.
-In the case of rules with multiple paths to explore, the path that will be typed first will also be explored first.
-When back tracking to rule that had multple paths the next path will be explored until no more paths exists for the rule and that rule is then considered to have happend after the paths already explored.
-
 \section{Soundness}\label{sec:Soundness}
 
 The type system is sound in that the type of
@@ -1202,10 +1194,10 @@ type is in agreement with the semantics.
 
 \section{Implementation}
 This seciton will give a short introduction to the implementation of the type system.
-The implementation was made as a type checker and implemented in the Rust programming language, which can be found at (link to implementation
+The implementation was made as a type checker and implemented in the Rust programming language, which can be found at \cite{df_implementation}.
 Additionally an intepreter and the approximation of $\Pi$ were also implemented.
 
-The implementation follows the type rules found in (ref to type rules), and only diverge in how abstractions and applications are handled.
+The implementation follows the type rules found in \cref{fig:ColSem}, and only diverge in how abstractions and applications are handled.
 This diverge were done, since the implementation needed to handle the assumption made by abstractions.
 This assumption were handled by switching the order in how the application rule is type checked, by first check $o_2$, i.e., the input parameter for the abstraction and using this as the assumption for the function.
 As such, the current implementation can only type check occurrences, where all abstractions are used.
@@ -1229,7 +1221,7 @@ fn check_app(&mut self) -> Type {
   let t1: Type = _tc1.check();
   self.gamma.extend(_tc1.gamma);
 
-  ...}
+...}
 \end{lstlisting}
 
 In this code example, it is visible the we first check the $o_2$, or right hand occurrence of the application rule, first and the adds it to the list $assumption$.
@@ -1237,6 +1229,54 @@ $assumption$ is then used when type checking $o_1$, or right hand side of the ap
 
 The rest of the function is abbrevated by $\ldots$, which follows the rest of the type rule for application, by checking that the type of $o_1$ is an abstraction and $T_1$ in the type is the same as the type of $o_2$.
 Lastly the function returns $T_2$, retrieved from type checking $o_1$.
+
+\bigskip
+To verify the implementation, we ran it against the examples presented earlier in this paper.
+All of the examples parsed and got typed correctly.
+
+\subsection{Approximation of $\Pi$}
+As a part of the implementation, we also implemented a syntex directed approximation of $\Pi$, as the rules denote the order of program points.
+This approximation were also designed with the limitation considered on this type system, but could be extended to also handle programs that does not contain those limitations.
+
+One of the challenges were how to handle abstractions, which were done by only approximate the order of the abstraction by holding a copy of the body of the abstraction and only approximate the body when we reach an application.
+
+In the following listing, we show how we approximate applications.
+Here we expect that the first occurrence, $o_1$, returns an occurrence that can be approximated, as the program points from the body of the abstraction, that $o_1$ returned, are after both $o_1$ and $o_2$.
+
+
+\begin{lstlisting}[language=Python]
+fn approx_app(occ: Occ, last_point: usize) ->
+  (Pi, usize, Option<Occ>)
+{
+  let mut vec1: Pi = Vec::new();
+  let p1: usize;
+  let l_occ: Option<Box<Occ>>;
+  match occ.expr.LHS { 
+    Some(a) => {
+      (vec1,p1,l_occ) = ApproximateOrder(); 
+      vec1.push();
+    }
+    None => { unreachable!(); }
+  }
+
+  let mut vec2: Pi = Vec::new();
+  let p2: usize;
+  match occ.expr.RHS { ... }
+  ...
+  let mut l_vec: Pi = Vec::new();
+  let l_p: usize;
+  let res_occ: Option<Box<Occ>>;
+  match l_occ {
+    Some(a) => { 
+      (l_vec,l_p,res_occ) = 
+        ApproximateOrder();
+        vec2.push();
+    }
+    None => { unreachable!(...); }
+  }
+
+...}
+\end{lstlisting}
 
 \section{Conclusion}\label{sec:Conc}
 
