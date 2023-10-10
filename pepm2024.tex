@@ -1192,17 +1192,21 @@ type is in agreement with the semantics.
 
 % \subfile{SoundProof/index.tex}
 
-\section{Implementation}
+\section{Implementation}\label{sec:Impl}
 This seciton will give a short introduction to the implementation of the type system.
-The implementation was made as a type checker and implemented in the Rust programming language, which can be found at \cite{df_implementation}.
-Additionally an intepreter and the approximation of $\Pi$ were also implemented.
+The implementation was made as a type checker and implemented in the Rust programming language, which can be found at~\cite{df_implementation}.
+Additionally we implemented an intepreter and a syntax directed algorithm to approximate $\Pi$.
 
-The implementation follows the type rules found in \cref{fig:ColSem}, and only diverge in how abstractions and applications are handled.
-This diverge were done, since the implementation needed to handle the assumption made by abstractions.
-This assumption were handled by switching the order in how the application rule is type checked, by first check $o_2$, i.e., the input parameter for the abstraction and using this as the assumption for the function.
-As such, the current implementation can only type check occurrences, where all abstractions are used.
+To verify the implementation, we used unit testing to test each rule, and we also ran it against the example occurrences, presented earlier in this paper.
 
-As an example, for how this assumption is made, consider the $check_app$ function, in the following listing:
+\subsection{Choices made}
+The implementation follows the type rules found in \cref{fig:ColSem}, with few changes.
+The largest change we made, were in regards to handle the assumption made in abstractions, for its parameter.
+This were done, by creating the assumption from an application and, as such, we assume that every abstractions in the program is used.
+
+To create this assumption, from the application rule, we switch the order of how the occurrences were type checked, by checking the argument occurrence, $o_2$, before checking the occurrence, $o_1$ that should have the abstraction type.
+
+To illustrate how this assumption is made, consider a snippet of the $check\_app$ function, in the following listing:
 
 \begin{lstlisting}[language=Python]
 fn check_app(&mut self) -> Type {
@@ -1220,19 +1224,13 @@ fn check_app(&mut self) -> Type {
     self.dive(self.occ.clone().expr.LHS);
   let t1: Type = _tc1.check();
   self.gamma.extend(_tc1.gamma);
-
-...}
+  ...
+}
 \end{lstlisting}
 
-In this code example, it is visible the we first check the $o_2$, or right hand occurrence of the application rule, first and the adds it to the list $assumption$.
-$assumption$ is then used when type checking $o_1$, or right hand side of the application rule.
-
-The rest of the function is abbrevated by $\ldots$, which follows the rest of the type rule for application, by checking that the type of $o_1$ is an abstraction and $T_1$ in the type is the same as the type of $o_2$.
-Lastly the function returns $T_2$, retrieved from type checking $o_1$.
-
-\bigskip
-To verify the implementation, we ran it against the examples presented earlier in this paper.
-All of the examples parsed and got typed correctly.
+In this code example, it is visible that we first check the $o_2$ occurrence and then we add it to the list of assumption, $assumption$.
+The $assumption$ list is then used when type checking $o_1$, where we pop the last element of the list, when we reach an abstraction before typing its body.
+The rest of the function is abbreviated by $\ldots$, which follows the rest of the type rule for application.
 
 \subsection{Approximation of $\Pi$}
 As a part of the implementation, we also implemented a syntex directed approximation of $\Pi$, as the rules denote the order of program points.
@@ -1240,10 +1238,7 @@ This approximation were also designed with the limitation considered on this typ
 
 One of the challenges were how to handle abstractions, which were done by only approximate the order of the abstraction by holding a copy of the body of the abstraction and only approximate the body when we reach an application.
 
-In the following listing, we show how we approximate applications.
-Here we expect that the first occurrence, $o_1$, returns an occurrence that can be approximated, as the program points from the body of the abstraction, that $o_1$ returned, are after both $o_1$ and $o_2$.
-
-
+To illustrate how we handle abstractions, consider the snippet for how we approximate applications, show in the following listing:
 \begin{lstlisting}[language=Python]
 fn approx_app(occ: Occ, last_point: usize) ->
   (Pi, usize, Option<Occ>)
@@ -1277,6 +1272,9 @@ fn approx_app(occ: Occ, last_point: usize) ->
 
 ...}
 \end{lstlisting}
+In the code snippet, we expect the first occurrence, $o_1$, should return an occurrence that can be approximated.
+We know this is the case, as the only rule that returns an occurrence is the abstraction rule.
+We can then approximate the program points in the occurrence, returned from $o_1$, as the program points in it should be after both $o_1$ and $o_2$.
 
 \section{Conclusion}\label{sec:Conc}
 
@@ -1333,10 +1331,6 @@ As the type system is currently defined, the type environment should be bound wi
 
 \subsection{Future work}\label{sec:FW}
 
-\paragraph{Implementation of a type checker}
-Implementing a type checker for the type system presented here would allow for testing how well the information is used.
-It would also allow for comparing how well it performs, compared to other data-flow analysis techniques.
-
 \paragraph{Polymorphism}
 
 A next step is that of introducing polymorphism. Polymorphism for the
@@ -1376,6 +1370,17 @@ It would also be interesting to introduce more language constructs, as the langu
 Some interesting constructs to add could be records, constructors and deconstructors, modules, or lazy evaluation.
 Here, lazy evaluation could take multiple forms, either by introducing it as a core part of the language, where every binding is lazy evaluated, or add special constructs for lazy evaluation.
 Modules, on the other hand, would allow for wrapping an occurrence, or multiple occurrences into a module, which could then be used in multiple places.
+
+\paragraph{Approximation of $\Pi$}
+In this paper, we have showcased a syntax directed algorithm for approximating $\Pi$, as shown in section \cref{sec:Impl}.
+However, there are some areas of improvement that could be made in this regard.
+
+The first area that could be improved, is in regards to completing the approach shown here, as it include the same limitation as the type system.
+This limitation, regarding binding abstractions to variables, could possibly be implemented by keeping track of the variables that should be bound to abstractions, but instead binding it to the occurrence, an abstraction returns.
+Another area is to explore other techniques for approximating the order of program points.
+
+The last area to explore, is combining the approximation of $\Pi$ with the type checker, since the type checker only need to know occurrences that has be type checked "in the past".
+However some challenges can arise, as to how abstractions and applications are handled are quite different between the approximation algorithm and the type checker.
 
 \bibliography{bib}
 \bibliographystyle{plain}
