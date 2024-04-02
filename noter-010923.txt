@@ -1,0 +1,10 @@
+
+Noter 1. september 2023 : Arbejdsopgaver inden næste møde
+
+	•	Implementation og bud på implementationsafsnit (Nicky)
+	•	Revidere IP (definition og notation) (Hans)
+	•	Kortere forklaring af regler
+	•	Konstruktion af \Pi (Nicky)
+	•	Non-interference vha. dette typesystem (Hans)
+	•	Få eksemplerne fulgt til dørs vha. implementation (Nicky)
+

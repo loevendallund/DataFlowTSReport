@@ -1,0 +1,163 @@
+[You don't often get email from pepm24@easychair.org. Learn why this is important at https://aka.ms/LearnAboutSenderIdentification ]
+
+Dear All,
+
+Some of you don't seem to be able to see the reviews on EasyChair. I have attached them here for your reference. Please don't hesitate to get back to us if there are any issues.
+
+Best regards,
+Gabriele & Meng
+
+SUBMISSION: 1
+TITLE: A type system for data flow and alias analysis in ReScript
+
+
+----------------------- REVIEW 1 ---------------------
+SUBMISSION: 1
+TITLE: A type system for data flow and alias analysis in ReScript
+AUTHORS: Hans Hüttel and Nicky Ask Lund
+
+----------- Overall evaluation -----------
+SCORE: -1 (weak reject)
+----- TEXT:
+# Paper Evaluation
+
+The paper presents an intriguing idea: over-approximate data-flow using a type system.
+But what is the motivation? There is some vague hope that this type-system might combine with
+other type-systems. Why would that be true? And why would that be useful? The paper doesn't
+address such questions.
+
+The design of the type system uses as a starting point a (big-step operational)
+semantics that tracks dependencies. One would expect at least a remark (if not
+a full argument) that this semantics corresponds to some standard semantics
+once dependency-tracking is dropped.
+
+The main (soundness) proof is essentially "by structural induction" (paraphrasing). Given that
+the presentation has many (small?) errors, this proof does not inspire much confidence.
+The main features handled by the type system are (a) pattern matching and (b) first-order state.
+The authors list as work to do (c) polymorphism, (d) higher-order state ("extending references"),
+and (e) type inference.
+
+Before tackling those challenges, I would recommend that more work is put into:
+- clarifying the motivation of this work
+- significantly improving the presentation, so that correctness is obvious
+
+
+
+# Notes
+
+## Introduction
+
+- covers subset of ReScript (lambda, bindings, pattern matching, mutability)
+- does some aliasing reasoning (from intro, not clear whether flow-insensitive)
+- implemented in Rust
+
+
+## A Fragment of ReScript
+
+### Syntax
+
+- the set notation A^B is used to mean AxB, which is non-standard
+- both Con and Loc are "constants"??
+- "Local declarations ... " talks about x being the bound variable, but it's either x or f
+- I don't see an explanation of what "c o1 o2" means
+- Example 2.1: why is "let" bold and "ref" isn't?
+- Example 2.1: Why so many program points? For example, we have "let z (5^3)^4" but, as far as I
+ can tell the given grammar allows "let z 5^3"; so, having two program points seems to serve no
+ purpose but makes the example harder to read.
+- No example of "locations" is given.
+- I don't understand the difference between "element" and "occurrence". My *guess*: "element" is the
+ occurrence at the binding point (but the text doesn't say so, so it might be wrong).
+
+### The binding model
+
+- Why are unit values not constants?
+- Definition 2.3: "2^var" should be "2^Var"
+- "which given, a location" -> "which, given a location"
+- It's unclear what is "next" useful for. Without motivation, it's hard to remember it.
+
+### Keeping track of dependencies
+
+- I was expecting concrete semantics for the given language. It seems to come with some enriched
+ semantics that have a notion of dependency built-in. There's nothing wrong with such semantics,
+ but my expectation would be that it should be explained how they relate to the concrete semantics
+ (which means hat one would need concrete semantics to speak of).
+- Definition 2.5: "such that" -> remove
+- Definition 2.5: ".," -> ","
+- Definition 2.5: I don't understand what it says. I *guess* it says that w(u^p)=(L,{...,v^p,...})
+ means that occurrence u^p *may* depend on occurrence *v^p*. I don't see the word "may" or anything
+ similar in the text, but absolute statements (not qualified by "may" or "must") can't possibly be
+ true in general.
+- Example 2.6: There is no "y^9" in Example 2.1. There is a "let y (...)^9". Are we supposed to read
+ that as "y^9"? (That would explain the seemingly unnecessary -- according to the grammar --
+ program point annotations.) And why does y depend on x??
+- "By considering example 2.6, we would like to read the information from the location, that x is
+ an alias to". It's difficult to say what this means; in particular, grammar seems wrong.
+ I suppose it means something like: "Consider the '!x' in example 2.1. We know that x is an alias
+ for the location \ell. But we have two \ell-s in w; so, which one to use when we type-check the
+ expression '!x'? For that, we need an order on program points..."
+- Definition 2.8: There are more open parentheses than closed parentheses.
+- Example 2.9: This doesn't seem to agree with Definition 2.8. For example, dom(w_ex) is
+ {x^2,z^4,y^9,l^2,l^8}, so points(dom(w_ex)) is {2,4,8,9}. However, the relation listed in
+ the example has a pair (5,_), and 5 is not among the program points of the domain (2,4,8,9).
+- The symbol suggest partial order, but both definition 2.8 and example 2.9 give non-symmetric
+ relations (i.e., could be at most *strict* partial orders); but example 2.9 also has (non-trivial)
+ cycles, so it's not a strict partial order either.
+- Definition 2.10: "inf" should probably be "sup"
+- Definition 2.11: What is the quantifier of the predicate of this set comprehension??
+- Example 2.12: How can l^7 be the infimum of l^2 and l^8 according to a relation that does not
+ mention l^7??
+
+### Collection Semantics
+
+I am stopping taking detailed notes, as there are too many mistakes/inaccuracies to note all.
+So I'm following only the main ideas, if I can.
+
+
+
+----------------------- REVIEW 2 ---------------------
+SUBMISSION: 1
+TITLE: A type system for data flow and alias analysis in ReScript
+AUTHORS: Hans Hüttel and Nicky Ask Lund
+
+----------- Overall evaluation -----------
+SCORE: -1 (weak reject)
+----- TEXT:
+This paper presents a type system for alias analysis for a subset of ReScript.
+
+While I found the explanation of the semantics somewhat confusing, the paper follows the conventional format of introducing a core calculus and a type system and proving properties of this type system. While this is indeed a type system presentation of alias analysis, the occurrence annotation and approximate order of program points is _extremely_ reminiscent of the conventional fixed point alias analysis algorithms. Yet, no comparison is drawn between these type systems and those algorithms, beyond one vague allusion the introduction.
+
+This leads me to what I consider to be the critical weakness of this paper, and why I do not recommend acceptance: There is no discussion of related work. Alias types are a well studied area (see the work of David Walker, Greg Morrisett, Amal Ahmed, Francois Pottier and many others.. the capability languages like L3 and Mezzo are worth a look here too). This is not the first type system to track aliasing or dependencies (see also Abadi et al.'s work on dependency analysis with types). There must be some discussion of at least some of these works for me to recommend accepting a paper like this.
+
+I found the explanation of the proofs quite unconvincing, and there doesn't seem to be any appendix with full proofs or mechanised formalisation to back up the very light intuitions given in the paper.
+
+Note: The paper can do with some proofreading and copy editing. "More specific" -> "More specifically". The paragraph ending with "reading, and writing" ends with a comma not a full stop. Some listings extend into the margins or other columns. The listings are also hard to read.
+
+
+
+----------------------- REVIEW 3 ---------------------
+SUBMISSION: 1
+TITLE: A type system for data flow and alias analysis in ReScript
+AUTHORS: Hans Hüttel and Nicky Ask Lund
+
+----------- Overall evaluation -----------
+SCORE: 0 (borderline paper)
+----- TEXT:
+ReScript is a strongly typed language targeting Javascript. The paper studies a fragment of ReScript, namely the lambda calculus with mutability and pattern matching, and provides a sound typing system.  The aims and results are valuable. The presentation contains typos and little introduction to the concepts. This reviewer could not confidently assess the soundness of the contribution.
+
+Pag 1:
+- .[1]. -> [1].
+- reading, and writing, -> reading, and writing. (?)
+- .[2] -> [2].
+
+Pag 2:
+- Why also locations are called constraints in the syntax?
+- Expressions o1 o2 and c o1 o2 are not commented on
+- Pattern matching, what is the role of o1?
+
+Pag 3:
+- Is f[u->w] Maybe there is a typo, f(u’) = f(u) should be f’(u)=f(u) ? Otherwise it would mean that f’ maps all elements in the domain to w. I found this definition confusing.
+- ., -> ,
+
+Pag 4 : there are comments of rules that are not in the figure: const, and let.
+
+Pag 5: Her nu y -> ? (not sure what it was meant here)

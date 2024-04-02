@@ -1,0 +1,18 @@
+Generelt
+
+- Motivation
+- Relateret arbejde (især Abadi et al. og alias-typer)
+
+Arbejdsopgaver nu:
+
+- Gennemlæse artiklen (begge)
+- Læse Morrissett et al. om alias-typer (begge)
+- Skrive om relateret arbejde i indledning (Hans)
+- Indarbejde detail-kommentarer (Nicky)
+- Få specialet lagt på arxiv.org, så vi kan henvise til det (Nicky)
+- Lav en LNCS-udgave (dokumentklasse llncs hos Springer) (Hans)
+
+Noter om terminologi:
+
+- Kald element for atomar forekomst (atomic occurrence)
+- Kald andre forekomster bare for forekomster
