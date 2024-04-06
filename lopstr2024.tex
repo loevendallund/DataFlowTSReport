@@ -13,6 +13,7 @@
 \newcommand{\setof}[2]{\set{ #1 \mid #2}}
 \newcommand{\refc}{\ensuremath{\textrm{ref}\xspace}}
 \newcommand{\points}{\ensuremath{\textsf{points}}}
+\newcommand{\nexte}{\ensuremath{\textrm{next}}\xspace}
 
 %\input{frontmatter/acm.tex}
 
@@ -33,80 +34,48 @@
 
 \section{Introduction}
 
-Data-flow analysis has been studied for decades in order to better
-provide flow information of programs that is then used for different
-tasks for compiler optimization, debugging and understanding programs,
-testing and maintenance.  In the context of compiler optimization, the
-flow information provides data that may be used at given parts of the
-program at runtime.
+The goal of data-flow analysis is to provide flow information of
+programs that can be used in compiler optimization.
 
-The classical approach uses an iterative algorithm based on
-representing the control-flow of a program as a graph.  The graph
-should provide a sound over-approximation of the control flow of a
-program, where edges represent the flow and nodes represent basic
-blocks.  By using the information in such graphs, many algorithms have
-been developed that annotate a graph and computing the maximal fixed
-point of the data flow equations that arise from it
-\cite{KildallGaryA1973Auat, RyderBarbara1988Idaa}.  Other techniques
-have also been presented, such as graph-free approaches
-\cite{HorspoolR.Niegel2002AGAt} and type systems with refinement types
-\cite{PavlinovicZvonimir2021Dfrt}.
+The original approach is to use a iterative algorithm that represents
+the control-flow of a program as a graph \cite{KildallGaryA1973Auat,
+  RyderBarbara1988Idaa}.  Other graph-free approaches have also been
+considered \cite{HorspoolR.Niegel2002AGAt}.
 
 Type systems have often been used to provide a semantic analysis of
-programs in order to characterize specific run-time errors. In what
-follows, we will use a type system in the setting of control flow
-analysis. An advantage of this approach is that we will then become
-able to combine data flow analysis with more widely known forms of
-type-based analyses.
+programs in order to characterize specific run-time errors. For
+languages with imperative features, the treatment of aliasing becomes
+important. In \cite{10.1007/3-540-46425-5_24} Smith et al. present a
+notion of alias types that allows functions to specify the shape of a
+store and to track the flow of pointers through a computation. The
+language is a simple location-based language. Later, Ahmed et
+al. \cite{DBLP:conf/tlca/MorrisettAF05} consider a language which is
+based on a linear $\lambda$-calculus to give an alternative
+formulation of alias types. The type system relies on linearity, and
+every well-typed program terminates.
 
-A complication arises in imperative languages that admit
-references. Here one must take into account aliasing, i.e., multiple
-variables referring to the same location.  Many data-flow analyses use
-special alias algorithms to compute this information.  Two overall
-types of alias algorithm exist. Some are flow-sensitive and give
-precise information but are expensive, others are flow-insensitive and
-are less precise but inexpensive \cite{LiangDonglin1999Eaag,
-  EmamiMaryam1994Cipa}.
+In what follows, we will use a type system in the setting of data flow
+analysis for a non-trivial fragment of the recent programming language
+ReScript. This is a language based on OCaml with a JavaScript-inspired
+synta.  ReScript offers a type system based on that of OCaml, which
+provides an alternative to other typed languages that target
+JavaScript \cite{rescript_rebrand}. Like OCaml, ReScript is imperative
+and allows for mutability through reference constructs for creation,
+reading, and writing,
 
-In this paper we consider the recent programming language ReScript
-which is based on OCaml with a JavaScript inspired syntax which
-targets JavaScript.  ReScript offers a robust type system based on
-OCaml, which provides an alternative to other gradually typed
-languages that targets JavaScript .\cite{rescript_rebrand}. ReScript
-is also imperative and allows for mutability, through reference
-constructs for creation, reading, and writing,
-
-ReScript provides integration with JavaScript and provides its own
-compiler toolchain and build system for optimizing and compiling to
-JavaScript.  ReScript introduces an analysis tool for
-dead-code, exception, and termination analysis, but the tool is only
-experimental.\cite{reanalyze} 
-
-In this paper we present a type system for data-flow analysis for
-binding and alias analysis in a subset of ReScript that incorporates
-both functional and imperative features. The goal of the system is
-that it for every location and variable occurrence will give us
-information about which other, previous occurrence its value depends
-upon. Our type system provides the data information used at each
-program point and the alias information used.  Since the analysis we
-present focuses on collecting dependencies that are used to evaluate a
-part of a program, this is a local analysis.
-
-We show that the the type system is sound in the sense that it
-correctly overapproximates the set of occurrences on which any given
-occurrence depends. Moreover, we present an implementation in Rust of
-a type checker based on our system.
+The fragment that we study incorporates both functional and imperative
+features. We show that the the type system is sound in the sense that
+it correctly overapproximates the set of occurrences on which any
+given occurrence depends.
 
 \section{A fragment of ReScript}\label{sec:lang}
 
 The fragment of ReScript that we study here is a $\lambda$-calculus
-with bindings, pattern matching and mutability. In this section we
-describe the syntax of our fragment and give a big-step semantics that
-is tailored to keep track of dependencies.
+with bindings, pattern matching and mutability. 
  
 \subsection{Syntax}
 
-The syntactic categories in our version of ReScript are
+The syntactic categories in our version of ReScript are 
 %
 \begin{align*}
 	e\in &\;\cat{Exp} &-\;&\mbox{Expressions} \\
@@ -115,16 +84,13 @@ The syntactic categories in our version of ReScript are
 	x,\;f\in &\;\cat{Var} &-\;&\mbox{Variables} \\
 	\loc\in &\;\cat{Loc} &-\;&\mbox{Constants}
 \end{align*}
-
-As the purpose of the dependency analysis is to analyse how the values
-of subexpressions within a program depend upon one another, we label
-every subexpression of a ReScript program with a unique \emph{program
-  point} taken from a countably infinite set $\cat{P}$. We call a
-labelled expression $e^p$ where $p \in \cat{P}$ an
-\emph{occurrence}. We let $u$ range over $\cat{Var} \cup \cat{Loc}$
-and call occurrences $u^p$ \emph{elements} in what follows. If $u^p$
-is an element, we call any other occurrence $u^q$ a
-\emph{$u$-occurrence}.
+%
+Every subexpression is labelled with a unique \emph{program point}
+taken from a countably infinite set $\cat{P}$. We call a labelled
+expression $e^p$ where $p \in \cat{P}$ an \emph{occurrence}. An
+occurrence is \emph{atomic} if it of the form $u^p$ where
+$u \in \cat{Var} \cup \cat{Loc}$. If $u^p$ is atomic, we call any
+other occurrence $u^q$ a \emph{$u$-occurrence}.
 
 When given a syntactic category $\mathbf{C}$, we let $\mathbf{C}^{P}$
 denote the pair $\mathbf{C}\times\cat{P}$, so that e.g.
@@ -169,74 +135,47 @@ We assume that all bindings bind distinct names; this can be ensured
 by means of $\alpha$-conversion. The notions of free and bound
 variables are defined as expected. 
 
-\begin{example}[]\label{ex:write}
-Consider
-\begin{lstlisting}[language=Caml, mathescape=true]
-  (let x (ref 3$^1$)$^2$
-  (let y (let z (5$^3$)$^4$
-     (x$^5$:=z$^7$)$^8$)$^{9}$ (!x)$^{10}$)$^{11}$)$^{12}$
-\end{lstlisting}
-This creates a reference to the constant 3 and binds the reference to
-$x$ (so $x$ is an alias of this reference). Next a binding for $y$ is
-made and after that a binding of $z$ to the constant 5 before writing
-to the reference, that $x$ is bound to, to the value that $z$ is bound
-to.  Finally the reference that $x$ is bound to is read. We expect to
-retrieve the value $5$.
-\end{example}
+% \begin{example}[]\label{ex:write}
+% Consider
+% \begin{lstlisting}[language=Caml, mathescape=true]
+%   (let x (ref 3$^1$)$^2$
+%   (let y (let z (5$^3$)$^4$
+%      (x$^5$:=z$^7$)$^8$)$^{9}$ (!x)$^{10}$)$^{11}$)$^{12}$
+% \end{lstlisting}
+% This creates a reference to the constant 3 and binds the reference to
+% $x$ (so $x$ is an alias of this reference). Next a binding for $y$ is
+% made and after that a binding of $z$ to the constant 5 before writing
+% to the reference, that $x$ is bound to, to the value that $z$ is bound
+% to.  Finally the reference that $x$ is bound to is read. We expect to
+% retrieve the value $5$.
+% \end{example}
 
 \subsection{The binding model}\label{sec:EnvSto}
 
-We now present the binding model used in the semantics that
-follows. As we are dealing with an imperative language with
-references, we use an environment-store model. The environment keeps
-track of bindings of variables to values. Our fragment of ReScript
-contains the imperative constructs of mutability and referencing, so
-values can be locations.
-
-Moreover, as our language has first-class functions, values can also be closures.
-We have that
-\begin{itemize}
-	\item All constants are values.
-	\item Locations are values.
-	\item Closures, $\langle x,e^{p'},env\rangle$ are values.
-	\item Recursive closures, $\langle x,f,e^{p''},env\rangle$, are values.
-	\item Unit values, $()$, are values.
-\end{itemize}
-
-and we let $v$ range over \cat{Values}.
-
-\begin{definition}
-	The set of all environments, \cat{Env}, is the set of partial functions from variables to values, given as:
-	$$\cat{Env}=\cat{Var}\rightharpoonup\cat{Values}$$
-\end{definition}
+Our binding model uses an environment that keeps
+track of bindings of variables to values. Values are given by the formation rules
 %
-Here $env\in\cat{Env}$ denotes an arbitrary environment in \cat{Env}.
-
-The set of variables bound to any given value $v$ in $env$ is defined
-as follows. 
-\begin{definition}
-  Let $v$ be a value and $env\in\cat{Env}$ be an environment. The
-  inverse $env^{-1} : \cat{Values} \to \cat{2}^{\cat{var}}$
-  is defined by
-  %
-	\[ env^{-1}(v)=\{x\in dom(env)\mid env(x)=v\} \]
-\end{definition}
+\[ v ::= c \mid \ell \mid () \mid \langle x,e^{p'},env\rangle \mid \langle
+  x,f,e^{p''},env\rangle \]
 %
-We use a store to keep the information about values bound to locations
-and introduce a placeholder $next$ that represents the next free location.
+Constants $c$, locations $\ell$ and unit $()$ are values as are closures, $\langle
+x,e^{p'},env\rangle$ and recursive closures, $\langle x,f,e^{p''},env\rangle$.
 
-\begin{definition}
-	The set of all stores, \cat{Sto}, is the set of partial functions from locations and the $next$ pointer to values.
+An environment $env \in \cat{Env} $ is a partial function
+\[ env: \cat{Var}\rightharpoonup\cat{Values} \]
+%
+and we let $env^{-1}(v)=\{x\in dom(env)\mid env(x)=v\}$.
+%
+A store $sto \in \cat{Sto}$ is a partial function
 \[ \cat{Sto}=\cat{Loc}\cup\{next\}\rightharpoonup\cat{Values} \]
-We let $sto\in\cat{Sto}$ denote an arbitrary store in \cat{Sto}.
-\end{definition}
+where $\nexte$ is a pointer to the next unused location -- this
+information is needed when new locations are needed.
 
-Moreover, we assume that the existence of a function
+Moreover, we assume a function
 $new:\cat{Loc}\rightarrow\cat{Loc}$, which given, a location, gives us
-a new, hitherto unused location.
+the next location.
 
-For any function $f$ appearing in our binding model and in the
-dependency model in Section \ref{sec:DepFunc} we let $f[u
+For any function $f$we let $f[u
 \mapsto w]$ denote the function $f'$ such that $f(u') = f(u)$ for $u
 \neq u'$ and $f'(u') = w$.
 

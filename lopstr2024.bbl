@@ -4,18 +4,6 @@
 ReScript Association.
 \newblock Bucklescript and reason rebranding, 2020.
 
-\bibitem{reanalyze}
-ReScript Association.
-\newblock reanalyze, 2020.
-
-\bibitem{EmamiMaryam1994Cipa}
-Maryam Emami, Rakesh Ghiya, and Laurie Hendren.
-\newblock Context-sensitive interprocedural points-to analysis in the presence
-  of function pointers.
-\newblock In {\em Conference on Programming Language Design and Implementation:
-  Proceedings of the ACM SIGPLAN 1994 conference on Programming language design
-  and implementation; 20-24 June 1994}, PLDI '94, pages 242--256. ACM, 1994.
-
 \bibitem{HorspoolR.Niegel2002AGAt}
 R.~Niegel Horspool, Juris Hartmanis, and Jan van Leeuwen.
 \newblock A graph—free approach to data—flow analysis.
@@ -28,28 +16,28 @@ Gary~A Kildall.
 \newblock A unified approach to global program optimization.
 \newblock 1973.
 
-\bibitem{LiangDonglin1999Eaag}
-Donglin Liang and Mary Harrold.
-\newblock Equivalence analysis: a general technique to improve the efficiency
-  of data-flow analyses in the presence of pointers.
-\newblock In {\em Proceedings of the 1999 ACM SIGPLAN-SIGSOFT workshop on
-  program analysis for software tools and engineering}, PASTE '99, pages
-  39--46. ACM, 1999.
-
 \bibitem{df_implementation}
 Nicky~Ask Lund.
 \newblock Dataflow implementation, 2023.
 
-\bibitem{PavlinovicZvonimir2021Dfrt}
-Zvonimir Pavlinovic, Yusen Su, and Thomas Wies.
-\newblock Data flow refinement type inference.
-\newblock {\em Proceedings of ACM on programming languages}, 5(POPL):1--31,
-  2021.
+\bibitem{DBLP:conf/tlca/MorrisettAF05}
+Greg Morrisett, Amal~J. Ahmed, and Matthew Fluet.
+\newblock L\({}^{\mbox{3}}\): {A} linear language with locations.
+\newblock In Pawel Urzyczyn, editor, {\em Typed Lambda Calculi and
+  Applications, 7th International Conference, {TLCA} 2005, Nara, Japan, April
+  21-23, 2005, Proceedings}, volume 3461 of {\em Lecture Notes in Computer
+  Science}, pages 293--307. Springer, 2005.
 
 \bibitem{RyderBarbara1988Idaa}
 Barbara Ryder and Marvin Paull.
 \newblock Incremental data-flow analysis algorithms.
 \newblock {\em ACM transactions on programming languages and systems},
   10(1):1--50, 1988.
+
+\bibitem{10.1007/3-540-46425-5_24}
+Frederick Smith, David Walker, and Greg Morrisett.
+\newblock Alias types.
+\newblock In Gert Smolka, editor, {\em Programming Languages and Systems},
+  pages 366--381, Berlin, Heidelberg, 2000. Springer Berlin Heidelberg.
 
 \end{thebibliography}

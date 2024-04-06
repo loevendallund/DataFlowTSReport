@@ -1,0 +1,3 @@
+- Kort præsentation af syntaks
+- Fjerne sundhedsbevis
+- Forkorte konklusion
