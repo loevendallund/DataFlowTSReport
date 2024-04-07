@@ -70,38 +70,48 @@ given occurrence depends.
 
 \section{A fragment of ReScript}\label{sec:lang}
 
-The fragment of ReScript that we study here is a $\lambda$-calculus
-with bindings, pattern matching and mutability. 
+This section presents a $\lambda$-calculus fragment of ReScript, with bindings, pattern matching, and mutability, formally.
+As we are interested in analysing the data-flow it is important to contain the information of where variables are used.
+Therefore, the language presented is extended with the notion of program points to distinguishe parts of a program.
+As such, we are calling an expression at a program point for occurrences and an expression without the notion of program points as atomic occurrence.
+
+%The fragment of ReScript that we study here is a $\lambda$-calculus
+%with bindings, pattern matching and mutability. 
  
 \subsection{Syntax}
 
-The syntactic categories in our version of ReScript are 
+As the language we present is based on $\lambda$-calculuse, a program is given by an occurrence, wich in turns consist of sub-occurrences.
+
+The syntactic categories for the language is given by% in our version of ReScript are
 %
 \begin{align*}
-	e\in &\;\cat{Exp} &-\;&\mbox{Expressions} \\
+	e\in &\;\cat{Exp} &-\;&\mbox{Atomic Occurrence} \\
 	o\in &\;\cat{Occ} &-\;&\mbox{Occurrences} \\
 	c\in &\;\cat{Con} &-\;&\mbox{Constants} \\
 	x,\;f\in &\;\cat{Var} &-\;&\mbox{Variables} \\
-	\loc\in &\;\cat{Loc} &-\;&\mbox{Constants}
+	\loc\in &\;\cat{Loc} &-\;&\mbox{Locations}
 \end{align*}
 %
-Every subexpression is labelled with a unique \emph{program point}
-taken from a countably infinite set $\cat{P}$. We call a labelled
-expression $e^p$ where $p \in \cat{P}$ an \emph{occurrence}. An
-occurrence is \emph{atomic} if it of the form $u^p$ where
-$u \in \cat{Var} \cup \cat{Loc}$. If $u^p$ is atomic, we call any
-other occurrence $u^q$ a \emph{$u$-occurrence}.
+Every occurrence consists of atomic occurrences labelled with a unique \emph{program point} taken from a countably infinte set $\cat{P}$.
+We denote an occurrence as $e^p$ where $p \in \cat{P}$.
+%Every subexpression is labelled with a unique \emph{program point}
+%taken from a countably infinite set $\cat{P}$. We call a labelled
+%expression $e^p$ where $p \in \cat{P}$ an \emph{occurrence}. An
+%occurrence is \emph{atomic} if it of the form $u^p$ where
+%$u \in \cat{Var} \cup \cat{Loc}$. If $u^p$ is atomic, we call any
+%other occurrence $u^q$ a \emph{$u$-occurrence}.
 
 When given a syntactic category $\mathbf{C}$, we let $\mathbf{C}^{P}$
 denote the pair $\mathbf{C}\times\cat{P}$, so that e.g.
-$\cat{Exp}^\cat{P}=\cat{Exp}\times\cat{P}$. As occurrences are
-labelled expressions, we have that $\cat{Occ}=\cat{Exp}^\cat{P}$.
+$\cat{Exp}^\cat{P}=\cat{Exp}\times\cat{P}$. 
+As occurrences are atomic occurrences labelled with a program point, we have that $\cat{Occ}=\cat{Exp}^\cat{P}$.
+%As occurrences are labelled expressions, we have that $\cat{Occ}=\cat{Exp}^\cat{P}$.
 
 The formation rules are shown below.
 %
 \begin{align*}
   \text{Occurrences} \; o &::= e^p \\[5mm]
-\text{Expressions} \; e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o\\
+\text{Atomic Occurrences} \; e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o\\
 			& \mid c \; o_1 \; o_2\\
 			& \mid \mbox{let} \; x \; o_1 \; o_2 \\
 			& \mid \mbox{let rec} \; x \; o_1 \; o_2 \\
@@ -112,7 +122,11 @@ The formation rules are shown below.
 \end{align*}
 %
 $\lambda\;x.o$ denotes an \emph{abstraction} with a parameter $x$ and body $o$.
-\emph{Constants} $c$ are either natural numbers $n$, boolean values $b$, or functional constants.
+\emph{Constants} $c$ are either natural numbers $n$, boolean values $b$, unit value $()$, or functional constants.
+Here, functional constants represents functions such as $PLUS$, $DIVISION$, etc.
+
+$o_1\;o_2$ denotes an \emph{Applications}, and $c\;o_1\;o_2$ denotes a \emph{Functional Applications}
+where $c$ is a functional constant and $o_1$, $o_2$ are arguments to the functional constant.
 
 \emph{Local declarations} $\mbox{let} \; x \; o_1 \; o_2$ and
 $\mbox{let rec} \; f \; o_1 \; o_2$ are immutable bindings that
