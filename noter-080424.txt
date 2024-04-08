@@ -1,0 +1,7 @@
+- Nævne implementation, men meget mere kan der ikke være (Hans)
+- Afsnit 2 skal skæres ned (Hans)
+- Afsnittet om typesystemet skal skæres ned og til (Nicky)
+- Voldsom reduktion af implementation (Hans)
+- Lemmaer skal væk (Hans)
+- Konklusionen er alt for lang (Hans)
+- Mere om relateret arbejde (Hans)
