@@ -34,34 +34,37 @@
 
 \section{Introduction}
 
-The goal of data-flow analysis is to provide flow information of
-programs that can be used in compiler optimization.
+The goal of data-flow analysis is to provide a static analysis of the
+flow information of in a program that can be used in compiler
+optimization.
 
-The original approach is to use a iterative algorithm that represents
-the control-flow of a program as a graph \cite{KildallGaryA1973Auat,
-  RyderBarbara1988Idaa}.  Other graph-free approaches have also been
-considered \cite{HorspoolR.Niegel2002AGAt}.
+The original approach is to build a system of flow equations based on
+a graph representation of the program and to compute a solution using
+an iterative algorithm \cite{KildallGaryA1973Auat,
+  RyderBarbara1988Idaa}. Other graph-free approaches have also been
+considered \cite{HorspoolR.Niegel2002AGAt}. A challenge is this
+setting is how to deal with aliasing.
 
-Type systems have often been used to provide a semantic analysis of
-programs in order to characterize specific run-time errors. For
+Type systems have often been used to provide static analyses of
+programs in order to characterize specific run-time errors, and for
 languages with imperative features, the treatment of aliasing becomes
-important. In \cite{10.1007/3-540-46425-5_24} Smith et al. present a
-notion of alias types that allows functions to specify the shape of a
-store and to track the flow of pointers through a computation. The
-language is a simple location-based language. Later, Ahmed et
-al. \cite{DBLP:conf/tlca/MorrisettAF05} consider a language which is
-based on a linear $\lambda$-calculus to give an alternative
+particularly important. In \cite{10.1007/3-540-46425-5_24} Smith et
+al. present a notion of alias types that allows functions to specify
+the shape of a store and to track the flow of pointers through a
+computation. The language is a simple location-based language. Later,
+Ahmed et al. \cite{DBLP:conf/tlca/MorrisettAF05} consider a language
+which is based on a linear $\lambda$-calculus to give an alternative
 formulation of alias types. The type system relies on linearity, and
 every well-typed program terminates.
 
-In what follows, we will use a type system in the setting of data flow
-analysis for a non-trivial fragment of the recent programming language
-ReScript. This is a language based on OCaml with a JavaScript-inspired
-synta.  ReScript offers a type system based on that of OCaml, which
-provides an alternative to other typed languages that target
-JavaScript \cite{rescript_rebrand}. Like OCaml, ReScript is imperative
-and allows for mutability through reference constructs for creation,
-reading, and writing,
+In what follows, we will use a type system for data flow analysis in
+the presence of aliasing for a non-trivial fragment of the recent
+programming language ReScript. This is a language based on OCaml with
+a JavaScript-inspired synta.  ReScript offers a type system based on
+that of OCaml, which provides an alternative to other typed languages
+that target JavaScript \cite{rescript_rebrand}. Like OCaml, ReScript
+is imperative and allows for mutability through reference constructs
+for creation, reading, and writing,
 
 The fragment that we study incorporates both functional and imperative
 features. We show that the the type system is sound in the sense that
@@ -70,19 +73,15 @@ given occurrence depends.
 
 \section{A fragment of ReScript}\label{sec:lang}
 
-This section presents a $\lambda$-calculus fragment of ReScript, with bindings, pattern matching, and mutability, formally.
-As we are interested in analysing the data-flow it is important to contain the information of where variables are used.
-Therefore, the language presented is extended with the notion of program points to distinguishe parts of a program.
-As such, we are calling an expression at a program point for occurrences and an expression without the notion of program points as atomic occurrence.
-
-%The fragment of ReScript that we study here is a $\lambda$-calculus
-%with bindings, pattern matching and mutability. 
+We consider a fragment of ReScript that contains a $\lambda$-calculus
+with bindings, pattern matching, and mutability.
  
 \subsection{Syntax}
 
-As the language we present is based on $\lambda$-calculuse, a program is given by an occurrence, wich in turns consist of sub-occurrences.
-
-The syntactic categories for the language is given by% in our version of ReScript are
+As we are interested in analysing the data-flow, we must record
+information of where variables are used.  Therefore, the language
+presented is extended with a notion of \emph{program points} taken
+from a countably infinite set $\cat{P}$. 
 %
 \begin{align*}
 	e\in &\;\cat{Exp} &-\;&\mbox{Atomic Occurrence} \\
@@ -92,14 +91,11 @@ The syntactic categories for the language is given by% in our version of ReScrip
 	\loc\in &\;\cat{Loc} &-\;&\mbox{Locations}
 \end{align*}
 %
-Every occurrence consists of atomic occurrences labelled with a unique \emph{program point} taken from a countably infinte set $\cat{P}$.
-We denote an occurrence as $e^p$ where $p \in \cat{P}$.
-%Every subexpression is labelled with a unique \emph{program point}
-%taken from a countably infinite set $\cat{P}$. We call a labelled
-%expression $e^p$ where $p \in \cat{P}$ an \emph{occurrence}. An
-%occurrence is \emph{atomic} if it of the form $u^p$ where
-%$u \in \cat{Var} \cup \cat{Loc}$. If $u^p$ is atomic, we call any
-%other occurrence $u^q$ a \emph{$u$-occurrence}.
+Every subexpression is labelled with a unique \emph{program point}. We call a labelled
+expression $e^p$ where $p \in \cat{P}$ an \emph{occurrence}. An
+occurrence is \emph{atomic} if it of the form $u^p$ where
+$u \in \cat{Var} \cup \cat{Loc}$. If $u^p$ is atomic, we call any
+other occurrence $u^q$ a \emph{$u$-occurrence}.
 
 When given a syntactic category $\mathbf{C}$, we let $\mathbf{C}^{P}$
 denote the pair $\mathbf{C}\times\cat{P}$, so that e.g.
