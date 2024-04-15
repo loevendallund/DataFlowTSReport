@@ -455,20 +455,28 @@ Since the language contains local information as bindings, and global
 information as locations, the type system must be able to describe
 this.
 
-Locations are a notion of the semantics and are used to represent
-references. But since references need not be bound to variables, we
-must find a way to represent this information in the type system,
-where we do not have semantic notions at our disposal. In the system
-we therefore use a notion of \emph{internal} variables to represent
-them. Internal variables are denoted by $\nu x,\; \nu y\in\cat{IVar}$
-and \cat{IVar} is the syntactic category for internal variables. The
-concept of "being an alias for'' we capture by means of a partition of
-the set $\cat{IVar} \cup \cat{Var}$. In such a partition, we think of
-variables and internal variables in the same set within the partition
-as sharing a location.
+In the language, references do not need to be bound to a variable, and is thus represented by locations.
+In the type system we do not have semantic notions at our disposal, we instead use the notion of \emph{internal} variables to represent locations.
+These internal variables are denoted by $\nu x,\; \nu y\in\cat{IVar}$, where $\cat{IVar}$ is the syntactic category for internal variables.
+
+To capture the concept of "being an alias for", or binding a variable to a reference, is captured by the means of a partition of the set $\cat{IVar} \cup \cat{Var}$.
+In such a partition, we think of variables and internal variables in the same set within the partition as sharing a location.
+
+
+%Locations are a notion of the semantics and are used to represent
+%references. But since references need not be bound to variables, we
+%must find a way to represent this information in the type system,
+%where we do not have semantic notions at our disposal. In the system
+%we therefore use a notion of \emph{internal} variables to represent
+%them. Internal variables are denoted by $\nu x,\; \nu y\in\cat{IVar}$
+%and \cat{IVar} is the syntactic category for internal variables. The
+%concept of "being an alias for'' we capture by means of a partition of
+%the set $\cat{IVar} \cup \cat{Var}$. In such a partition, we think of
+%variables and internal variables in the same set within the partition
+%as sharing a location.
 
 We also impose the constraint on the type system that references
-cannot be bound to abstractions.  Since we do not introduce
+cannot be bound to abstractions. Since we do not introduce
 polymorphism into our type system, every abstraction is affine -- it
 can be used at most once.
 
@@ -476,12 +484,16 @@ To see the need for this assumption, consider the occurrence
 \begin{lstlisting}[language=Caml, mathescape=true]
 (let x ($\lambda$ y.y$^1$)$^2$ (x$^3$ (x$^4$ 1$^5$)$^6$)$^7$)$^8$
 \end{lstlisting}
-To type the occurrences used in both places where we apply the
-abstractions, the type of the argument in the innermost application is
-empty, as it applies a constant. 
-For the second, and outermost, application, the argument type must
-contain the occurrence $x^4$, as it were used to evaluate the value
-for the argument. 
+As can be seen, the variable $x$ is used in both program point 3 and 4.
+To type this, we first do an application with a constant as argument.
+In the second application, the argument type needs to contain the occurrence $x^4$, as it were used for the evaluation.
+
+%To type the occurrences used in both places where we apply the
+%abstractions, the type of the argument in the innermost application is
+%empty, as it applies a constant. 
+%For the second, and outermost, application, the argument type must
+%contain the occurrence $x^4$, as it were used to evaluate the value
+%for the argument. 
 
 \subsection{Types}\label{sec:types}
 
@@ -490,33 +502,52 @@ The set of types \cat{Types} is defined by the following formation rules:
 \[ T ::=(\delta,\kappa)\mid T_1 \rightarrow T_2 \]
 %
 Here, we introduce two types, the base type $(\delta,\kappa)$ and the
-abstraction type $T_1 \rightarrow T_2$.
+arrow type $T_1 \rightarrow T_2$.
 
 The base type $(\delta,\kappa)$ contains a set $\delta$ that is
-the set of occurrences upon the value of a occurrence can at most
+the set of occurrences upon the value of an occurrence can at most
 depend, and $\kappa$ represents alias information in the form of the
-set of internal variables upon which this occurrence may
+set of variables and internal variables upon which this occurrence may
 depend. Therefore, if an occurrence has a base type where
-$\kappa/neq \emptyset$, then the occurrence must represent a location.
+$\kappa \neq \emptyset$, then the occurrence must represent a location.
 
-In order to be able to type functions, we introduce arrow types
-$T_1 \rightarrow T_2$. If an occurrence has the
-abstraction type where either $T_1$ or $T_2$ are base types with alias
-information, then the abstraction either takes a reference as input or
-returns a reference.
+\begin{definition}[Type Base for aliasing]
+	For an occurrence $o$, let $\cat{Var}_o$ be the set of all
+        variables found in $o$ and $\cat{IVar}_o$ be the set of all
+        internal variables found in $o$.
+	The type base $\kappa^0=\{\kappa^0_1,\cdots,\kappa^0_n\}$ is
+        then a partition of $\cat{Var}_o \cup \cat{IVar}_o$, where
+        $\kappa_i^0\cap\kappa_j^0=\emptyset$ for all $i\neq j$. 
+\end{definition}
+This partition represents the assumption about which variables are
+an alias to internal variables: If $x \in \kappa^0_1$ and
+$\nu y \in \kappa^0_i$, then $x$ is an alias of $\nu y$.
+As such multiple variables can only belong to the same element
+$\kappa_0^i\in\kappa_0$, if there also exists an internal variable in
+$\kappa_0^i$. 
 
-\begin{example}[]
-Consider the following occurrence:
-\begin{lstlisting}[language=Caml, mathescape=true]
-(let x (3$^1$)$^2$ (let y (ref x$^3$)$^4$ (!y)))
-\end{lstlisting}
-Here, we can type $x$ with $(\emptyset,\emptyset)$ as $x$ is bound to a constant and there a no variables or internal variables used.
-$y$ can then be given the type $(\set{x},\{x,\nu y\})$, as the reference construct \refc creates a new reference, which $y$ is then an alias to, e.g., $y$ is bound to a location.
-Her $\nu y$ represents the reference from $ref$, and can thus be given the type $(\{x^3\},\emptyset)$, where $\nu y$ is bound to a constant, because of $x$, but the occurrence $x^3$ were used, so it should be part of the set of occurrences $\delta$.
-\end{example}
+The arrow type is introduced to type abstractions.
+If the $T_1$ or $T_2$ part of the arrow type is a base type with $\kappa \neq \emptyset$,
+then the abstraction must either take a reference as input or returns a reference.
 
-Since the type system approximates the occurrences used to evaluate an occurrence, we introduce two unions.
-The first union is a simple union that expects the types to be similar, that is, only the base types are allowed to be different.
+%In order to be able to type functions, we introduce arrow types
+%$T_1 \rightarrow T_2$. If an occurrence has the
+%abstraction type where either $T_1$ or $T_2$ are base types with alias
+%information, then the abstraction either takes a reference as input or
+%returns a reference.
+
+%\begin{example}[]
+%Consider the following occurrence:
+%\begin{lstlisting}[language=Caml, mathescape=true]
+%(let x (3$^1$)$^2$ (let y (ref x$^3$)$^4$ (!y)))
+%\end{lstlisting}
+%Here, we can type $x$ with $(\emptyset,\emptyset)$ as $x$ is bound to a constant and there a no variables or internal variables used.
+%$y$ can then be given the type $(\set{x},\{x,\nu y\})$, as the reference construct \refc creates a new reference, which $y$ is then an alias to, e.g., $y$ is bound to a location.
+%Her $\nu y$ represents the reference from $ref$, and can thus be given the type $(\{x^3\},\emptyset)$, where $\nu y$ is bound to a constant, because of $x$, but the occurrence $x^3$ were used, so it should be part of the set of occurrences $\delta$.
+%\end{example}
+
+Since the type system approximates the occurrences used to evaluate an occurrence, we introduce the notion of union of types. %we introduce two unions.
+%The first union is a simple union that expects the types to be similar, that is, only the base types are allowed to be different.
 
 \begin{definition}
   	Let $T_1$ and $T_2$ be two types, then their union is defined as
@@ -558,39 +589,26 @@ T_1\cup T_2=
 The semantics will let us find dependency information, and the type 
 system most approximate these semantic notions.
 
-As locations do not appear at the level of the type system, we
-introduce the notion of a type base. This is a partitioning of the
-sets of variables and internal variables. 
+%As locations do not appear at the level of the type system, we
+%introduce the notion of a type base. This is a partitioning of the
+%sets of variables and internal variables. 
 
-\begin{definition}[Type Base for aliasing]
-	For an occurrence $o$, let $\cat{Var}_o$ be the set of all
-        variables found in $o$ and $\cat{IVar}_o$ be the set of all
-        internal variables in $o$ found in $o$.
-	The type base $\kappa^0=\{\kappa^0_1,\cdots,\kappa^0_n\}$ is
-        then a partition of $\cat{Var}_o \cup \cat{IVar}_o$, where
-        $\kappa_i^0\cap\kappa_j^0=\emptyset$ for all $i\neq j$. 
-\end{definition}
+%\begin{definition}[Type Base for aliasing]
+%	For an occurrence $o$, let $\cat{Var}_o$ be the set of all
+%        variables found in $o$ and $\cat{IVar}_o$ be the set of all
+%        internal variables in $o$ found in $o$.
+%	The type base $\kappa^0=\{\kappa^0_1,\cdots,\kappa^0_n\}$ is
+%        then a partition of $\cat{Var}_o \cup \cat{IVar}_o$, where
+%        $\kappa_i^0\cap\kappa_j^0=\emptyset$ for all $i\neq j$. 
+%\end{definition}
 
-This partition represents the assumption about which variables are
-actually an alias to internal variables: If $x \in \kappa^0_1$ and
-$\nu y \in \kappa^0_i$, then $x$ is an alias of $\nu y$.
+%This partition represents the assumption about which variables are
+%actually an alias to internal variables: If $x \in \kappa^0_1$ and
+%$\nu y \in \kappa^0_i$, then $x$ is an alias of $\nu y$.
 
-As such multiple variables can only belong to the same element
-$\kappa_0^i\in\kappa_0$, if there also exists an internal variable in
-$\kappa_0^i$. 
-
-We also assume an ordering of program points at type level.
-
-\begin{definition}[Approximated order of program points]
-	An approximated order of program points $\Pi$ is a pair
-	\[ \Pi=(\cat{P},\sqleq_\Pi) \]
-	where
-	\begin{itemize}
-		\item \cat{P} is the set of program points in an occurrence,
-		\item $\sqleq_\Pi\subseteq\cat{P}\times\cat{P}$
-	\end{itemize}
-	We say that $\Pi$ is a partial order if $\sqleq_\Pi$ is a partial order.
-\end{definition}
+%As such multiple variables can only belong to the same element
+%$\kappa_0^i\in\kappa_0$, if there also exists an internal variable in
+%$\kappa_0^i$. 
 
 A type environment tells us the types of elements.
 
@@ -609,6 +627,19 @@ A type environment tells us the types of elements.
 			T & \mbox{if}\;y^{p'}=u^{p}
 		\end{matrix}\right.
 	\end{align*}
+\end{definition}
+
+We also assume an ordering of program points at type level.
+
+\begin{definition}[Approximated order of program points]
+	An approximated order of program points $\Pi$ is a pair
+	\[ \Pi=(\cat{P},\sqleq_\Pi) \]
+	where
+	\begin{itemize}
+		\item \cat{P} is the set of program points in an occurrence,
+		\item $\sqleq_\Pi\subseteq\cat{P}\times\cat{P}$
+	\end{itemize}
+	We say that $\Pi$ is a partial order if $\sqleq_\Pi$ is a partial order.
 \end{definition}
 
 The notion of the immediate predecessor of a $u$ at type level is
