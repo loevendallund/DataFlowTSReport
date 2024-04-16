@@ -320,34 +320,35 @@ an updated dependency function $w'$, a relation over $w'$, the
 dependency pair $(L,V)$, and the program point $p''$ reached after
 evaluating $e^{p'}$, given the bindings in the environment $env$. 
 
-A selection of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}.
+A selection of the rules for $\rightarrow$ can be found in
+\cref{fig:ColSem}.
 
-\begin{description}
-	\item[\runa{Const}] rule, for the occurrence $c^{p'}$, is the simplest rule, as it has no premises and does not have any side effects.
-		As constants are evaluated to the constant value, no dependencies are used, i.e., no variable or location occurrences are used to evaluate a constant.
-
-	\item[\runa{Var}] rule, for the occurrence $x^{p'}$, uses the environment to get the value $x$ is bound to and uses dependency function $w$ to get its dependencies.
+The \runa{Var} rule  uses the environment to get the value $x$ is bound to and uses dependency function $w$ to get its dependencies.
 		To lookup the dependencies, the function $\uf_{\sqleq_w}$ is used to get the greatest binding a variable is bound to, in respect to the ordering $\sqleq_w$.
 		Since the occurrence of $x$ is used, it is added to the set of variable occurrences we got from the lookup of the dependencies for $x$.
 
-	\item[\runa{Let}] rule, for the occurrence $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, creates a local binding that can be used in $e_2^{p_2}$.
-		The \runa{Let} rule evaluate $e_1^{p_1}$, to get the value $v$, that $x$ will be bound to in the environment for $e_2^{p_2}$, and the dependencies used to evaluate $e_1^{p_1}$ is bound in the dependency function.
+The \runa{Let} rule for the occurrence $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, creates a local binding that can be used in $e_2^{p_2}$.
+		The \runa{Let} rule evaluate $e_1^{p_1}$, to get the value $v$, that $x$ will be bound to in the environment for $e_2^{p_2}$, and the dependencies used to evaluate $e_1^{p_1}$ are bound in the dependency function.
 		As we reach the program point $p_1$ after evaluating $e_1^{p_1}$, and it is also the program point before evaluating $e_2^{p_2}$, the binding of $x$ in $w$ is to the program points $p_1$.	
 
-	\item[\runa{Ref}] rule, for the occurrence $[\refc\;e^{p'}]^{p''}$, creates a new location and binds it in the store $sto$, to the value evaluated from $e^{p'}$.
-		The \runa{Ref} rule also binds the dependencies, from evaluating the body $e^{p'}$, in the dependency function $w$ at the program point $p''$.
-		As the \runa{Ref} rule creates a location (where we get the location from the $next$ pointer), and binds it in $sto$.
-		The environment is not updated as \runa{Ref} does not in itself give any alias information.
-		To create an alias for a location, it should be bound to a variable using the \runa{Let} rule.
+The \runa{Ref} rule, for the occurrence $[\refc\;e^{p'}]^{p''}$,
+creates a new location and binds it in the store $sto$, to the value
+evaluated from $e^{p'}$. We record the dependencies from evaluating
+the body $e^{p'}$ in $w$ at the program point $p''$.
 
-	\item[\runa{Ref-read}] rule, for the occurrence $[!e^{p_1}]^{p'}$, evaluates the body $e^{p_1}$ to a value, that must be a location $\loc$, and reads the value of $\loc$ in the store.
-		The \runa{Ref-read} rule also makes a lookup for the dependencies $\loc$ is bound to in the dependency function $w$.
+\runa{Ref-read} evaluates the body $e^{p_1}$ to a value which
+must be a location $\loc$, and reads the value of $\loc$ in the store.
+		The \runa{Ref-read} rule looks up the dependencies for
+                $\loc$ in $w$.
 		As there could be multiple bindings for $\loc$, in $w$, at different program points, we use the $\uf_{\sqleq_{w'}}$ function to get greatest binding of $\loc$ with respect to the ordering $\sqleq_{w'}$, 
 		and we also add the location occurrence $\loc^{p'}$ to the set of locations.
 
-	\item[\runa{Ref-write}] rule, for the occurrence $[e_1^{p_1}\;:=\;e_2^{p_2}]^{p'}$, evaluate $e_1^{p_1}$ to a location $\loc$ and $e_2^{p_2}$ to a value $v$, and binds $\loc$ in the store $sto$ to the value $v$.
-		The dependency function is also updated with a new binding for $\loc$ at the program point $p'$.
-\end{description}
+                Finally \runa{Ref-write} tells us that we must
+                evaluate $e_1^{p_1}$ to a location $\loc$ and
+                $e_2^{p_2}$ to a value $v$, and bind2 $\loc$ in the
+                store $sto$ to the value $v$.  We pass the program
+                point $p'$ and the dependency function
+                is also updated with a new binding for $\loc$.
 
 \begin{table*}
 %	\setlength\tabcolsep{8pt}
@@ -361,6 +362,7 @@ A selection of the rules for $\rightarrow$ can be found in \cref{fig:ColSem}.
 	{env\vdash \left\langle x^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqleq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[6mm]
 	where $env(x)=v$, $x^{p''}=\uf_{\sqleq_w}(x,w)$, and $w(x^{p''})=(L,V)$
           \\[4mm]
+                    \runa{Let}\\[0.2cm]
 	\inference[]
 	{
 		env\vdash \left\langle e_1^{p_1},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle v_1,sto_1,(w_1,\sqleq_w^1),(L_1,V_1),p_1 \right\rangle &\\
@@ -1142,34 +1144,25 @@ type is in agreement with the semantics.
 \section{Conclusion}\label{sec:Conc}
 
 We have introduced a type system for local data-flow analysis for a
-subset of ReScript. 
+subset of ReScript that includes functional as well as imperative
+feature, notably that of references.
 
-In the type system, we have shown how to handle data-flow analysis for
-different language constructs, for pattern matching, local
-declarations, and referencing. 
-As pattern matching introduces branches to the language, we showed a
-sound over-approximation of how to handle these branches. 
-Additionally, since we also have mutability, through referencing, the approximation should also, in case of reading from a reference, get all places where a reference binding could exist in the type environment.
-Since some branches could write to a reference, while others do not, it was important to consider each branch separately when reading from references.
-
-However, the type system introduced contains slack. In particular, the
+The type system provides a safe approximation of the data flow in an
+expression. However, the system contains slack. In particular, the
 type system is monomorphic. This means that a locally declared
 abstraction can cannot be used at multiple places, as this would mean
 it would contain occurrences at multiple program points. Moreover,
 abstractions cannot be bound to references.
 
-A next step is that of introducing polymorphism. Polymorphism for the
-base type $(\delta,\kappa)$ would allow for abstractions to be used
-multiple times in an occurrence ad the input and output type would not
-be restricted from only allowing the exact same input type.
-
-Consider the following occurrence.
+Polymorphism for the base type $(\delta,\kappa)$ would allow 
+abstractions to be used multiple times in an occurrence. Consider as
+an example
 
 \begin{lstlisting}[language=Caml, mathescape=true]
 (let x ($\lambda$ y.y$^1$)$^2$ (x$^3$ (x$^4$ 1$^5$)$^6$)$^7$)$^8$
 \end{lstlisting}
 
-If polymorphism is introduced, occurrences like this could be defined,
+Occurrences such as this would now become typable,
 since when typing the applications, the type of the argument changes,
 since the occurrence $x^4$ is present in the second application. 
 
