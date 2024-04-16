@@ -190,10 +190,10 @@ occurrence what other, previous occurrences they depend upon.
         partial functions from location and variable occurrences to a
         pair of dependencies, such that
 \[
-  \cat{W}=\cat{Loc}^P\cup\cat{Var}^P\rightharpoonup\Pow{\cat{Loc}^P}\times\Pow{\cat{Var}^P} \] 
+  \cat{W}=\cat{Loc}_{\mathbf{P}}\cup\cat{Var}_{\mathbf{P}}\rightharpoonup\Pow{\cat{Loc}_{\mathbf{P}}}\times\Pow{\cat{Var}_{\mathbf{P}}} \] 
 \end{definition}
 For a dependency function $w$ and a
-$u^p\in\cat{Loc}^P\cup\cat{Var}^P$, the clause
+$u^p\in\cat{Loc}_{\mathbf{P}}\cup\cat{Var}_{\mathbf{P}}$, the clause
 %
 \[ w (u^p)=(L,V) \]
 %
@@ -597,7 +597,7 @@ system most approximate these semantic notions.
 A type environment tells us the types of elements.
 
 \begin{definition}[Type Environment]
-	A type environment $\Gamma$ is a partial function $\Gamma:\cat{Var}^P\cup\cat{IVar}^P\rightharpoonup\cat{Types}$
+  A type environment $\Gamma$ is a partial function $\Gamma:\cat{Var}_{\mathbf{P}}\cup\cat{IVar}_{\mathbf{P}}\rightharpoonup\cat{Types}$
 \end{definition}
 
 \begin{definition}[Updating a type environment]
@@ -1112,7 +1112,7 @@ Based on these assumptions, we then need to make sure that, after an
 evaluation, we are still in agreement, we can type the value, and the
 type is in agreement with the semantics. 
 
-\begin{theorem}[Soundness of type system]
+\begin{theorem}[Soundness]
 	Suppose $e^{p'}$ is an occurrence where
 	\begin{itemize}
 		\item $env\vdash\left\langle e^{p'},sto,(w,\sqleq_w),p\right\rangle\rightarrow\left\langle v,sto',(w',\sqleq_w'),(L,V),p''\right\rangle$,
@@ -1120,7 +1120,7 @@ type is in agreement with the semantics.
 		\item $\Gamma,\Pi\vdash env$
 		\item $(env,sto,(w,\sqleq_w))\models(\Gamma,\Pi)$
 	\end{itemize}
-	Then we have that:
+	Then we have that
 	\begin{itemize}
 		\item $\Gamma,\Pi\vdash v:T$
 		\item $(env,sto',(w',\sqleq_w'))\models(\Gamma,\Pi)$
