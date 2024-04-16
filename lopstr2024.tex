@@ -738,9 +738,9 @@ A highlight of type rules can be found in \cref{fig:TypeSys}.
 \begin{table*}
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{ll}
-\runa{T-Const} &
-	\inference[]{}
-	{\Gamma,\Pi\vdash  c^{p}:(\emptyset,\emptyset)} \\
+% \runa{T-Const} &
+% 	\inference[]{}
+% 	{\Gamma,\Pi\vdash  c^{p}:(\emptyset,\emptyset)} \\
 \runa{T-Var} &
 	\condinf{}
 	{\Gamma,\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}{where 
@@ -833,20 +833,20 @@ int \cref{sec:EnvSto}. The type rules are given in
                 environment updated with the type $T_1$ of its
                 parameter.
 
-	\item[\runa{RClosure}] is similar to the
-          \runa{Closure} rule, but since this is a recursive closure,
-          we also update the type environment with the
-          name of the recursive binding to the type of the
-          abstraction. 
+	% \item[\runa{RClosure}] is similar to the
+        %   \runa{Closure} rule, but since this is a recursive closure,
+        %   we also update the type environment with the
+        %   name of the recursive binding to the type of the
+        %   abstraction. 
 
-	\item[\runa{Unit}] simply assigns the base type, as this is
-          not an abstraction and it also cannot have alias
-          information. As the unit value is introduced from writing to
-          references, $o=[o_1\;:=\;o_2]^p$, we know that from the type
-          rule \runa{Ref-write} that the dependencies from the
-          occurrence $o$ should also contain the set of occurrences. 
-		As such, the \runa{Unit} rule also contains a set of
-                occurrences, $\delta$. 
+	% \item[\runa{Unit}] simply assigns the base type, as this is
+        %   not an abstraction and it also cannot have alias
+        %   information. As the unit value is introduced from writing to
+        %   references, $o=[o_1\;:=\;o_2]^p$, we know that from the type
+        %   rule \runa{Ref-write} that the dependencies from the
+        %   occurrence $o$ should also contain the set of occurrences. 
+	% 	As such, the \runa{Unit} rule also contains a set of
+        %         occurrences, $\delta$. 
 \end{description}
 
 As closures and recursive closures contain an environment, we also
@@ -886,38 +886,36 @@ value that is well-typed wrt. $\Gamma$.
 					\Gamma,\Pi\vdash env \\
 					\Gamma[x^{p}:T_1],\Pi\vdash e^{p'}:T_2
 				}
-				{\Gamma,\Pi\vdash \left\langle x^{p}, e^{p'}, env \right\rangle^{p''}:T_1\rightarrow T_2}\\[1cm]
+				{\Gamma,\Pi\vdash \left\langle x^{p}, e^{p'}, env \right\rangle^{p''}:T_1\rightarrow T_2}% \\[1cm]
 
-		\runa{RClosure} &
-			\inference[]
-				{
-					\Gamma,\Pi\vdash env \\
-					\Gamma[x^{p}:T_1,f^{p'}:T_1\rightarrow T_2],\Pi\vdash e^{p''}:T_2
-				}
-				{\Gamma,\Pi\vdash \left\langle x^{p}, f^{p'}, e^{p''}, env \right\rangle^{p_3}:T_1\rightarrow T_2}\\[1cm]
+		% \runa{RClosure} &
+		% 	\inference[]
+		% 		{
+		% 			\Gamma,\Pi\vdash env \\
+		% 			\Gamma[x^{p}:T_1,f^{p'}:T_1\rightarrow T_2],\Pi\vdash e^{p''}:T_2
+		% 		}
+		% 		{\Gamma,\Pi\vdash \left\langle x^{p}, f^{p'}, e^{p''}, env \right\rangle^{p_3}:T_1\rightarrow T_2}\\[1cm]
 
-		\runa{Unit} &
-			\inference[]{}
-				{\Gamma,\Pi\vdash  ():(\delta,\emptyset)}\\[0.5cm]
+		% \runa{Unit} &
+		% 	\inference[]{}
+		% 		{\Gamma,\Pi\vdash  ():(\delta,\emptyset)}\\[0.5cm]
 	\end{tabular}
 	\caption{Type rules for values}
 	\label{fig:ValTypeRules}
 \end{figure}
 
 \subsection{Agreement}
-In this section we define notions of agreement between the type system and the
-semantics.
-
-\subsubsection{Agreement of dependencies and aliases}
+Soundness relates the type system to the semantics, and in order to
+state the soundness property we must define notions of agreement
+between the different entities.
 
 Types contain sets of occurrences, and in order to define agreement
-between types and values, we must first define dependency
-agreement. This notion will ensure that a set of occurrences $\delta$
-contains all information from a dependency pair $(L,V)$ wrt. a
-semantic environment $env$.
+between types and values, we must first what it means for a set of
+occurrences $\delta$ to contain the from a dependency pair $(L,V)$
+wrt. a environment $env$.
 
 \begin{definition}[Dependency agreement]\label{def:DepAgree}
-	Let $env$ be an environment, $(L,V)$ be a dependency pair, and $\delta$ be a set of occurrences.
+	% Let $env$ be an environment, $(L,V)$ be a dependency pair, and $\delta$ be a set of occurrences.
 	We say that:
 	$$(env,(L,V))\models\delta$$
 	if
@@ -929,9 +927,20 @@ semantic environment $env$.
 	\end{itemize}
       \end{definition}
 
+      Since types can contain alias information $\kappa$, we also need
+      to define what it means for the information in $\kappa$ to be
+      known to an environment $env$.  If there exists alias
+      information in $env$, then there exists an alias base
+      $\kappa^0_i\in\kappa^0$ such that the alias information known to
+      $env$ is included in that of $\kappa^0_i$, and there exists a
+      $\nu x\in\kappa$, such that $\nu x\in \kappa^0_i$.  If there is
+      no currently known alias information, we simply check that there
+      exists a corresponding internal variable, that is part of an
+      alias base.
+
       \begin{definition}[Alias agreement]\label{def:AliasAgree}
-	Let $env$ be an environment, $w$ be a pair of a dependency function, $\sqleq_w$ be a relation over $w$, $\loc$ be a location, and $\kappa$ be an alias set.
-	We say that:
+	% Let $env$ be an environment, $w$ be a pair of a dependency function, $\sqleq_w$ be a relation over $w$, $\loc$ be a location, and $\kappa$ be an alias set.
+	We say that
 	$$(env,(w,\sqleq_w),\loc)\models(\Gamma,\kappa)$$
 	if
 	\begin{itemize}
@@ -943,21 +952,8 @@ semantic environment $env$.
 	\end{itemize}
 \end{definition}
 
-Types can also contain alias information $\kappa$, so next we define
-what it means for the information in $\kappa$ to be known to a semantic environment.
-To do this, we ensure that if there exists alias information in the
-environment $env$, then there exists an alias base
-$\kappa^0_i\in\kappa^0$ such that the currently know alias information
-known in in $env$ is a subset of $\kappa^0_i$, and that there exists a
-$\nu x\in\kappa$, such that $\nu x\in \kappa^0_i$. 
-If there is no currently known alias information, we simply check that
-there exists a corresponding internal variable, that is part of an
-alias base.
-
-\subsubsection{Agreement between values and types}
-
-Next, we define what it means for a value $v$ to agree with a type $T$.
- 
+%\subsubsection{Agreement between values and types}
+% Next, we define what it means for a value $v$ to agree with a type $T$.
 If a value $v$ is a location, then we check that both the set of occurrences agrees with the dependency pair, presented in \cref{def:DepAgree}, 
 and check if the alias information agrees with the semantics, \cref{def:AliasAgree}.
 If the value $v$ is not a location, then its type can either be an
@@ -971,8 +967,8 @@ abstraction, then the dependencies would already be part of the return
 type. 
 
 \begin{definition}[Type agreement]\label{def:TAgree}
-	Let $env$ be an environment, $w$ be a dependency function, $\sqleq_w$ be a relation over $w$, $(L,V)$ be a dependency pair, and $T$ be a type.
-	We say that:
+	% Let $env$ be an environment, $w$ be a dependency function, $\sqleq_w$ be a relation over $w$, $(L,V)$ be a dependency pair, and $T$ be a type.
+	We say that
 	$$(env,v,(w,\sqleq_w),(L,V))\models(\Gamma,T)$$
 	iff
 	\begin{itemize}
@@ -994,15 +990,16 @@ type.
 	\end{itemize}
 \end{definition}
 
-\subsubsection{Agreements between bindings}
-
-We are now finally able to define agreement between the binding models, i.e.,
-define what it means for a type environment and an approximated order
-of program points $(\Gamma,\Pi)$ to be in agreement with an
-environment, a store, and a dependency function $(env,sto,w)$.
+% \subsubsection{Agreements between bindings}
+% This definition of agreement will ensure that the bindings in the
+% semantics and the type system speak of the same elements in the same way.
+% We are now finally able to define agreement between the binding models, i.e.,
+% define what it means for a type environment and an approximated order
+% of program points $(\Gamma,\Pi)$ to be in agreement with an
+% environment, a store, and a dependency function $(env,sto,w)$.
 
 \begin{definition}[Environment agreement]\label{def:EnvAgree}
-	Let $(w,\sqleq_w)$ be a pair containing the dependency function and a relation over it, $env$ be an environment, $sto$ be the a store, $\Gamma$ be a type environment, and $\Pi$ be an approximated program point order.
+	% Let $(w,\sqleq_w)$ be a pair containing the dependency function and a relation over it, $env$ be an environment, $sto$ be the a store, $\Gamma$ be a type environment, and $\Pi$ be an approximated program point order.
 	We say that:
 	$$(env,sto,(w,\sqleq_w))\models(\Gamma,\Pi)$$
 	if 
@@ -1019,8 +1016,7 @@ environment, a store, and a dependency function $(env,sto,w)$.
 	\end{enumerate}
 \end{definition}
 
-This definition of agreement will ensure that the bindings in the
-semantics and the type system speak of the same elements in the same way.%  In
+%  In
 % particular, the variables mentioned in the environment $env$ and in
 % $w$ have dependency information recorded in $\Gamma$ \eqref{prop:1}.
 % It will also ensure that variables mentioned in $w$ have values that
@@ -1179,7 +1175,7 @@ since the occurrence $x^4$ is present in the second application.
 
 
 References are defined currently in the type system, they cannot be bound to abstractions.
-Moroeover, if different references had different types, e.g., if it had an abstraction type at one point and a base type at another point.
+Moreover, if different references had different types, e.g., if it had an abstraction type at one point and a base type at another point.
 Here, either we should require references to always have the same type, e.g., with base type polymorphism.
 Consider the following occurrence:
 \begin{lstlisting}[language=Caml, mathescape=true]
