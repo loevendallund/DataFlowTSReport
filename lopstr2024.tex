@@ -36,14 +36,13 @@
 
 The goal of data-flow analysis is to provide a static analysis of the
 flow information of in a program that can be used in compiler
-optimization.
-
-The original approach is to build a system of flow equations based on
-a graph representation of the program and to compute a solution using
-an iterative algorithm \cite{KildallGaryA1973Auat,
-  RyderBarbara1988Idaa}. Other graph-free approaches have also been
-considered \cite{HorspoolR.Niegel2002AGAt}. A challenge is this
-setting is how to deal with aliasing.
+optimizations and for register allocation. The original approach is to
+build a system of flow equations based on a graph representation of
+the program and to compute a solution using an iterative algorithm
+\cite{KildallGaryA1973Auat,RyderBarbara1988Idaa}. Other graph-free
+approaches have also been considered
+\cite{HorspoolR.Niegel2002AGAt}. A challenge is this setting is how to
+deal with aliasing.
 
 Type systems have often been used to provide static analyses of
 programs in order to characterize specific run-time errors, and for
@@ -57,17 +56,17 @@ which is based on a linear $\lambda$-calculus to give an alternative
 formulation of alias types. The type system relies on linearity, and
 every well-typed program terminates.
 
-In what follows, we will use a type system for data flow analysis in
-the presence of aliasing for a non-trivial fragment of the recent
-programming language ReScript. This is a language based on OCaml with
-a JavaScript-inspired synta.  ReScript offers a type system based on
-that of OCaml, which provides an alternative to other typed languages
-that target JavaScript \cite{rescript_rebrand}. Like OCaml, ReScript
-is imperative and allows for mutability through reference constructs
-for creation, reading, and writing,
+In this paper we present a type system for data flow analysis in the
+presence of aliasing for a non-trivial fragment of the recent
+programming language ReScript which is intended as an alternative to
+other typed languages that target JavaScript. ReScript is based on
+OCaml with a JavaScript-inspired syntax and a type system based on
+that of OCaml\cite{rescript_rebrand}. Like OCaml, ReScript is
+imperative and allows for mutability through reference constructs for
+creation, reading, and writing,
 
 The fragment that we study incorporates both functional and imperative
-features. We show that the the type system is sound in the sense that
+features. We show that the type system is sound in the sense that
 it correctly overapproximates the set of occurrences on which any
 given occurrence depends.
 
@@ -78,50 +77,42 @@ with bindings, pattern matching, and mutability.
  
 \subsection{Syntax}
 
-As we are interested in analysing the data-flow, we must record
-information of where variables are used.  Therefore, the language
-presented is extended with a notion of \emph{program points} taken
-from a countably infinite set $\cat{P}$. 
+In a data-flow we must record information of where variables are used.
+Therefore, the language presented is extended with a notion of
+\emph{program points} taken from a countably infinite set $\cat{P}$.
 %
-\begin{align*}
-	e\in &\;\cat{Exp} &-\;&\mbox{Atomic Occurrence} \\
-	o\in &\;\cat{Occ} &-\;&\mbox{Occurrences} \\
-	c\in &\;\cat{Con} &-\;&\mbox{Constants} \\
-	x,\;f\in &\;\cat{Var} &-\;&\mbox{Variables} \\
-	\loc\in &\;\cat{Loc} &-\;&\mbox{Locations}
-\end{align*}
-%
-Every subexpression is labelled with a unique \emph{program point}. We call a labelled
-expression $e^p$ where $p \in \cat{P}$ an \emph{occurrence}. An
-occurrence is \emph{atomic} if it of the form $u^p$ where
-$u \in \cat{Var} \cup \cat{Loc}$. If $u^p$ is atomic, we call any
-other occurrence $u^q$ a \emph{$u$-occurrence}.
+Every subexpression is labelled with a unique \emph{program
+  point}. \emph{Occurrences} $o \in \cat{Occ}$ are labelled
+expressions $e^p$ where $e \in \cat{Exp}$ and $p \in \cat{P}$.We let
+$\ell$ range over set set of locations $\cat{Loc}$ and $x,f$ range
+over the set of variables $\cat{Var}$.  An occurrence is \emph{atomic}
+if it of the form $u^p$ where $u \in \cat{Var} \cup \cat{Loc}$. If
+$u^p$ is atomic, we call any other occurrence $u^q$ a
+\emph{$u$-occurrence}.
 
-When given a syntactic category $\mathbf{C}$, we let $\mathbf{C}^{P}$
+When given a syntactic category $\mathbf{C}$, we let $\mathbf{C}_{\cat{P}}$
 denote the pair $\mathbf{C}\times\cat{P}$, so that e.g.
-$\cat{Exp}^\cat{P}=\cat{Exp}\times\cat{P}$. 
-As occurrences are atomic occurrences labelled with a program point, we have that $\cat{Occ}=\cat{Exp}^\cat{P}$.
-%As occurrences are labelled expressions, we have that $\cat{Occ}=\cat{Exp}^\cat{P}$.
+$\cat{Exp}_\cat{P}=\cat{Exp}\times\cat{P}$. 
+As occurrences are atomic occurrences labelled with a program point, we have that $\cat{Occ}=\cat{Exp}_{\cat{P}}$.
+%As occurrences are labelled expressions, we have that $\cat{Occ}=\cat{Exp}_{\cat{P}}$.
 
 The formation rules are shown below.
 %
 \begin{align*}
-  \text{Occurrences} \; o &::= e^p \\[5mm]
-\text{Atomic Occurrences} \; e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o\\
-			& \mid c \; o_1 \; o_2\\
-			& \mid \mbox{let} \; x \; o_1 \; o_2 \\
-			& \mid \mbox{let rec} \; x \; o_1 \; o_2 \\
-			& \mid \mbox{case} \; o_1 \; \vec{\pi} \; \vec{o}\\
-			& \mid \refc \; o \mid o_1 := o_2 \mid \; !o\\[5mm]
-  \text{Patterns} \; \pi &::= n \mid b \mid x \mid \_  \mid
-                                (s_1,\cdots,s_n)\\
+o &::= e^p \\
+e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o \mid c \; o_1 \; o_2\\
+			& \mid \mbox{let} \; x \; o_1 \; o_2 \mid
+                   \mbox{let rec} \; x \; o_1 \; o_2 \mid \mbox{case}
+                   \; o_1 \; \vec{\pi} \; \vec{o} \mid  \refc \; o \mid o_1 := o_2 \mid \; !o\\
+\pi &::= n \mid b \mid x \mid \_  \mid
+                                (s_1,\cdots,s_n)
 \end{align*}
 %
 $\lambda\;x.o$ denotes an \emph{abstraction} with a parameter $x$ and body $o$.
 \emph{Constants} $c$ are either natural numbers $n$, boolean values $b$, unit value $()$, or functional constants.
-Here, functional constants represents functions such as $PLUS$, $DIVISION$, etc.
+such as the arithmetic operations and the Boolea connectives.
 
-$o_1\;o_2$ denotes an \emph{Applications}, and $c\;o_1\;o_2$ denotes a \emph{Functional Applications}
+$o_1\;o_2$ denotes an \emph{application}, and $c\;o_1\;o_2$ denotes a \emph{functional application}
 where $c$ is a functional constant and $o_1$, $o_2$ are arguments to the functional constant.
 
 \emph{Local declarations} $\mbox{let} \; x \; o_1 \; o_2$ and
@@ -145,20 +136,20 @@ We assume that all bindings bind distinct names; this can be ensured
 by means of $\alpha$-conversion. The notions of free and bound
 variables are defined as expected. 
 
-% \begin{example}[]\label{ex:write}
-% Consider
-% \begin{lstlisting}[language=Caml, mathescape=true]
-%   (let x (ref 3$^1$)$^2$
-%   (let y (let z (5$^3$)$^4$
-%      (x$^5$:=z$^7$)$^8$)$^{9}$ (!x)$^{10}$)$^{11}$)$^{12}$
-% \end{lstlisting}
-% This creates a reference to the constant 3 and binds the reference to
-% $x$ (so $x$ is an alias of this reference). Next a binding for $y$ is
-% made and after that a binding of $z$ to the constant 5 before writing
-% to the reference, that $x$ is bound to, to the value that $z$ is bound
-% to.  Finally the reference that $x$ is bound to is read. We expect to
-% retrieve the value $5$.
-% \end{example}
+\begin{example}\label{ex:write}
+Consider
+\begin{lstlisting}[language=Caml, mathescape=true]
+  (let x (ref 3$^1$)$^2$
+  (let y (let z (5$^3$)$^4$
+     (x$^5$:=z$^7$)$^8$)$^{9}$ (!x)$^{10}$)$^{11}$)$^{12}$
+\end{lstlisting}
+This creates a reference to the constant 3 and binds the reference to
+$x$ (so $x$ is an alias of this reference). Next a binding for $y$ is
+made and after that a binding of $z$ to the constant 5 before writing
+to the reference, that $x$ is bound to, to the value that $z$ is bound
+to.  Finally the reference that $x$ is bound to is read. We expect to
+retrieve the value $5$.
+\end{example}
 
 \subsection{The binding model}\label{sec:EnvSto}
 
@@ -171,15 +162,13 @@ track of bindings of variables to values. Values are given by the formation rule
 Constants $c$, locations $\ell$ and unit $()$ are values as are closures, $\langle
 x,e^{p'},env\rangle$ and recursive closures, $\langle x,f,e^{p''},env\rangle$.
 
-An environment $env \in \cat{Env} $ is a partial function
-\[ env: \cat{Var}\rightharpoonup\cat{Values} \]
-%
-and we let $env^{-1}(v)=\{x\in dom(env)\mid env(x)=v\}$.
+An environment $env \in \cat{Env} $ is a partial function $env:
+\cat{Var}\rightharpoonup\cat{Values}$ and we let $env^{-1}(v)=\{x\in dom(env)\mid env(x)=v\}$.
 %
 A store $sto \in \cat{Sto}$ is a partial function
-\[ \cat{Sto}=\cat{Loc}\cup\{next\}\rightharpoonup\cat{Values} \]
-where $\nexte$ is a pointer to the next unused location -- this
-information is needed when new locations are needed.
+$\cat{Sto}=\cat{Loc}\cup\{next\}\rightharpoonup\cat{Values}$ where
+$\nexte$ is a pointer to the next unused location -- this information
+is needed when new locations are needed.
 
 Moreover, we assume a function
 $new:\cat{Loc}\rightarrow\cat{Loc}$, which given, a location, gives us
@@ -215,7 +204,7 @@ occurrences $V =\{x_1^{p'_1},\cdots,x_m^{p'_m}\}$., meaning that the
 value of the element $u^p$ depends on the occurrences found in $L$ and
 in $V$.
 
-\begin{example}[]\label{ex:dep}
+\begin{example}\label{ex:dep}
 	Consider the occurrence from \cref{ex:write}, where we can
         infer the following bindings for a dependency function
         $w_{ex}$ over this occurrence: 
@@ -259,7 +248,7 @@ program points.% :
 
 Any dependency function induces an ordering on program points as follows.
 
-\begin{definition}[]\label{def:RelPoint}
+\begin{definition}\label{def:RelPoint}
 	Let $w\in\cat{W}$ be a dependency function.
 	Then the induced order $\sqleq_w$ is given by
 	 \[ \sqleq_w= \{(p,p')\mid p \in \points(dom(w), p' \in
@@ -267,7 +256,7 @@ Any dependency function induces an ordering on program points as follows.
          	We say that $w$ is a partial order if $\sqleq_w$ is a partial order.
 \end{definition}
 
-\begin{example}[]\label{ex:depRel}
+\begin{example}\label{ex:depRel}
 	Consider the example from \cref{ex:dep}. Assume a binary
         relation over the dependency function $w_{ex}$ given by
 	\[ \sqleq_{w_{ex}}=\{(2,4),(2,9),(5,9),(2,8),(8,2)\} \]
@@ -437,7 +426,7 @@ Here, we now have two bindings for the parameter $y$, but since we also know tha
 
 \section{A type system for data-flow analysis}\label{sec:TypeSys}
 
-The the type system for data-flow analysis is an overapproximation of
+The type system for data-flow analysis is an overapproximation of
 the big-step semantics.
 
 \subsection{An overview of the type system}
@@ -497,15 +486,12 @@ The set of types \cat{Types} is defined by the following formation rules:
 %
 \[ T ::=(\delta,\kappa)\mid T_1 \rightarrow T_2 \]
 %
-Here, we introduce two types, the base type $(\delta,\kappa)$ and the
-arrow type $T_1 \rightarrow T_2$.
-
-The base type $(\delta,\kappa)$ contains a set $\delta$ that is
-the set of occurrences upon the value of an occurrence can at most
-depend, and $\kappa$ represents alias information in the form of the
-set of variables and internal variables upon which this occurrence may
-depend. Therefore, if an occurrence has a base type where
-$\kappa \neq \emptyset$, then the occurrence must represent a location.
+The base type $(\delta,\kappa)$ contains a set $\delta$ that is the
+set of occurrences upon the value of an occurrence can at most depend,
+and $\kappa$ represents alias information in the form of the set of
+variables and internal variables upon which this occurrence may
+depend. If an occurrence has type $\kappa \neq \emptyset$,
+the occurrence must represent a location.
 
 \begin{definition}[Type Base for aliasing]
 	For an occurrence $o$, let $\cat{Var}_o$ be the set of all
@@ -532,7 +518,7 @@ then the abstraction must either take a reference as input or returns a referenc
 %information, then the abstraction either takes a reference as input or
 %returns a reference.
 
-%\begin{example}[]
+%\begin{example}
 %Consider the following occurrence:
 %\begin{lstlisting}[language=Caml, mathescape=true]
 %(let x (3$^1$)$^2$ (let y (ref x$^3$)$^4$ (!y)))
@@ -681,7 +667,7 @@ We can now define what it means to be an immediate predecessor
 wrt. the set of $p$-chains. This immediate predecesor is found as the
 union of the immediate predecessors of $u$.
 
-\begin{definition}[]\label{def:GBindUps}
+\begin{definition}\label{def:GBindUps}
 	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Upsilon_p$ be a set of $p$-chains, then $\uf_{\Upsilon_p}$ is given by:
 \[
   \uf_{\Upsilon_p}(u,\Gamma)=\bigcup_{\Pi_p^{*}\in\Upsilon_p}\uf_{\Pi_p^{*}}(u,\Gamma) \]
@@ -751,10 +737,10 @@ A highlight of type rules can be found in \cref{fig:TypeSys}.
 
 \begin{table*}
 	\setlength\tabcolsep{8pt}
-	\begin{tabular}{llll}
+	\begin{tabular}{ll}
 \runa{T-Const} &
 	\inference[]{}
-	{\Gamma,\Pi\vdash  c^{p}:(\emptyset,\emptyset)} & 
+	{\Gamma,\Pi\vdash  c^{p}:(\emptyset,\emptyset)} \\
 \runa{T-Var} &
 	\condinf{}
 	{\Gamma,\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}{where 
@@ -766,7 +752,7 @@ A highlight of type rules can be found in \cref{fig:TypeSys}.
 		\Gamma',\Pi\vdash e_2^{p_2}:T_2
 	}
 	{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p_1} \; e_2^{p_2}]^{p}:T_2}{where $\Gamma'=\Gamma[x^{p}:(\delta,\kappa\cup \{x\})]$ and
-          $\kappa\neq\emptyset$} &
+          $\kappa\neq\emptyset$} \\
 \runa{T-Case} &
 	\condinf
 	{
@@ -777,7 +763,7 @@ A highlight of type rules can be found in \cref{fig:TypeSys}.
 	{where $e_i^{p_i}\in\vec{o}$ and $s_i\in\vec{\pi}$ $T=\bigcup_{i=1}^{|\vec{\pi}|}T_i$, and\\
           $\Gamma'=\Gamma[x^p:(\delta,\kappa)]$ if $s_i=x$} \\[18mm]
 \runa{T-Ref-read} &
-	\multicolumn{3}{l}{\condinf
+	\condinf
 	{\Gamma,\Pi\vdash  e^{p}:(\delta,\kappa)}
 	{\Gamma,\Pi\vdash
                     [!e^{p}]^{p'}:T\cup(\delta\cup\delta',\emptyset)}
@@ -789,8 +775,9 @@ A highlight of type rules can be found in \cref{fig:TypeSys}.
 	T=\Gamma(\nu x_1^{p_1})\cup\cdots\cup\Gamma(\nu
                          x_1^{p_m})\cup\cdots\cup\Gamma(\nu
                          x_n^{p_1'})\cup\cdots\cup\Gamma(\nu
-                         x_n^{p_s'})\end{array}\right\}$}} \\
-          & & &
+                         x_n^{p_s'})\end{array}\right\}$}
+          \\
+          & 
 	\end{tabular}
 	\caption{Selected rules from the type system}
 	\label{fig:TypeSys}
@@ -1081,35 +1068,35 @@ semantics and the type system speak of the same elements in the same way.%  In
         $\loc^p$. This is captured by \eqref{prop:6}.
 \end{itemize}
 
-\subsection{Properties of the type system}
+% \subsection{Properties of the type system}
 
-The soundness proof that follows makes use of certain properties of
-the semantics and type system.
+% The soundness proof that follows makes use of certain properties of
+% the semantics and type system.
 
-The first property we present is for the dependency function, since
-the dependency function is global, and as such can contain information
-that arises from the side effects on an evaluation. The property
-states that if any new variable bindings are introduced to the
-dependency function by evaluating an occurrence $e^p$, those
-variables are not free in $e^p$.
+% The first property we present is for the dependency function, since
+% the dependency function is global, and as such can contain information
+% that arises from the side effects on an evaluation. The property
+% states that if any new variable bindings are introduced to the
+% dependency function by evaluating an occurrence $e^p$, those
+% variables are not free in $e^p$.
 
-\begin{lemma}[History]\label{lemma:His}
-	Suppose $e^p$ is an occurrence, that
-	$$env\vdash\left\langle e^{p},sto,(w,\sqleq_w),p'\right\rangle\rightarrow\left\langle v,sto',(w',\sqleq_w'),(L,V),p''\right\rangle$$
-		and $x^{p_1}\in dom(w')\backslash dom(w)$.
-		Then $x\notin fv(e^{p})$
-\end{lemma}
-%The proof for \cref{lemma:His} can be found in \cref{app:HisProof}.
+% \begin{lemma}[History]\label{lemma:His}
+% 	Suppose $e^p$ is an occurrence, that
+% 	$$env\vdash\left\langle e^{p},sto,(w,\sqleq_w),p'\right\rangle\rightarrow\left\langle v,sto',(w',\sqleq_w'),(L,V),p''\right\rangle$$
+% 		and $x^{p_1}\in dom(w')\backslash dom(w)$.
+% 		Then $x\notin fv(e^{p})$
+% \end{lemma}
+% %The proof for \cref{lemma:His} can be found in \cref{app:HisProof}.
 
-%\subfile{HisProof/index.tex}
+% %\subfile{HisProof/index.tex}
 
-The second property is the strengthening of the type environment, which states that if there is a binding the type environment, used to type an occurrence $e^p$, and the variables is not free in $e^p$ then the binding can be removed.
+% The second property is the strengthening of the type environment, which states that if there is a binding the type environment, used to type an occurrence $e^p$, and the variables is not free in $e^p$ then the binding can be removed.
 
-\begin{lemma}[Strengthening]\label{lemma:Strength}
-	If $\Gamma[x^{p'}:T'],\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma,\Pi\vdash e^{p}:T$
-\end{lemma}
-%The proof for \cref{lemma:Strength} can be found in \cref{app:StrProof}.
-%\subfile{StrProof/index.tex}
+% \begin{lemma}[Strengthening]\label{lemma:Strength}
+% 	If $\Gamma[x^{p'}:T'],\Pi\vdash e^{p}:T$ and $x\notin fv(e^p)$, then $\Gamma,\Pi\vdash e^{p}:T$
+% \end{lemma}
+% %The proof for \cref{lemma:Strength} can be found in \cref{app:StrProof}.
+% %\subfile{StrProof/index.tex}
 
 \section{The soundness theorem}
 
@@ -1142,17 +1129,17 @@ type is in agreement with the semantics.
 		\item $(env,(w',\sqleq_w'),v,(L,V))\models(\Gamma,T)$
 	\end{itemize}
 \end{theorem}
-\begin{proof}(Outline)
-	The proof proceeds by induction on the height of the derivation tree for 
-	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
-	%We will only show the proof of four rules here, for \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref-write}.% , the full proof can be found in \cref{app:SoundnessProof}.
+% \begin{proof}(Outline)
+% 	The proof proceeds by induction on the height of the derivation tree for 
+% 	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
+% 	%We will only show the proof of four rules here, for \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref-write}.% , the full proof can be found in \cref{app:SoundnessProof}.
 
-	% \begin{description}
-	% 	\input{sections/Proof/SoundProof/var.tex}
-	% 	\input{sections/Proof/SoundProof/case.tex}
-	% 	\input{sections/Proof/SoundProof/refread.tex}
-	% \end{description}
-\end{proof}
+% 	% \begin{description}
+% 	% 	\input{sections/Proof/SoundProof/var.tex}
+% 	% 	\input{sections/Proof/SoundProof/case.tex}
+% 	% 	\input{sections/Proof/SoundProof/refread.tex}
+% 	% \end{description}
+% \end{proof}
 
 % \subfile{SoundProof/index.tex}
 

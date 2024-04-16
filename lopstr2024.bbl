@@ -16,10 +16,6 @@ Gary~A Kildall.
 \newblock A unified approach to global program optimization.
 \newblock 1973.
 
-\bibitem{df_implementation}
-Nicky~Ask Lund.
-\newblock Dataflow implementation, 2023.
-
 \bibitem{DBLP:conf/tlca/MorrisettAF05}
 Greg Morrisett, Amal~J. Ahmed, and Matthew Fluet.
 \newblock L\({}^{\mbox{3}}\): {A} linear language with locations.
