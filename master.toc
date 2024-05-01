@@ -1,0 +1,38 @@
+\contentsline {section}{Abstract}{1}{section*.1}%
+\contentsline {section}{Contents}{1}{section*.2}%
+\contentsline {section}{\numberline {1}Introduction}{2}{section.1}%
+\contentsline {section}{\numberline {2}Language}{2}{section.2}%
+\contentsline {subsection}{\numberline {2.1}Syntax}{3}{subsection.2.1}%
+\contentsline {subsection}{\numberline {2.2}Environments and stores}{5}{subsection.2.2}%
+\contentsline {subsection}{\numberline {2.3}Dependencies}{6}{subsection.2.3}%
+\contentsline {subsection}{\numberline {2.4}Collection semantics}{8}{subsection.2.4}%
+\contentsline {section}{\numberline {3}Type system for data-flow analysis}{10}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Types}{10}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Basis and type environment}{11}{subsection.3.2}%
+\contentsline {subsection}{\numberline {3.3}The type system}{13}{subsection.3.3}%
+\contentsline {section}{\numberline {4}Soundness}{16}{section.4}%
+\contentsline {subsection}{\numberline {4.1}Type rules for values}{16}{subsection.4.1}%
+\contentsline {subsection}{\numberline {4.2}Agreement}{17}{subsection.4.2}%
+\contentsline {subsection}{\numberline {4.3}Properties}{20}{subsection.4.3}%
+\contentsline {section}{\numberline {5}Conclusion}{23}{section.5}%
+\contentsline {subsection}{\numberline {5.1}discussion}{23}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Future work}{24}{subsection.5.2}%
+\contentsline {paragraph}{Implementation of a type checker}{24}{section*.15}%
+\contentsline {paragraph}{Polymorphism}{24}{section*.16}%
+\contentsline {paragraph}{Extending references}{24}{section*.17}%
+\contentsline {paragraph}{Type inference}{25}{section*.18}%
+\contentsline {paragraph}{Extending with more language constructs}{25}{section*.19}%
+\contentsline {section}{References}{25}{section*.21}%
+\contentsline {section}{\numberline {A}Collection Semantics}{26}{appendix.A}%
+\contentsline {subsection}{\numberline {A.1}Pattern matching}{28}{subsection.A.1}%
+\contentsline {paragraph}{number and boolean}{28}{section*.24}%
+\contentsline {paragraph}{variables}{28}{section*.25}%
+\contentsline {paragraph}{patterns}{28}{section*.26}%
+\contentsline {paragraph}{wildcard and fail}{28}{section*.27}%
+\contentsline {subsection}{\numberline {A.2}Extending $w$}{28}{subsection.A.2}%
+\contentsline {section}{\numberline {B}Type system Judgement}{30}{appendix.B}%
+\contentsline {subsection}{\numberline {B.1}$\sigma $ function}{32}{subsection.B.1}%
+\contentsline {section}{\numberline {C}Proofs of theorems and lemmas}{32}{appendix.C}%
+\contentsline {subsection}{\numberline {C.1}History}{32}{subsection.C.1}%
+\contentsline {subsection}{\numberline {C.2}Strengthening}{36}{subsection.C.2}%
+\contentsline {subsection}{\numberline {C.3}Soundness}{40}{subsection.C.3}%

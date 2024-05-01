@@ -51,19 +51,19 @@ particularly important. In \cite{10.1007/3-540-46425-5_24} Smith et
 al. present a notion of alias types that allows functions to specify
 the shape of a store and to track the flow of pointers through a
 computation. The language is a simple location-based language. Later,
-Ahmed et al. \cite{DBLP:conf/tlca/MorrisettAF05} consider a language
-which is based on a linear $\lambda$-calculus to give an alternative
+Ahmed et al. \cite{DBLP:conf/tlca/MorrisettAF05} use a language s
+based on a linear $\lambda$-calculus to give an alternative
 formulation of alias types. The type system relies on linearity, and
 every well-typed program terminates.
 
 In this paper we present a type system for data flow analysis in the
-presence of aliasing for a non-trivial fragment of the recent
-programming language ReScript which is intended as an alternative to
-other typed languages that target JavaScript. ReScript is based on
-OCaml with a JavaScript-inspired syntax and a type system based on
-that of OCaml\cite{rescript_rebrand}. Like OCaml, ReScript is
-imperative and allows for mutability through reference constructs for
-creation, reading, and writing,
+presence of aliasing for a non-trivial fragment of the programming
+language ReScript which is meant as an alternative to other typed
+languages that target JavaScript. ReScript is based on OCaml with a
+JavaScript-inspired syntax and a type system based on that of
+OCaml\cite{rescript_rebrand}. ReScript is imperative and allows for
+mutability through reference constructs for creation, reading, and
+writing,
 
 The fragment that we study incorporates both functional and imperative
 features. We show that the type system is sound in the sense that
@@ -77,9 +77,10 @@ with bindings, pattern matching, and mutability.
  
 \subsection{Syntax}
 
-In a data-flow we must record information of where variables are used.
-Therefore, the language presented is extended with a notion of
-\emph{program points} taken from a countably infinite set $\cat{P}$.
+In a data-flow analysis we must record information of where variables
+are used.  Therefore, the language presented is extended with a notion
+of \emph{program points} taken from a countably infinite set
+$\cat{P}$.
 %
 Every subexpression is labelled with a unique \emph{program
   point}. \emph{Occurrences} $o \in \cat{Occ}$ are labelled
@@ -90,13 +91,13 @@ if it of the form $u^p$ where $u \in \cat{Var} \cup \cat{Loc}$. If
 $u^p$ is atomic, we call any other occurrence $u^q$ a
 \emph{$u$-occurrence}.
 
-When given a syntactic category $\mathbf{C}$, we let $\mathbf{C}_{\cat{P}}$
-denote the pair $\mathbf{C}\times\cat{P}$, so that e.g.
-$\cat{Exp}_\cat{P}=\cat{Exp}\times\cat{P}$. 
-As occurrences are atomic occurrences labelled with a program point, we have that $\cat{Occ}=\cat{Exp}_{\cat{P}}$.
+When given a syntactic category $\mathbf{C}$, we let
+$\mathbf{C}_{\cat{P}}$ denote the pair $\mathbf{C}\times\cat{P}$, so
+that e.g.  $\cat{Exp}_\cat{P}=\cat{Exp}\times\cat{P}$.  This means
+that $\cat{Occ}=\cat{Exp}_{\cat{P}}$.
 %As occurrences are labelled expressions, we have that $\cat{Occ}=\cat{Exp}_{\cat{P}}$.
 
-The formation rules are shown below.
+The formation rules of our abstract syntax are shown below.
 %
 \begin{align*}
 o &::= e^p \\
@@ -108,17 +109,19 @@ e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o \mid c \; o_1 \; o_2\\
                                 (s_1,\cdots,s_n)
 \end{align*}
 %
-$\lambda\;x.o$ denotes an \emph{abstraction} with a parameter $x$ and body $o$.
-\emph{Constants} $c$ are either natural numbers $n$, boolean values $b$, unit value $()$, or functional constants.
-such as the arithmetic operations and the Boolea connectives.
+$\lambda\;x.o$ denotes an \emph{abstraction} with a parameter $x$ and
+body $o$.  \emph{Constants} $c$ are either natural numbers $n$,
+boolean values $b$, unit value $()$, or functional constants.  such as
+the arithmetic operations and the Boolean connectives.
 
-$o_1\;o_2$ denotes an \emph{application}, and $c\;o_1\;o_2$ denotes a \emph{functional application}
-where $c$ is a functional constant and $o_1$, $o_2$ are arguments to the functional constant.
+$o_1\;o_2$ denotes an \emph{application}, and $c\;o_1\;o_2$ denotes a
+\emph{functional application} where $c$ is a functional constant and
+$o_1$, $o_2$ are its arguments.
 
 \emph{Local declarations} $\mbox{let} \; x \; o_1 \; o_2$ and
 $\mbox{let rec} \; f \; o_1 \; o_2$ are immutable bindings that
 associate the variable $x$ with the value $o_1$ within $o_2$. The latter
-form is recursive; $x$ can then appear inside $o_1$. Mutability
+form is recursive; $x$ may occur in $o_1$. Mutability
 in ReScript is introduced using the \emph{reference} construct
 $\mbox{ref\;o}$. This construct creates a reference in the form of a
 location and allows for binding locations to local declarations. We
@@ -737,7 +740,7 @@ A highlight of type rules can be found in \cref{fig:TypeSys}.
 % 	From the type information, it is clear that only $x$ and the internal variable $\nu x$ is used.
 % \end{example}
 
-\begin{table*}
+\begin{table*}[h]
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{ll}
 % \runa{T-Const} &
@@ -906,14 +909,14 @@ value that is well-typed wrt. $\Gamma$.
 	\label{fig:ValTypeRules}
 \end{figure}
 
-\subsection{Agreement}
-Soundness relates the type system to the semantics, and in order to
-state the soundness property we must define notions of agreement
-between the different entities.
+\subsection{Notions of agreement}
 
-Types contain sets of occurrences, and in order to define agreement
-between types and values, we must first what it means for a set of
-occurrences $\delta$ to contain the from a dependency pair $(L,V)$
+As our soundness theorem relates the type system to the semantics, we
+must define what it means for instances of the binding models of the
+semantics and the type system to agree.
+
+First we define what it means for a set of occurrences $\delta$ to
+faithfully represent the information from a dependency pair $(L,V)$
 wrt. a environment $env$.
 
 \begin{definition}[Dependency agreement]\label{def:DepAgree}
@@ -1096,21 +1099,9 @@ type.
 % %The proof for \cref{lemma:Strength} can be found in \cref{app:StrProof}.
 % %\subfile{StrProof/index.tex}
 
-\section{The soundness theorem}
+\subsection{The soundness theorem}
 
-We can now present the soundness theorem for our type system. The
-theorem compares the semantics to the type system and shows that it is
-a sound approximation of the type system.
-
-Here we need to make sure that an
-evaluation of an occurrence, and the type for the occurrence agrees. 
-As such, we assume that the type environment and approximated order of
-program points are in an agreement with the binding models in the
-semantics, and we also assume that the environment is well-typed. 
-
-Based on these assumptions, we then need to make sure that, after an
-evaluation, we are still in agreement, we can type the value, and the
-type is in agreement with the semantics. 
+We can now present the soundness theorem for our type system.
 
 \begin{theorem}[Soundness]
 	Suppose $e^{p'}$ is an occurrence where

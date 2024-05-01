@@ -1,0 +1,151 @@
+%%% -*-BibTeX-*-
+%%% Do NOT edit. File created by BibTeX with style
+%%% ACM-Reference-Format-Journals [18-Jan-2012].
+
+\begin{thebibliography}{9}
+
+%%% ====================================================================
+%%% NOTE TO THE USER: you can override these defaults by providing
+%%% customized versions of any of these macros before the \bibliography
+%%% command.  Each of them MUST provide its own final punctuation,
+%%% except for \shownote{}, \showDOI{}, and \showURL{}.  The latter two
+%%% do not use final punctuation, in order to avoid confusing it with
+%%% the Web address.
+%%%
+%%% To suppress output of a particular field, define its macro to expand
+%%% to an empty string, or better, \unskip, like this:
+%%%
+%%% \newcommand{\showDOI}[1]{\unskip}   % LaTeX syntax
+%%%
+%%% \def \showDOI #1{\unskip}           % plain TeX syntax
+%%%
+%%% ====================================================================
+
+\ifx \showCODEN    \undefined \def \showCODEN     #1{\unskip}     \fi
+\ifx \showDOI      \undefined \def \showDOI       #1{#1}\fi
+\ifx \showISBNx    \undefined \def \showISBNx     #1{\unskip}     \fi
+\ifx \showISBNxiii \undefined \def \showISBNxiii  #1{\unskip}     \fi
+\ifx \showISSN     \undefined \def \showISSN      #1{\unskip}     \fi
+\ifx \showLCCN     \undefined \def \showLCCN      #1{\unskip}     \fi
+\ifx \shownote     \undefined \def \shownote      #1{#1}          \fi
+\ifx \showarticletitle \undefined \def \showarticletitle #1{#1}   \fi
+\ifx \showURL      \undefined \def \showURL       {\relax}        \fi
+% The following commands are used for tagged output and should be
+% invisible to TeX
+\providecommand\bibfield[2]{#2}
+\providecommand\bibinfo[2]{#2}
+\providecommand\natexlab[1]{#1}
+\providecommand\showeprint[2][]{arXiv:#2}
+
+\bibitem[Association(2020a)]%
+        {rescript_rebrand}
+\bibfield{author}{\bibinfo{person}{ReScript Association}.}
+  \bibinfo{year}{2020}\natexlab{a}.
+\newblock \bibinfo{booktitle}{\emph{BuckleScript and Reason Rebranding}}.
+\newblock
+\urldef\tempurl%
+\url{https://rescript-lang.org/blog/bucklescript-is-rebranding}
+\showURL{%
+\tempurl}
+
+
+\bibitem[Association(2020b)]%
+        {reanalyze}
+\bibfield{author}{\bibinfo{person}{ReScript Association}.}
+  \bibinfo{year}{2020}\natexlab{b}.
+\newblock \bibinfo{booktitle}{\emph{reanalyze}}.
+\newblock
+\urldef\tempurl%
+\url{https://github.com/rescript-association/reanalyze}
+\showURL{%
+\tempurl}
+
+
+\bibitem[Emami et~al\mbox{.}(1994)]%
+        {EmamiMaryam1994Cipa}
+\bibfield{author}{\bibinfo{person}{Maryam Emami}, \bibinfo{person}{Rakesh
+  Ghiya}, {and} \bibinfo{person}{Laurie Hendren}.}
+  \bibinfo{year}{1994}\natexlab{}.
+\newblock \showarticletitle{Context-sensitive interprocedural points-to
+  analysis in the presence of function pointers}. In
+  \bibinfo{booktitle}{\emph{Conference on Programming Language Design and
+  Implementation: Proceedings of the ACM SIGPLAN 1994 conference on Programming
+  language design and implementation; 20-24 June 1994}}
+  \emph{(\bibinfo{series}{PLDI '94})}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{242--256}.
+\newblock
+\showISBNx{9780897916622}
+
+
+\bibitem[Horspool et~al\mbox{.}(2002)]%
+        {HorspoolR.Niegel2002AGAt}
+\bibfield{author}{\bibinfo{person}{R.~Niegel Horspool}, \bibinfo{person}{Juris
+  Hartmanis}, {and} \bibinfo{person}{Jan van Leeuwen}.}
+  \bibinfo{year}{2002}\natexlab{}.
+\newblock \showarticletitle{A Graph—Free Approach to Data—Flow Analysis}.
+\newblock In \bibinfo{booktitle}{\emph{COMPILER CONSTRUCTION, PROCEEDINGS}}.
+  \bibinfo{series}{Lecture Notes in Computer Science},
+  Vol.~\bibinfo{volume}{2304}. \bibinfo{publisher}{Springer Berlin /
+  Heidelberg}, \bibinfo{address}{Germany}, \bibinfo{pages}{46--61}.
+\newblock
+\showISBNx{3540433694}
+\showISSN{0302-9743}
+
+
+\bibitem[Kildall(1973)]%
+        {KildallGaryA1973Auat}
+\bibfield{author}{\bibinfo{person}{Gary~A Kildall}.}
+  \bibinfo{year}{1973}\natexlab{}.
+\newblock \showarticletitle{A unified approach to global program optimization}.
+\newblock  (\bibinfo{year}{1973}).
+\newblock
+
+
+\bibitem[Liang and Harrold(1999)]%
+        {LiangDonglin1999Eaag}
+\bibfield{author}{\bibinfo{person}{Donglin Liang} {and} \bibinfo{person}{Mary
+  Harrold}.} \bibinfo{year}{1999}\natexlab{}.
+\newblock \showarticletitle{Equivalence analysis: a general technique to
+  improve the efficiency of data-flow analyses in the presence of pointers}. In
+  \bibinfo{booktitle}{\emph{Proceedings of the 1999 ACM SIGPLAN-SIGSOFT
+  workshop on program analysis for software tools and engineering}}
+  \emph{(\bibinfo{series}{PASTE '99})}. \bibinfo{publisher}{ACM},
+  \bibinfo{pages}{39--46}.
+\newblock
+\showISBNx{9781581131376}
+\showISSN{0163-5948}
+
+
+\bibitem[Lund(2023)]%
+        {DVNicky}
+\bibfield{author}{\bibinfo{person}{Nicky~Ask Lund}.}
+  \bibinfo{year}{2023}\natexlab{}.
+\newblock \showarticletitle{Type system to determine dead value in ReScript}.
+\newblock
+
+
+\bibitem[Pavlinovic et~al\mbox{.}(2021)]%
+        {PavlinovicZvonimir2021Dfrt}
+\bibfield{author}{\bibinfo{person}{Zvonimir Pavlinovic}, \bibinfo{person}{Yusen
+  Su}, {and} \bibinfo{person}{Thomas Wies}.} \bibinfo{year}{2021}\natexlab{}.
+\newblock \showarticletitle{Data flow refinement type inference}.
+\newblock \bibinfo{journal}{\emph{Proceedings of ACM on programming languages}}
+  \bibinfo{volume}{5}, \bibinfo{number}{POPL} (\bibinfo{year}{2021}),
+  \bibinfo{pages}{1--31}.
+\newblock
+\showISSN{2475-1421}
+
+
+\bibitem[Ryder and Paull(1988)]%
+        {RyderBarbara1988Idaa}
+\bibfield{author}{\bibinfo{person}{Barbara Ryder} {and} \bibinfo{person}{Marvin
+  Paull}.} \bibinfo{year}{1988}\natexlab{}.
+\newblock \showarticletitle{Incremental data-flow analysis algorithms}.
+\newblock \bibinfo{journal}{\emph{ACM transactions on programming languages and
+  systems}} \bibinfo{volume}{10}, \bibinfo{number}{1} (\bibinfo{year}{1988}),
+  \bibinfo{pages}{1--50}.
+\newblock
+\showISSN{0164-0925}
+
+
+\end{thebibliography}
