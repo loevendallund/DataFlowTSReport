@@ -441,16 +441,21 @@ occurrences given a type environment (presented in
 \cref{sec:Judge}) and a so-called basis (presented in
 \cref{sec:basis}).
 
-Since the language contains local information as bindings, and global
-information as locations, the type system must be able to describe
-this.
+%Since the language contains local information as bindings, and global
+%information as locations, the type system must be able to describe
+%this.
+As presented, the language contains local information as bindings and global information as locations.
+Since locations a a notion of the semantics, and references do not need to be bound to variables, we user the notion of \emph{internal} variables to represent locations.
+An internal variable is denoted by $\nu x,\; \nu y\in\cat{IVar}$, where $\cat{IVar}$ is the syntactic category for internal variables.
+To captue the alias information, or "being an alias for", is done by means of a partition set of $\cat{IVar} \cup \cat{Var}$.
+When a set of variables and internal variables are in the same set, in a partition, we say that they share the same location.
 
-In the language, references do not need to be bound to a variable, and is thus represented by locations.
-In the type system we do not have semantic notions at our disposal, we instead use the notion of \emph{internal} variables to represent locations.
-These internal variables are denoted by $\nu x,\; \nu y\in\cat{IVar}$, where $\cat{IVar}$ is the syntactic category for internal variables.
+%As references do not need to be bound to a variable, and is thus represented by locations.
+%In the type system we do not have semantic notions at our disposal, we instead use the notion of \emph{internal} variables to represent locations.
+%These internal variables are denoted by $\nu x,\; \nu y\in\cat{IVar}$, where $\cat{IVar}$ is the syntactic category for internal variables.
 
-To capture the concept of "being an alias for", or binding a variable to a reference, is captured by the means of a partition of the set $\cat{IVar} \cup \cat{Var}$.
-In such a partition, we think of variables and internal variables in the same set within the partition as sharing a location.
+%To capture the concept of "being an alias for", or binding a variable to a reference, is captured by the means of a partition of the set $\cat{IVar} \cup \cat{Var}$.
+%In such a partition, we think of variables and internal variables in the same set within the partition as sharing a location.
 
 
 %Locations are a notion of the semantics and are used to represent
@@ -465,18 +470,20 @@ In such a partition, we think of variables and internal variables in the same se
 %variables and internal variables in the same set within the partition
 %as sharing a location.
 
-We also impose the constraint on the type system that references
-cannot be bound to abstractions. Since we do not introduce
-polymorphism into our type system, every abstraction is affine -- it
-can be used at most once.
+In this paper, we will not introduce polymorphism into the type system.
+As such we will introduce the constraints that references cannot be bound to abstractions and every abstractions can at most be used once.
+%We also impose the constraint on the type system that references
+%cannot be bound to abstractions. Since we do not introduce
+%polymorphism into our type system, every abstraction is affine -- it
+%can be used at most once.
 
-To see the need for this assumption, consider the occurrence
-\begin{lstlisting}[language=Caml, mathescape=true]
-(let x ($\lambda$ y.y$^1$)$^2$ (x$^3$ (x$^4$ 1$^5$)$^6$)$^7$)$^8$
-\end{lstlisting}
-As can be seen, the variable $x$ is used in both program point 3 and 4.
-To type this, we first do an application with a constant as argument.
-In the second application, the argument type needs to contain the occurrence $x^4$, as it were used for the evaluation.
+%To see the need for this assumption, consider the occurrence
+%\begin{lstlisting}[language=Caml, mathescape=true]
+%(let x ($\lambda$ y.y$^1$)$^2$ (x$^3$ (x$^4$ 1$^5$)$^6$)$^7$)$^8$
+%\end{lstlisting}
+%As can be seen, the variable $x$ is used in both program point 3 and 4.
+%To type this, we first do an application with a constant as argument.
+%In the second application, the argument type needs to contain the occurrence $x^4$, as it were used for the evaluation.
 
 %To type the occurrences used in both places where we apply the
 %abstractions, the type of the argument in the innermost application is
@@ -491,11 +498,9 @@ The set of types \cat{Types} is defined by the following formation rules:
 %
 \[ T ::=(\delta,\kappa)\mid T_1 \rightarrow T_2 \]
 %
-The base type $(\delta,\kappa)$ contains a set $\delta$ that is the
-set of occurrences upon the value of an occurrence can at most depend,
-and $\kappa$ represents alias information in the form of the set of
-variables and internal variables upon which this occurrence may
-depend. If an occurrence has type $\kappa \neq \emptyset$,
+The base type $(\delta,\kappa)$ contains a set, $\delta$, of occurrences upon the value of an occurrence can at most depend,
+and $\kappa$ represents alias information in the form of the set of variables and internal variables upon which this occurrence may depend.
+If an occurrence has type $\kappa \neq \emptyset$,
 the occurrence must represent a location.
 
 \begin{definition}[Type Base for aliasing]
@@ -506,15 +511,18 @@ the occurrence must represent a location.
         then a partition of $\cat{Var}_o \cup \cat{IVar}_o$, where
         $\kappa_i^0\cap\kappa_j^0=\emptyset$ for all $i\neq j$. 
 \end{definition}
-This partition represents the assumption about which variables are
-an alias to internal variables: If $x \in \kappa^0_1$ and
-$\nu y \in \kappa^0_i$, then $x$ is an alias of $\nu y$.
-As such multiple variables can only belong to the same element
-$\kappa_0^i\in\kappa_0$, if there also exists an internal variable in
-$\kappa_0^i$. 
+For a variable, $x$ to be an alias of an internal variable, $\nu y$, then there must exists a $\kappa^0_i$ where $x \in \kappa^0_i$ and $\nu y \in \kappa^0_i$.
+As such, there can only be multiple variable in a $\kappa^0_i$, if there also exists an internal variable in $\kappa^0_i$.
+
+%This partition represents the assumption about which variables are
+%an alias to internal variables: If $x \in \kappa^0_1$ and
+%$\nu y \in \kappa^0_i$, then $x$ is an alias of $\nu y$.
+%As such multiple variables can only belong to the same element
+%$\kappa^0_i\in\kappa^0$, if there also exists an internal variable in
+%$\kappa_0^i$. 
 
 The arrow type is introduced to type abstractions.
-If the $T_1$ or $T_2$ part of the arrow type is a base type with $\kappa \neq \emptyset$,
+If either $T_1$ or $T_2$, in an arrow type, is a base type where $\kappa \neq \emptyset$,
 then the abstraction must either take a reference as input or returns a reference.
 
 %In order to be able to type functions, we introduce arrow types
@@ -533,7 +541,8 @@ then the abstraction must either take a reference as input or returns a referenc
 %Her $\nu y$ represents the reference from $ref$, and can thus be given the type $(\{x^3\},\emptyset)$, where $\nu y$ is bound to a constant, because of $x$, but the occurrence $x^3$ were used, so it should be part of the set of occurrences $\delta$.
 %\end{example}
 
-Since the type system approximates the occurrences used to evaluate an occurrence, we introduce the notion of union of types. %we introduce two unions.
+Since the type system approximates the occurrences used to evaluate an occurrence, we need a notion of combining types.
+%Since the type system approximates the occurrences used to evaluate an occurrence, we introduce the notion of union of types. %we introduce two unions.
 %The first union is a simple union that expects the types to be similar, that is, only the base types are allowed to be different.
 
 \begin{definition}
@@ -574,7 +583,7 @@ T_1\cup T_2=
 \subsection{The binding model of the type system}\label{sec:basis}
 
 The semantics will let us find dependency information, and the type 
-system most approximate these semantic notions.
+system must approximate these semantic notions.
 
 %As locations do not appear at the level of the type system, we
 %introduce the notion of a type base. This is a partitioning of the
@@ -629,33 +638,39 @@ We also assume an ordering of program points at type level.
 	We say that $\Pi$ is a partial order if $\sqleq_\Pi$ is a partial order.
 \end{definition}
 
-The notion of the immediate predecessor of a $u$ at type level is
-relative to a type environment $\Gamma$ and the approximated order
-$\Pi$. Since we do not have locations at the level of the type system,
-$u$ will now be either a variable or an internal variable.
+The notion of the immediate predecessor of a $u\in\cat{IVar} \cup \cat{Var}$ at the type level is relative to a type environment $\Gamma$ and the approximated order $\Pi$.
 
 \begin{definition}[Immediate predecessor at type level]\label{def:GBindPi}
-	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or
-        internal variable, $\Gamma$ be a type environment, and $\Pi$
-        be the approximated order of program points that is a partial
-        order, then $\uf_{\sqleq_\Pi}$ is given by: 
-	\[ \uf_{\sqleq_\Pi}(u,\Gamma)=\inf\{u^p\in
+	%Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or
+        %internal variable, $\Gamma$ be a type environment, and $\Pi$
+        %be the approximated order of program points that is a partial
+        %order, then $\uf_{\sqleq_\Pi}$ is given by: 
+	\[ \IP_{\sqleq_\Pi}(u,\Gamma)=\inf\{u^p\in
           dom(\Gamma)\mid u^q\in dom(\Gamma).q\sqleq_\Pi p\} \]
 \end{definition}
 
-We need to be able to explain from which other elements in a
-computation, an element $u^p$ obtained its value at $p$. Since our
-fragment of ReScript contains conditional expressions in the form of
-pattern matching, we need to express the different paths of evaluation
-that may arise -- where each pattern in the pattern matching construct
-introduces a new path).
-
+A lookup of variable $u^p$ in the semantics is straightforward as it only have a single value.
+In the type system, however, we need to approximate over all possible branches in an occurrence.
 To this end, we consider chains wrt. our approximate order. 
 A $p$-chain describes the history behind an occurrence $u^p$, and can
 thus be used to describe what an internal variable depends on. 
 
+%In the type system, we do not have this luxary, as the language has pattern matching, where each pattern introduces a new branch.
+%To handle this, we need to approximate for all possible branches (what we also call paths) an evaluation can take.
+
+%We need to be able to explain from which other elements in a
+%computation, an element $u^p$ obtained its value at $p$. Since our
+%fragment of ReScript contains conditional expressions in the form of
+%pattern matching, we need to express the different paths of evaluation
+%that may arise -- where each pattern in the pattern matching construct
+%introduces a new path).
+
+%To this end, we consider chains wrt. our approximate order. 
+%A $p$-chain describes the history behind an occurrence $u^p$, and can
+%thus be used to describe what an internal variable depends on. 
+
 \begin{definition}[$p$-chains]
-	Let $\Pi$ be an approximated order of program points, that is a partial order, and $p$ be a program point.
+	%Let $\Pi$ be an approximated order of program points, that is a partial order, and $p$ be a program point.
 A $p$-chain, denoted as $\Pi_p^{*}$, is a maximal chain
 wrt. $\sqleq_\Pi$ whose maximal element is $p$. We write
 $\Pi_p^{*}\in\Pi$, if $\Pi_p^{*}$ is a $\Pi$-chain.
@@ -668,9 +683,10 @@ $\Pi$.
 % contain any pairs $(p,q)\in\sqleq_\Pi$, where $p\neq q$, then
 % $(p,q)\notin\sqleq_{\Pi_p^{*}}$.
 
-We can now define what it means to be an immediate predecessor
-wrt. the set of $p$-chains. This immediate predecesor is found as the
-union of the immediate predecessors of $u$.
+We can now define the immediate predecesor for the type system wrt. the set of $p$-chains.
+This is done by taking the union of all $p$-chains for an occurrence $u^p$.
+%We can now define what it means to be an immediate predecessor wrt. the set of $p$-chains.
+%This immediate predecesor is found as the union of the immediate predecessors of $u$.
 
 \begin{definition}\label{def:GBindUps}
 	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Upsilon_p$ be a set of $p$-chains, then $\uf_{\Upsilon_p}$ is given by:
@@ -694,23 +710,27 @@ points $\Pi$.
 A highlight of type rules can be found in \cref{fig:TypeSys}.
 
 \begin{description}
-	\item[\runa{T-Const}] rule, for occurrence $c^p$, is the simplest type rule, as there is nothing to track for constants, and as such it has the type $(\emptyset,\emptyset)$.
+	%\item[\runa{T-Const}] rule, for occurrence $c^p$, is the simplest type rule, as there is nothing to track for constants, and as such it has the type $(\emptyset,\emptyset)$.
 
-	\item[\runa{T-Var}] rule, for occurrence $x^p$, looks up the type for $x$ in the type environment, by finding the greatest binding using \cref{def:GBindPi}, and add the occurrence $x^p$ to the type.
+	\item[\runa{T-Var}] rule, for occurrence $x^p$, looks up the type for $x$ in the type environment, by finding the greatest binding using \cref{def:GBindPi}, and adding the occurrence $x^p$ to the type.
 
-	\item[\runa{T-Let-1}] rule, for occurrence $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^p$, creates a local binding for a variable, with the type of $e_1^{p_1}$ that can be used in $e_2^{p_2}$.
-		The \runa{T-Let-1} rule assumes that the type of $e_1^{p_1}$ is a base type with alias information, i.e., $\kappa\neq\emptyset$.
-		If this is the case, then $e_1^{p_1}$ must evaluate to a location, in the semantics.
+	\item[\runa{T-Let-1}] rule, for occurrence $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^p$, creates a local binding for an internal variable, with the type of $e_1^{p_1}$ that can be used in $e_2^{p_2}$.
+     As such, the rule assumes that the type of $e_1^{p_1}$ is a base type with alias information, i.e., $\kappa\neq\emptyset$.
+		%The \runa{T-Let-1} rule assumes that the type of $e_1^{p_1}$ is a base type with alias information, i.e., $\kappa\neq\emptyset$.
+		%If this is the case, then $e_1^{p_1}$ must evaluate to a location, in the semantics.
 		The other cases, when $e_1^{p_1}$ is not a base type with alias information, are handled by the \runa{T-Let-2} rule.
-		Since a pattern can be a variable, we updates the type environment with the type of $e^p$.
+		%Since a pattern can be a variable, we updates the type environment with the type of $e^p$.
 
 	\item[\runa{T-Case}] rule, for occurrence $[\mbox{case}\;e^{p}\;\vec{\pi}\;\vec{o}]^{p'}$, is an over-approximation of all cases in the pattern matching expression, by taking an union of the type of each case.
 		Since the type of $e^p$ is used to evaluate the pattern matching, we also add this type to the type of the pattern matching.
 
 	\item[\runa{T-Ref-read}] rule, for occurrence $[!e^{p}]^{p'}$, is used to retrieve the type of references, where $e^p$ must be a base type with alias information.
-		Since the type system is an over-approximation, there can be multiple internal variables in $\kappa$ and multiple occurrences we need to read from.
-		As such we need to lookup for all internal variables and also possible for multiple program points.
-		As such, we use the $uf_{Upsilon_{p'}}$ to lookup for all $p'$-chains.
+     Since the language contains pattern matching, there can be multiple internal variables in $\kappa$ and multiple occurrences to read from.
+     To do the lookup, we use $IP_{\Upsilon_{p'}}$ to look up all the $p'$-chains.
+     %As such, we need to lookup for all the possible internal variables and program points, where we use $ip_{\Upsilon_{p'}}$ to look them up.
+		%Since the type system is an over-approximation, there can be multiple internal variables in $\kappa$ and multiple occurrences we need to read from.
+		%As such we need to lookup for all internal variables and also possible for multiple program points.
+		%As such, we use the $uf_{Upsilon_{p'}}$ to lookup for all $p'$-chains.
 \end{description}
 
 % \begin{example}[Data-flow for abstractions]
