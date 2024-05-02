@@ -1165,11 +1165,22 @@ subset of ReScript that includes functional as well as imperative
 feature, notably that of references.
 
 The type system provides a safe approximation of the data flow in an
-expression. However, the system contains slack. In particular, the
-type system is monomorphic. This means that a locally declared
-abstraction can cannot be used at multiple places, as this would mean
-it would contain occurrences at multiple program points. Moreover,
-abstractions cannot be bound to references.
+expression. This also allows us to reason about security
+properties. In particular, the notion of non-interference introduced
+by Goguen and Meseguer \cite{goguen-meseguer} and studied in information-flow analysis can be
+understood in this setting. A program satisfies the non-interference
+property if the variables classified as \emph{low} cannot be affected
+by variables classified as \emph{high}. This corresponds to the
+absence of chains in $\Pi$ in which low occurrences appear below high
+occurrences. A topic of further work is to understand the relative
+expressive power of our system wrt. the systems of Volpano and Smith
+\cite{volpano-smith-96,volpano-smith-97}.
+
+On the other hand, the system contains slack. In particular, the type
+system is monomorphic. This means that a locally declared abstraction
+cannot be used at multiple places, even though this may be safe, as
+this would mean it would contain occurrences at multiple program
+points. Moreover, abstractions cannot be bound to references.
 
 Polymorphism for the base type $(\delta,\kappa)$ would allow 
 abstractions to be used multiple times in an occurrence. Consider as
@@ -1183,10 +1194,12 @@ Occurrences such as this would now become typable,
 since when typing the applications, the type of the argument changes,
 since the occurrence $x^4$ is present in the second application. 
 
-
 References are defined currently in the type system, they cannot be bound to abstractions.
-Moreover, if different references had different types, e.g., if it had an abstraction type at one point and a base type at another point.
-Here, either we should require references to always have the same type, e.g., with base type polymorphism.
+Moreover, if different references had different types, e.g., if it had
+an abstraction type at one point and a base type at another point. 
+Here, either we should require references to always have the same
+type, e.g., with base type polymorphism.
+
 Consider the following occurrence:
 \begin{lstlisting}[language=Caml, mathescape=true]
 ((!(case 1 (1$^1$) (let z 5$^2$ (ref ($\lambda$ y.(PLUS z$^3$ y$^4$)$^5$)$^6$))$^7$)$^8$)$^9$ 5)$^{10}$
