@@ -275,13 +275,13 @@ dependency function and the binary relation are used to define the
 flow of information. As illustrated by \cref{ex:depRel}, we need to
 lookup the greatest of $\sqleq_w$. 
 
-The immediate predecessor $\uf(u,S)$ of an element $u^p$ wrt. a set of
+The immediate predecessor $\IP(u,S)$ of an element $u^p$ wrt. a set of
 occurrences $S$ is the most recent $u$-element in $S$ seen before $u$. 
 
 \begin{definition}[Immediate predecessor]\label{def:GBind}
   Let $u$ be an element, let \sqleq\ be an ordering on program points
-  and $S$ be a set of occurrences, then $\uf(u,S)$ is given by
-\[ \uf(u^p,S)=\inf\{u^q\in S\mid q\sqleq p\} \]
+  and $S$ be a set of occurrences, then $\IP(u,S)$ is given by
+\[ \IP(u^p,S)=\inf\{u^q\in S\mid q\sqleq p\} \]
 \end{definition}
 
 Based on \cref{def:GBind}, we can present an instantiation of the
@@ -290,8 +290,8 @@ $\sqleq_w$:
 
 \begin{definition}
   Let $w$ be a dependency function, $\sqleq_w$ be the induced order,
-  and $u$ be an element, then $\uf_{\sqleq_w}$ is given by:
-	$$\uf_{\sqleq_w}(u,w)=\inf\{u^p\in dom(w)\mid u^q\in dom(w).q\sqleq_w p\}$$
+  and $u$ be an element, then $\IP_{\sqleq_w}$ is given by:
+	$$\IP_{\sqleq_w}(u,w)=\inf\{u^p\in dom(w)\mid u^q\in dom(w).q\sqleq_w p\}$$
 \end{definition}
 
 
@@ -299,13 +299,13 @@ $\sqleq_w$:
   As a continuation of \cref{ex:depRel}, we can now find the greatest
   element for an element, e.g., a variable or location.  As we were
   interested in finding the greatest bindings a location is bound to
-  in $w_ex$, we use the function $\uf_{\sqleq_w}$:
-	\[ \uf_{\sqleq_{w_ex}}(\loc,w_ex)=\inf\{\loc^p\in dom(w)\mid
+  in $w_ex$, we use the function $\IP_{\sqleq_w}$:
+	\[ \IP_{\sqleq_{w_ex}}(\loc,w_ex)=\inf\{\loc^p\in dom(w)\mid
           \loc^q\in dom(w). q\sqleq_{w_ex} p\} \]
 where the set we get for $\loc$ is 
 $\{\loc^2,\loc^8\}$. From this, we find the greatest element: 
 	\[ \loc^7=\inf\{\loc^2,\loc^8\} \]
-	As we can see, from the $\uf_{w_ex}$ function, we got $\loc^8$ which were the occurrence we wanted.
+	As we can see, from the $\IP_{w_ex}$ function, we got $\loc^8$ which were the occurrence we wanted.
 \end{example}
 
 \subsection{Collection semantics}\label{sec:sem}
@@ -329,7 +329,7 @@ A selection of the rules for $\rightarrow$ can be found in
 \cref{fig:ColSem}.
 
 The \runa{Var} rule  uses the environment to get the value $x$ is bound to and uses dependency function $w$ to get its dependencies.
-		To lookup the dependencies, the function $\uf_{\sqleq_w}$ is used to get the greatest binding a variable is bound to, in respect to the ordering $\sqleq_w$.
+		To lookup the dependencies, the function $\IP_{\sqleq_w}$ is used to get the greatest binding a variable is bound to, in respect to the ordering $\sqleq_w$.
 		Since the occurrence of $x$ is used, it is added to the set of variable occurrences we got from the lookup of the dependencies for $x$.
 
 The \runa{Let} rule for the occurrence $[\mbox{let}\;x\;e_1^{p_1}\;e_2^{p_2}]^{p'}$, creates a local binding that can be used in $e_2^{p_2}$.
@@ -345,7 +345,7 @@ the body $e^{p'}$ in $w$ at the program point $p''$.
 must be a location $\loc$, and reads the value of $\loc$ in the store.
 		The \runa{Ref-read} rule looks up the dependencies for
                 $\loc$ in $w$.
-		As there could be multiple bindings for $\loc$, in $w$, at different program points, we use the $\uf_{\sqleq_{w'}}$ function to get greatest binding of $\loc$ with respect to the ordering $\sqleq_{w'}$, 
+		As there could be multiple bindings for $\loc$, in $w$, at different program points, we use the $\IP_{\sqleq_{w'}}$ function to get greatest binding of $\loc$ with respect to the ordering $\sqleq_{w'}$, 
 		and we also add the location occurrence $\loc^{p'}$ to the set of locations.
 
                 Finally \runa{Ref-write} tells us that we must
@@ -361,11 +361,11 @@ must be a location $\loc$, and reads the value of $\loc$ in the store.
           \runa{Var}\\[0.2cm]
 	\inference[]{}
 	{env\vdash \left\langle x^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqleq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[6mm]
-	where $env(x)=v$, $x^{p''}=\uf_{\sqleq_w}(x,w)$, and
+	where $env(x)=v$, $x^{p''}=\IP_{\sqleq_w}(x,w)$, and
           $w(x^{p''})=(L,V)$ \\[4mm]
 	\inference[]{}
 	{env\vdash \left\langle x^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqleq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[6mm]
-	where $env(x)=v$, $x^{p''}=\uf_{\sqleq_w}(x,w)$, and $w(x^{p''})=(L,V)$
+	where $env(x)=v$, $x^{p''}=\IP_{\sqleq_w}(x,w)$, and $w(x^{p''})=(L,V)$
           \\[4mm]
                     \runa{Let}\\[0.2cm]
 	\inference[]
@@ -387,7 +387,7 @@ must be a location $\loc$, and reads the value of $\loc$ in the store.
 	{env \vdash \left\langle e^{p_1},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle \loc,sto',(w',\sqleq_w'),(L_1,V_1),p_1 \right\rangle}
 	{env\vdash \left\langle \left[!e^{p_1}\right]^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle v,sto',(w',\sqleq_w'),(L\cup L_1\cup\{\loc^{p''}\},V\cup V_1),p' \right\rangle}\\[6mm]
 	where $sto'(\loc)=v$,
-          $\loc^{p''}=\uf_{\sqleq_w'}(\loc,w')$, and
+          $\loc^{p''}=\IP_{\sqleq_w'}(\loc,w')$, and
           $w'(\loc^{p''})=(L,V)$ \\[4mm]
 \runa{Ref-write}\\
 	\inference[]
@@ -472,8 +472,10 @@ When a set of variables and internal variables are in the same set, in a partiti
 %variables and internal variables in the same set within the partition
 %as sharing a location.
 
-In this paper, we will not introduce polymorphism into the type system.
-As such we will introduce the constraints that references cannot be bound to abstractions and every abstractions can at most be used once.
+In this paper, we will not introduce polymorphism into the type
+system.  As such we will introduce the constraints that references
+cannot be bound to abstractions and every abstraction can at most be
+used once.
 %We also impose the constraint on the type system that references
 %cannot be bound to abstractions. Since we do not introduce
 %polymorphism into our type system, every abstraction is affine -- it
@@ -505,7 +507,7 @@ and $\kappa$ represents alias information in the form of the set of variables an
 If an occurrence has type $\kappa \neq \emptyset$,
 the occurrence must represent a location.
 
-\begin{definition}[Type Base for aliasing]
+\begin{definition}[Type base for aliasing]
 	For an occurrence $o$, let $\cat{Var}_o$ be the set of all
         variables found in $o$ and $\cat{IVar}_o$ be the set of all
         internal variables found in $o$.
@@ -513,8 +515,11 @@ the occurrence must represent a location.
         then a partition of $\cat{Var}_o \cup \cat{IVar}_o$, where
         $\kappa_i^0\cap\kappa_j^0=\emptyset$ for all $i\neq j$. 
 \end{definition}
-For a variable, $x$ to be an alias of an internal variable, $\nu y$, then there must exists a $\kappa^0_i$ where $x \in \kappa^0_i$ and $\nu y \in \kappa^0_i$.
-As such, there can only be multiple variable in a $\kappa^0_i$, if there also exists an internal variable in $\kappa^0_i$.
+For a variable, $x$ to be an alias of an internal variable, $\nu y$,
+there must exist a $\kappa^0_i$ where $x \in \kappa^0_i$ and $\nu y
+\in \kappa^0_i$. 
+As such, there can only be multiple variables in a $\kappa^0_i$, if
+there also exists an internal variable in $\kappa^0_i$. 
 
 %This partition represents the assumption about which variables are
 %an alias to internal variables: If $x \in \kappa^0_1$ and
@@ -524,8 +529,8 @@ As such, there can only be multiple variable in a $\kappa^0_i$, if there also ex
 %$\kappa_0^i$. 
 
 The arrow type is introduced to type abstractions.
-If either $T_1$ or $T_2$, in an arrow type, is a base type where $\kappa \neq \emptyset$,
-then the abstraction must either take a reference as input or returns a reference.
+If either $T_1$ or $T_2$ in an arrow type $T_1 \to T_2$ is a base type where $\kappa \neq \emptyset$,
+then the abstraction must either take a reference as input or return a reference.
 
 %In order to be able to type functions, we introduce arrow types
 %$T_1 \rightarrow T_2$. If an occurrence has the
@@ -646,16 +651,17 @@ The notion of the immediate predecessor of a $u\in\cat{IVar} \cup \cat{Var}$ at 
 	%Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or
         %internal variable, $\Gamma$ be a type environment, and $\Pi$
         %be the approximated order of program points that is a partial
-        %order, then $\uf_{\sqleq_\Pi}$ is given by: 
+        %order, then $\IP_{\sqleq_\Pi}$ is given by: 
 	\[ \IP_{\sqleq_\Pi}(u,\Gamma)=\inf\{u^p\in
           dom(\Gamma)\mid u^q\in dom(\Gamma).q\sqleq_\Pi p\} \]
 \end{definition}
 
-A lookup of variable $u^p$ in the semantics is straightforward as it only have a single value.
-In the type system, however, we need to approximate over all possible branches in an occurrence.
-To this end, we consider chains wrt. our approximate order. 
-A $p$-chain describes the history behind an occurrence $u^p$, and can
-thus be used to describe what an internal variable depends on. 
+A lookup of variable $u^p$ in the semantics is straightforward as its
+value will be unique. In the type system, however, we need to
+approximate over all possible branches in an occurrence.  To this end,
+we consider chains wrt. our approximate order.  A $p$-chain describes
+the history behind an occurrence $u^p$, and can thus be used to
+describe what an internal variable depends on.
 
 %In the type system, we do not have this luxary, as the language has pattern matching, where each pattern introduces a new branch.
 %To handle this, we need to approximate for all possible branches (what we also call paths) an evaluation can take.
@@ -673,12 +679,10 @@ thus be used to describe what an internal variable depends on.
 
 \begin{definition}[$p$-chains]
 	%Let $\Pi$ be an approximated order of program points, that is a partial order, and $p$ be a program point.
-A $p$-chain, denoted as $\Pi_p^{*}$, is a maximal chain
-wrt. $\sqleq_\Pi$ whose maximal element is $p$. We write
-$\Pi_p^{*}\in\Pi$, if $\Pi_p^{*}$ is a $\Pi$-chain.
-
-For any $p$, we let $\Upsilon_p$ denote the set of all $p$-chains in
-$\Pi$.
+  A $p$-chain, denoted as $\Pi_p^{*}$, is a maximal chain
+  wrt. $\sqleq_\Pi$ whose maximal element is $p$. We write
+  $\Pi_p^{*}\in\Pi$, if $\Pi_p^{*}$ is a $\Pi$-chain. For any $p$, we
+  let $\Upsilon_p$ denote the set of all $p$-chains in $\Pi$.
 \end{definition}
 
 % A $p$-chain is a total order, where $\Pi_p^{*}$ does not
@@ -691,9 +695,9 @@ This is done by taking the union of all $p$-chains for an occurrence $u^p$.
 %This immediate predecesor is found as the union of the immediate predecessors of $u$.
 
 \begin{definition}\label{def:GBindUps}
-	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Upsilon_p$ be a set of $p$-chains, then $\uf_{\Upsilon_p}$ is given by:
+	Let $u\in \cat{Var}\cup\cat{IVar}$, be either a variable or internal variable, $\Gamma$ be a type environment, and $\Upsilon_p$ be a set of $p$-chains, then $\IP_{\Upsilon_p}$ is given by:
 \[
-  \uf_{\Upsilon_p}(u,\Gamma)=\bigcup_{\Pi_p^{*}\in\Upsilon_p}\uf_{\Pi_p^{*}}(u,\Gamma) \]
+  \IP_{\Upsilon_p}(u,\Gamma)=\bigcup_{\Pi_p^{*}\in\Upsilon_p}\IP_{\Pi_p^{*}}(u,\Gamma) \]
 \end{definition}
 
 
@@ -1038,8 +1042,8 @@ type.
 		\item \label{prop:5} if $p_1\sqleq_w p_2$ then $p_1\sqleq_\Pi p_2$
 	\item \label{prop:6} $\forall \loc^p\in dom(w).\exists \nu
           x^p\in dom(\Gamma)\Rightarrow\exists
-          p'\in\cat{P}.\uf_{\sqleq_w}(\loc,w)\in
-          \uf_{\Upsilon_{p'}}(\nu x,\Gamma)$ 
+          p'\in\cat{P}.\IP_{\sqleq_w}(\loc,w)\in
+          \IP_{\Upsilon_{p'}}(\nu x,\Gamma)$ 
 	\end{enumerate}
 \end{definition}
 
