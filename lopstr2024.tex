@@ -663,9 +663,11 @@ The notion of the immediate predecessor of a $u\in\cat{IVar} \cup \cat{Var}$ at 
 A lookup of variable $u^p$ in the semantics is straightforward as its
 value will be unique. In the type system, however, we need to
 approximate over all possible branches in an occurrence.  To this end,
-we consider chains wrt. our approximate order.  A $p$-chain describes
-the history behind an occurrence $u^p$, and can thus be used to
-describe what an internal variable depends on.
+we consider chains wrt. our approximate order. A $p$-chain describes
+the history, or a single possible evalution, behind an occurrence $u^p$.
+A set of $p$-chains can thus be used to describe what an internal variable depends on.
+
+%and can thus be used to describe what an internal variable depends on.
 
 %In the type system, we do not have this luxary, as the language has pattern matching, where each pattern introduces a new branch.
 %To handle this, we need to approximate for all possible branches (what we also call paths) an evaluation can take.
@@ -805,10 +807,10 @@ A highlight of type rules can be found in \cref{fig:TypeSys}.
                    % {a}}
 	{where $\left\{\begin{array}{l}\kappa\neq\emptyset$, $\delta'=\{\nu x^{p'}\mid\nu x\in\kappa\}$, $\nu x_1,\cdots,\nu x_n\in\kappa\\ 
 	\{\nu x_1^{p_1},\cdots,\nu x_1^{p_m}\}=uf_{\Upsilon_{p'}}(\nu
-                  x_1,\Gamma),\cdots,\{\nu x_n^{p_1'},\cdots,\nu
+                  x_1,\Gamma),\cdots,\\ \quad\{\nu x_n^{p_1'},\cdots,\nu
                   x_n^{p_s'}\}=uf_{\Upsilon_{p'}}(\nu x_n,\Gamma) \\
 	T=\Gamma(\nu x_1^{p_1})\cup\cdots\cup\Gamma(\nu
-                         x_1^{p_m})\cup\cdots\cup\Gamma(\nu
+                         x_1^{p_m})\cup\cdots\cup\\ \quad\Gamma(\nu
                          x_n^{p_1'})\cup\cdots\cup\Gamma(\nu
                          x_n^{p_s'})\end{array}\right\}$}
           \\
@@ -1196,20 +1198,28 @@ an example
 
 Occurrences such as this would now become typable,
 since when typing the applications, the type of the argument changes,
-since the occurrence $x^4$ is present in the second application. 
+as the occurrence $x^4$ is present in the second application. 
 
-References are defined currently in the type system, they cannot be bound to abstractions.
-Moreover, if different references had different types, e.g., if it had
-an abstraction type at one point and a base type at another point. 
-Here, either we should require references to always have the same
-type, e.g., with base type polymorphism.
+The way references are defined currently in the type system, they cannot be bound to abstractions.
+If this should be introduced a couple of questions need to be evaluated.
+First there should be looked into base type polymorphism, the second
+would be to look into type polymorphism, i.e., allow a reference to be bound to
+an arrow type at one point and a base type at another.
 
-Consider the following occurrence:
-\begin{lstlisting}[language=Caml, mathescape=true]
-((!(case 1 (1$^1$) (let z 5$^2$ (ref ($\lambda$ y.(PLUS z$^3$ y$^4$)$^5$)$^6$))$^7$)$^8$)$^9$ 5)$^{10}$
-\end{lstlisting}
-This occurrence would create a reference to a local abstraction which depends on the locally declared variable $z$ before reading from the reference and applying the constant to it.
-In the semantics, the environment would be added to the abstraction closure, and when evaluating the body of the abstraction, in an application, it would use the environment in the closure.
+%Moreover, if a reference had different types, e.g., if it had
+%an abstraction type at one point and a base type at another point, we should
+%either require references to always have the same type, e.g., with base type polymorphism.
+
+%Here, either we should require references to always have the same
+%type, e.g., with base type polymorphism.
+
+%For the base type polymorphism consider the following occurrence:
+%Consider the following occurrence:
+%\begin{lstlisting}[language=Caml, mathescape=true]
+%((!(case 1 (1$^1$) (let z 5$^2$ (ref ($\lambda$ y.(PLUS z$^3$ y$^4$)$^5$)$^6$))$^7$)$^8$)$^9$ 5)$^{10}$
+%\end{lstlisting}
+%This occurrence would create a reference to a local abstraction which depends on the locally declared variable $z$ before reading from the reference and applying the constant to it.
+%In the semantics, the environment would be added to the abstraction closure, and when evaluating the body of the abstraction, in an application, it would use the environment in the closure.
 
 A next step is to devise a type inference algorithm for the type
 system. An inference algorithm must compute an approximated order of
