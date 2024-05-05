@@ -907,7 +907,7 @@ value that is well-typed wrt. $\Gamma$.
 	\end{itemize}
 \end{definition}
 
-\begin{figure}
+\begin{table*}
 	\setlength\tabcolsep{8pt}
 	\begin{tabular}{ll}
 		\runa{Constant} &
@@ -941,7 +941,7 @@ value that is well-typed wrt. $\Gamma$.
 	\end{tabular}
 	\caption{Type rules for values}
 	\label{fig:ValTypeRules}
-\end{figure}
+\end{table*}
 
 \subsection{Notions of agreement}
 
@@ -985,7 +985,7 @@ wrt. a environment $env$.
 	\begin{itemize}
 		\item $\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa$
 		\item $env^{-1}(\loc)\neq\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
-			(env^{-1}(\loc)\subseteq\kappa^0_i)\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\\\nu x\in\kappa^0_i\wedge\nu x\in\kappa)$
+			(env^{-1}(\loc)\subseteq\kappa^0_i)\wedge(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i\wedge\nu x\in\kappa)$
 		\item $env^{-1}(\loc)=\emptyset.\exists \kappa^0_i\in\kappa^0\Rightarrow
 			(\exists \loc^p\in dom(w).\nu x^p\in dom(\Gamma)\Rightarrow\nu x\in\kappa^0_i\wedge\nu x\in\kappa)$
 	\end{itemize}
@@ -1045,8 +1045,8 @@ type.
 	\begin{enumerate}
 		\item \label{prop:1} $\forall x\in dom(env).(\exists x^p\in dom(w))\wedge(x^p\in dom(w)\Rightarrow \exists x^p\in dom(\Gamma))$
 		\item \label{prop:2} $\forall x^p\in dom(w).x^p\in dom(\Gamma)\Rightarrow env(x)=v\wedge w(x^p)=(L,V)\wedge\Gamma(x^p)=T.\\(env,v,(w,\sqleq_w),(L,V))\models (\Gamma,T)$
-		\item \label{prop:3} $\forall \loc\in dom(sto).(\exists \loc^p\in dom(w))\wedge(\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}\Rightarrow\nu x^p\in dom(\Gamma))$
-		\item \label{prop:4} $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=T.(env,\loc,(w,\sqleq_w),(L,V))\models T$
+		\item \label{prop:3} $\forall \loc\in dom(sto).(\exists \loc^p\in dom(w))\wedge(\exists \nu x.\forall p\in\{p'\mid\loc^{p'}\in dom(w)\}\Rightarrow\\\nu x^p\in dom(\Gamma))$
+		\item \label{prop:4} $\forall \loc^p \in dom(w).\exists\nu x^{p}\in dom(\Gamma)\Rightarrow w(\loc^p)=(L,V)\wedge\Gamma(\nu x^{p})=\\T.(env,\loc,(w,\sqleq_w),(L,V))\models T$
 		\item \label{prop:5} if $p_1\sqleq_w p_2$ then $p_1\sqleq_\Pi p_2$
 	\item \label{prop:6} $\forall \loc^p\in dom(w).\exists \nu
           x^p\in dom(\Gamma)\Rightarrow\exists
@@ -1094,10 +1094,10 @@ type.
 	\eqref{prop:5} ensures that the ordering information
         $\sqleq_w$ agrees with that of $\Pi$.
 
-	We finally need to ensure that for every location
+   \item We finally need to ensure that for every location
         known, there exists a corresponding internal variable
         where, getting the greatest binding of this occurrence,
-        $\loc^p$, then there exists a program point $p'$, such that
+        $\loc^p$, there exists a program point $p'$, such that
         looking up all greatest bindings for the $p'$-chain, there
         exists an internal variable occurrence that corresponds to
         $\loc^p$. This is captured by \eqref{prop:6}.
