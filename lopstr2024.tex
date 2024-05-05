@@ -44,19 +44,19 @@ the program and to compute a solution using an iterative algorithm
 \cite{KildallGaryA1973Auat,RyderBarbara1988Idaa}. Other graph-free
 approaches have also been considered
 \cite{HorspoolR.Niegel2002AGAt}. A challenge in this setting is how to
-deal with aliasing.
+deal with the aliasing that imperative language constructs introduce.
 
 Type systems have often been used to provide static analyses of
-programs in order to characterize specific run-time errors, and for
-languages with imperative features, the treatment of aliasing becomes
-particularly important. In \cite{10.1007/3-540-46425-5_24} Smith et
+programs in order to characterize specific run-time errors, including
+ones caused by aliasing. In \cite{10.1007/3-540-46425-5_24} Smith et
 al. present a notion of alias types that allows functions to specify
 the shape of a store and to track the flow of pointers through a
-computation. The language is a simple location-based language. Later,
-Ahmed et al. \cite{DBLP:conf/tlca/MorrisettAF05} uses a language
-based on a linear $\lambda$-calculus to give an alternative
-formulation of alias types. The type system relies on linearity, and
-every well-typed program terminates.
+computation. The language is a simple location-based language. Other
+type systems are substructural. Ahmed et
+al. \cite{DBLP:conf/tlca/MorrisettAF05} use a language based on a
+linear $\lambda$-calculus to give an alternative formulation of alias
+types. The type system crucially relies on linearity, and every
+well-typed program terminates.
 
 In this paper we present a type system for data flow analysis in the
 presence of aliasing for a non-trivial fragment of the programming
@@ -70,7 +70,9 @@ writing,
 The fragment that we study incorporates both functional and imperative
 features. We show that the type system is sound in the sense that
 it correctly overapproximates the set of occurrences on which any
-given occurrence depends.
+given occurrence depends. Moreover, the dependency information that
+the type system provides can also be used to reason about information
+flow properties such as non-interference.
 
 \section{A fragment of ReScript}\label{sec:lang}
 
