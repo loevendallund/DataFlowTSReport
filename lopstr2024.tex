@@ -37,13 +37,13 @@
 \section{Introduction}
 
 The goal of data-flow analysis is to provide a static analysis of the
-flow information of in a program that can be used in compiler
+flow information in a program that can be used in compiler
 optimizations and for register allocation. The original approach is to
 build a system of flow equations based on a graph representation of
 the program and to compute a solution using an iterative algorithm
 \cite{KildallGaryA1973Auat,RyderBarbara1988Idaa}. Other graph-free
 approaches have also been considered
-\cite{HorspoolR.Niegel2002AGAt}. A challenge is this setting is how to
+\cite{HorspoolR.Niegel2002AGAt}. A challenge in this setting is how to
 deal with aliasing.
 
 Type systems have often been used to provide static analyses of
@@ -53,7 +53,7 @@ particularly important. In \cite{10.1007/3-540-46425-5_24} Smith et
 al. present a notion of alias types that allows functions to specify
 the shape of a store and to track the flow of pointers through a
 computation. The language is a simple location-based language. Later,
-Ahmed et al. \cite{DBLP:conf/tlca/MorrisettAF05} use a language s
+Ahmed et al. \cite{DBLP:conf/tlca/MorrisettAF05} uses a language
 based on a linear $\lambda$-calculus to give an alternative
 formulation of alias types. The type system relies on linearity, and
 every well-typed program terminates.
@@ -89,7 +89,7 @@ Every subexpression is labelled with a unique \emph{program
 expressions $e^p$ where $e \in \cat{Exp}$ and $p \in \cat{P}$.We let
 $\ell$ range over set set of locations $\cat{Loc}$ and $x,f$ range
 over the set of variables $\cat{Var}$.  An occurrence is \emph{atomic}
-if it of the form $u^p$ where $u \in \cat{Var} \cup \cat{Loc}$. If
+if it is of the form $u^p$ where $u \in \cat{Var} \cup \cat{Loc}$. If
 $u^p$ is atomic, we call any other occurrence $u^q$ a
 \emph{$u$-occurrence}.
 
@@ -113,29 +113,28 @@ e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o \mid c \; o_1 \; o_2\\
 %
 $\lambda\;x.o$ denotes an \emph{abstraction} with a parameter $x$ and
 body $o$.  \emph{Constants} $c$ are either natural numbers $n$,
-boolean values $b$, unit value $()$, or functional constants.  such as
+boolean values $b$, unit value $()$, or functional constants, such as
 the arithmetic operations and the Boolean connectives.
 
 $o_1\;o_2$ denotes an \emph{application}, and $c\;o_1\;o_2$ denotes a
 \emph{functional application} where $c$ is a functional constant and
 $o_1$, $o_2$ are its arguments.
 
-\emph{Local declarations} $\mbox{let} \; x \; o_1 \; o_2$ and
-$\mbox{let rec} \; f \; o_1 \; o_2$ are immutable bindings that
-associate the variable $x$ with the value $o_1$ within $o_2$. The latter
-form is recursive; $x$ may occur in $o_1$. Mutability
+$\mbox{let} \; x \; o_1 \; o_2$ and $\mbox{let rec} \; f \; o_1 \; o_2$
+denotes immutable bindings that associate the variable $x$ with the value $o_1$ within $o_2$. 
+The latter form is recursive; $x$ may occur in $o_1$. Mutability
 in ReScript is introduced using the \emph{reference} construct
 $\mbox{ref\;o}$. This construct creates a reference in the form of a
 location and allows for binding locations to local declarations. We
-can read from a reference for $o$ by writing $!o$ and write to a
+can read from a reference $o$ by writing $!o$ and write to a
 reference using the assignment construct $o_1\;:=\;o_2$. 
 
-\emph{Pattern matching} $\mbox{case} \; o_1 \; \vec{\pi} \; \vec{o}$,
+$\mbox{case} \; o_1 \; \vec{\pi} \; \vec{o}$ denotes pattern matching, that
 matches an occurrence with the ordered set, $\vec{\pi}$, of patterns.
 We denote the size of the tuple pattern $\pi$ by $|\vec{\pi}|$ and the
 size of a tuple occurrence by $|\vec{o}|$, requiring that
 $|\vec{\pi}| = |\vec{o}|$ such that for each pattern in $\vec{\pi}$
-there is clause in $\vec{o}$.
+there is a clause in $\vec{o}$.
 
 We assume that all bindings bind distinct names; this can be ensured
 by means of $\alpha$-conversion. The notions of free and bound
@@ -149,29 +148,34 @@ Consider
      (x$^5$:=z$^7$)$^8$)$^{9}$ (!x)$^{10}$)$^{11}$)$^{12}$
 \end{lstlisting}
 This creates a reference to the constant 3 and binds the reference to
-$x$ (so $x$ is an alias of this reference). Next a binding for $y$ is
-made and after that a binding of $z$ to the constant 5 before writing
-to the reference, that $x$ is bound to, to the value that $z$ is bound
-to.  Finally the reference that $x$ is bound to is read. We expect to
-retrieve the value $5$.
+$x$ (so $x$ is an alias of this reference). Next a binding of $z$ is made
+to the constant 5 before writing to the reference, that $x$ is bound to, 
+to the value that $z$ is bound to. Then a binding for $y$ is made to the unit value,
+as the write construct evaluates to the unit value. Lastly the reference, that $x$ is bound to, is read.
+
+%Next a binding for $y$ is made
+%and after that a binding of $z$ to the constant 5 before writing
+%to the reference, that $x$ is bound to, to the value that $z$ is bound
+%to. Finally the reference that $x$ is bound to is read. We expect to
+%retrieve the value $5$.
 \end{example}
 
 \subsection{The binding model}\label{sec:EnvSto}
 
 Our binding model uses an environment that keeps
-track of bindings of variables to values. Values are given by the formation rules
+track of the bindings of variables to values. Values are given by the formation rules
 %
 \[ v ::= c \mid \ell \mid () \mid \langle x,e^{p'},env\rangle \mid \langle
   x,f,e^{p''},env\rangle \]
 %
-Constants $c$, locations $\ell$ and unit $()$ are values as are closures, $\langle
+Constants $c$, locations $\ell$, and unit $()$ are values, as are closures, $\langle
 x,e^{p'},env\rangle$ and recursive closures, $\langle x,f,e^{p''},env\rangle$.
 
 An environment $env \in \cat{Env} $ is a partial function $env:
 \cat{Var}\rightharpoonup\cat{Values}$ and we let $env^{-1}(v)=\{x\in dom(env)\mid env(x)=v\}$.
 %
 A store $sto \in \cat{Sto}$ is a partial function
-$\cat{Sto}=\cat{Loc}\cup\{next\}\rightharpoonup\cat{Values}$ where
+$\cat{Sto}=\cat{Loc}\cup\{\nexte\}\rightharpoonup\cat{Values}$ where
 $\nexte$ is a pointer to the next unused location -- this information
 is needed when new locations are needed.
 
@@ -179,7 +183,7 @@ Moreover, we assume a function
 $new:\cat{Loc}\rightarrow\cat{Loc}$, which given, a location, gives us
 the next location.
 
-For any function $f$we let $f[u
+For any function $f$ we let $f[u
 \mapsto w]$ denote the function $f'$ such that $f(u') = f(u)$ for $u
 \neq u'$ and $f'(u') = w$.
 
@@ -205,7 +209,7 @@ $u^p\in\cat{Loc}_{\mathbf{P}}\cup\cat{Var}_{\mathbf{P}}$, the clause
 tells us that the element $u^p$ is bound to a pair of location and
 variable occurrences where $L$ is a set of location occurrences
 $L=\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\}$ and a set of variable
-occurrences $V =\{x_1^{p'_1},\cdots,x_m^{p'_m}\}$., meaning that the
+occurrences $V =\{x_1^{p'_1},\cdots,x_m^{p'_m}\}$, meaning that the
 value of the element $u^p$ depends on the occurrences found in $L$ and
 in $V$.
 
@@ -229,7 +233,7 @@ in $V$.
 By considering \cref{ex:dep}, we would like to read the information
 from the location, that $x$ is an alias to.  As it is visible from the
 occurrence in \cref{ex:write}, we know that we should read from
-$\loc^8$, since we wrote that reference at the program point $8$.
+$\loc^8$, since we wrote to that reference at the program point $8$.
 From $w_{ex}$ alone it is not possible to know which occurrence to
 read, since there is no order defined between the bindings.  We therefore
 introduce a notion of ordering in the form of a binary relation over
@@ -256,7 +260,7 @@ Any dependency function induces an ordering on program points as follows.
 \begin{definition}\label{def:RelPoint}
 	Let $w\in\cat{W}$ be a dependency function.
 	Then the induced order $\sqleq_w$ is given by
-	 \[ \sqleq_w= \{(p,p')\mid p \in \points(dom(w), p' \in
+	 \[ \sqleq_w= \{(p,p')\mid p \in \points(dom(w)), p' \in
            \points(w(p)) \} \]
          	We say that $w$ is a partial order if $\sqleq_w$ is a partial order.
 \end{definition}
@@ -264,7 +268,7 @@ Any dependency function induces an ordering on program points as follows.
 \begin{example}\label{ex:depRel}
 	Consider the example from \cref{ex:dep}. Assume a binary
         relation over the dependency function $w_{ex}$ given by
-	\[ \sqleq_{w_{ex}}=\{(2,4),(2,9),(5,9),(2,8),(8,2)\} \]
+	\[ \sqleq_{w_{ex}}=\{(2,4),(2,9),(5,9),(2,8),(7,8)\} \]
 	From this ordering, it is easy to see the ordering of the elements.
 	The ordering we present also respects the flow the occurrence from \cref{ex:write} would evaluate to.
 	We then know that the dependencies for the reference (that $x$ is an alias to) is for the largest binding of $\loc$.
@@ -304,7 +308,7 @@ $\sqleq_w$:
           \loc^q\in dom(w). q\sqleq_{w_ex} p\} \]
 where the set we get for $\loc$ is 
 $\{\loc^2,\loc^8\}$. From this, we find the greatest element: 
-	\[ \loc^7=\inf\{\loc^2,\loc^8\} \]
+	\[ \loc^8=\inf\{\loc^2,\loc^8\} \]
 	As we can see, from the $\IP_{w_ex}$ function, we got $\loc^8$ which were the occurrence we wanted.
 \end{example}
 
@@ -350,7 +354,7 @@ must be a location $\loc$, and reads the value of $\loc$ in the store.
 
                 Finally \runa{Ref-write} tells us that we must
                 evaluate $e_1^{p_1}$ to a location $\loc$ and
-                $e_2^{p_2}$ to a value $v$, and bind2 $\loc$ in the
+                $e_2^{p_2}$ to a value $v$, and bind $\loc$ in the
                 store $sto$ to the value $v$.  We pass the program
                 point $p'$ and the dependency function
                 is also updated with a new binding for $\loc$.
