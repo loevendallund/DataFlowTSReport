@@ -199,9 +199,8 @@ dependency function that will tell us for each variable and location
 occurrence what other, previous occurrences they depend upon.
 
 \begin{definition}[Dependency function]\label{def:DepFunc}
-	A dependency function $w$ is a 
-        partial functions from location and variable occurrences to a
-        pair of dependencies:
+  A dependency function $w$ is a partial functions from atomic
+  occurrences to a pair of dependencies:
 \[
   w: \cat{Loc}_{\mathbf{P}}\cup\cat{Var}_{\mathbf{P}}\rightharpoonup\Pow{\cat{Loc}_{\mathbf{P}}}\times\Pow{\cat{Var}_{\mathbf{P}}} \] 
 \end{definition}
@@ -440,8 +439,8 @@ Here, we now have two bindings for the parameter $y$, but since we also know tha
 
 \section{A type system for data-flow analysis}\label{sec:TypeSys}
 
-The type system for data-flow analysis is an overapproximation of
-the big-step semantics.
+The type system for data-flow analysis that we now present is an
+overapproximation of the big-step semantics.
 
 \subsection{An overview of the type system}
 
@@ -450,69 +449,32 @@ occurrences given a type environment (presented in
 \cref{sec:Judge}) and a so-called basis (presented in
 \cref{sec:basis}).
 
-%Since the language contains local information as bindings, and global
-%information as locations, the type system must be able to describe
-%this.
-As presented, the language contains local information as bindings and global information as locations.
-Since locations a a notion of the semantics, and references do not need to be bound to variables, we user the notion of \emph{internal} variables to represent locations.
-An internal variable is denoted by $\nu x,\; \nu y\in\cat{IVar}$, where $\cat{IVar}$ is the syntactic category for internal variables.
-To captue the alias information, or "being an alias for", is done by means of a partition set of $\cat{IVar} \cup \cat{Var}$.
-When a set of variables and internal variables are in the same set, in a partition, we say that they share the same location.
-
-%As references do not need to be bound to a variable, and is thus represented by locations.
-%In the type system we do not have semantic notions at our disposal, we instead use the notion of \emph{internal} variables to represent locations.
-%These internal variables are denoted by $\nu x,\; \nu y\in\cat{IVar}$, where $\cat{IVar}$ is the syntactic category for internal variables.
-
-%To capture the concept of "being an alias for", or binding a variable to a reference, is captured by the means of a partition of the set $\cat{IVar} \cup \cat{Var}$.
-%In such a partition, we think of variables and internal variables in the same set within the partition as sharing a location.
-
-
-%Locations are a notion of the semantics and are used to represent
-%references. But since references need not be bound to variables, we
-%must find a way to represent this information in the type system,
-%where we do not have semantic notions at our disposal. In the system
-%we therefore use a notion of \emph{internal} variables to represent
-%them. Internal variables are denoted by $\nu x,\; \nu y\in\cat{IVar}$
-%and \cat{IVar} is the syntactic category for internal variables. The
-%concept of "being an alias for'' we capture by means of a partition of
-%the set $\cat{IVar} \cup \cat{Var}$. In such a partition, we think of
-%variables and internal variables in the same set within the partition
-%as sharing a location.
+As presented, the language contains local information as bindings and
+global information as locations.  Since locations are a semantic
+notion, and references do not need to be bound to variables, we user
+the notion of \emph{internal} variables to represent locations.
+Internal variables are denoted by
+$\nu x,\nu y, \nu z \ldots \in\cat{IVar}$.  We use a partition of
+$\cat{IVar} \cup \cat{Var}$ to represent aliasing.  Whenever variables
+or internal variables belong to the same subset in a partition, the
+intention is that they share the same location.
 
 In this paper, we will not introduce polymorphism into the type
-system.  As such we will introduce the constraints that references
-cannot be bound to abstractions and every abstraction can at most be
-used once.
-%We also impose the constraint on the type system that references
-%cannot be bound to abstractions. Since we do not introduce
-%polymorphism into our type system, every abstraction is affine -- it
-%can be used at most once.
-
-%To see the need for this assumption, consider the occurrence
-%\begin{lstlisting}[language=Caml, mathescape=true]
-%(let x ($\lambda$ y.y$^1$)$^2$ (x$^3$ (x$^4$ 1$^5$)$^6$)$^7$)$^8$
-%\end{lstlisting}
-%As can be seen, the variable $x$ is used in both program point 3 and 4.
-%To type this, we first do an application with a constant as argument.
-%In the second application, the argument type needs to contain the occurrence $x^4$, as it were used for the evaluation.
-
-%To type the occurrences used in both places where we apply the
-%abstractions, the type of the argument in the innermost application is
-%empty, as it applies a constant. 
-%For the second, and outermost, application, the argument type must
-%contain the occurrence $x^4$, as it were used to evaluate the value
-%for the argument. 
+system.  For this reason we require that references cannot be bound to
+abstractions and that every abstraction is used at most used once.
 
 \subsection{Types}\label{sec:types}
 
-The set of types \cat{Types} is defined by the following formation rules:
+The set of types \cat{Types} is defined by the formation rules
 %
 \[ T ::=(\delta,\kappa)\mid T_1 \rightarrow T_2 \]
 %
-The base type $(\delta,\kappa)$ contains a set, $\delta$, of occurrences upon the value of an occurrence can at most depend,
-and $\kappa$ represents alias information in the form of the set of variables and internal variables upon which this occurrence may depend.
-If an occurrence has type $\kappa \neq \emptyset$,
-the occurrence must represent a location.
+If an occurrence $o$ has the base type $(\delta,\kappa)$, the set
+$\delta$ is the set of occurrences that the value of $o$ can depend
+on, and $\kappa$ represents alias information in the form of the set
+of variables and internal variables upon which the value of $o$ may
+depend.  If $o$ has type $\kappa \neq \emptyset$, the
+occurrence must therefore represent a location.
 
 \begin{definition}[Type base for aliasing]
 	For an occurrence $o$, let $\cat{Var}_o$ be the set of all
