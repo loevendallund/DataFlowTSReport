@@ -86,14 +86,14 @@ are used.  Therefore, the language presented is extended with a notion
 of \emph{program points} taken from a countably infinite set
 $\cat{P}$.
 %
-Every subexpression is labelled with a unique \emph{program
-  point}. \emph{Occurrences} $o \in \cat{Occ}$ are labelled
-expressions $e^p$ where $e \in \cat{Exp}$ and $p \in \cat{P}$.We let
-$\ell$ range over set set of locations $\cat{Loc}$ and $x,f$ range
-over the set of variables $\cat{Var}$.  An occurrence is \emph{atomic}
-if it is of the form $u^p$ where $u \in \cat{Var} \cup \cat{Loc}$. If
-$u^p$ is atomic, we call any other occurrence $u^q$ a
-\emph{$u$-occurrence}.
+Every subexpression is labelled with a unique program
+point. \emph{Occurrences} $o \in \cat{Occ}$ are labelled expressions
+$e^p$ where $e \in \cat{Exp}$ and $p \in \cat{P}$. We let $\ell$ range
+over a countably infinite, totally ordered set of locations
+$\cat{Loc}$ and $x,f$ range over the set of variables $\cat{Var}$.  An
+occurrence is \emph{atomic} if it is of the form $u^p$ where
+$u \in \cat{Var} \cup \cat{Loc}$. If $u^p$ is atomic, we call any
+other occurrence $u^q$ a \emph{$u$-occurrence}.
 
 When given a syntactic category $\mathbf{C}$, we let
 $\mathbf{C}_{\cat{P}}$ denote the pair $\mathbf{C}\times\cat{P}$, so
@@ -113,34 +113,36 @@ e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o \mid c \; o_1 \; o_2\\
                                 (s_1,\cdots,s_n)
 \end{align*}
 %
-$\lambda\;x.o$ denotes an \emph{abstraction} with a parameter $x$ and
+An \emph{abstraction} $\lambda\;x.o$ has a parameter $x$ and
 body $o$.  \emph{Constants} $c$ are either natural numbers $n$,
 boolean values $b$, unit value $()$, or functional constants, such as
 the arithmetic operations and the Boolean connectives.
 
-$o_1\;o_2$ denotes an \emph{application}, and $c\;o_1\;o_2$ denotes a
+An \emph{application} is written $o_1\;o_2$ , and $c\;o_1\;o_2$ denotes a
 \emph{functional application} where $c$ is a functional constant and
 $o_1$, $o_2$ are its arguments.
 
-$\mbox{let} \; x \; o_1 \; o_2$ and $\mbox{let rec} \; f \; o_1 \; o_2$
-denotes immutable bindings that associate the variable $x$ with the value $o_1$ within $o_2$. 
-The latter form is recursive; $x$ may occur in $o_1$. Mutability
-in ReScript is introduced using the \emph{reference} construct
-$\mbox{ref\;o}$. This construct creates a reference in the form of a
-location and allows for binding locations to local declarations. We
-can read from a reference $o$ by writing $!o$ and write to a
-reference using the assignment construct $o_1\;:=\;o_2$. 
+\emph{Local declarations} $\mbox{let} \; x \; o_1 \; o_2$ and
+$\mbox{let rec} \; f \; o_1 \; o_2$ associate the variable $x$ with
+the value $o_1$ within $o_2$.  The latter form is recursive; $x$ may
+occur in $o_1$. Mutability in ReScript is introduced using the
+\emph{reference} construct $\mbox{ref\;o}$ which creates a
+reference in the form of a location and allows for binding locations
+to local declarations. We can read from a reference $o$ by writing
+$!o$ and write to a reference using the assignment construct
+$o_1\;:=\;o_2$.
 
-$\mbox{case} \; o_1 \; \vec{\pi} \; \vec{o}$ denotes pattern matching, that
-matches an occurrence with the ordered set, $\vec{\pi}$, of patterns.
-We denote the size of the tuple pattern $\pi$ by $|\vec{\pi}|$ and the
-size of a tuple occurrence by $|\vec{o}|$, requiring that
-$|\vec{\pi}| = |\vec{o}|$ such that for each pattern in $\vec{\pi}$
-there is a clause in $\vec{o}$.
+The pattern matching construct
+$\mbox{case} \; o_1 \; \vec{\pi} \; \vec{o}$ matches an occurrence
+with the ordered set, $\vec{\pi}$, of patterns.  We denote the size of
+the tuple pattern $\pi$ by $|\vec{\pi}|$ and the size of a tuple
+occurrence by $|\vec{o}|$, requiring that $|\vec{\pi}| = |\vec{o}|$
+such that for each pattern in $\vec{\pi}$ there is a clause in
+$\vec{o}$.
 
-We assume that all bindings bind distinct names; this can be ensured
-by means of $\alpha$-conversion. The notions of free and bound
-variables are defined as expected. 
+The notions of free and bound variables are defined as expected. We
+assume that all binding occurrences involve distinct names; this can
+be ensured by means of $\alpha$-conversion.
 
 \begin{example}\label{ex:write}
 Consider
@@ -164,7 +166,7 @@ as the write construct evaluates to the unit value. Lastly the reference, that $
 
 \subsection{The binding model}\label{sec:EnvSto}
 
-Our binding model uses an environment that keeps
+Our binding model uses an environment $env$ that keeps
 track of the bindings of variables to values. Values are given by the formation rules
 %
 \[ v ::= c \mid \ell \mid () \mid \langle x,e^{p'},env\rangle \mid \langle
@@ -191,17 +193,17 @@ For any function $f$ we let $f[u
 
 \subsection{Keeping track of dependencies}\label{sec:DepFunc}
 
-The goal of the semantics that follows is to collect the semantic
+The semantics that follows will  collect the semantic
 dependencies as they appear in a computation. To this end, we use a
 dependency function that will tell us for each variable and location
 occurrence what other, previous occurrences they depend upon.
 
 \begin{definition}[Dependency function]\label{def:DepFunc}
-	The set of dependency functions, $\cat{W}$, is the set of
+	A dependency function $w$ is a 
         partial functions from location and variable occurrences to a
-        pair of dependencies, such that
+        pair of dependencies:
 \[
-  \cat{W}=\cat{Loc}_{\mathbf{P}}\cup\cat{Var}_{\mathbf{P}}\rightharpoonup\Pow{\cat{Loc}_{\mathbf{P}}}\times\Pow{\cat{Var}_{\mathbf{P}}} \] 
+  w: \cat{Loc}_{\mathbf{P}}\cup\cat{Var}_{\mathbf{P}}\rightharpoonup\Pow{\cat{Loc}_{\mathbf{P}}}\times\Pow{\cat{Var}_{\mathbf{P}}} \] 
 \end{definition}
 For a dependency function $w$ and a
 $u^p\in\cat{Loc}_{\mathbf{P}}\cup\cat{Var}_{\mathbf{P}}$, the clause
@@ -224,12 +226,12 @@ in $V$.
                     [x^2\mapsto(\emptyset,\emptyset),z^4\mapsto(\emptyset,\emptyset),y^9\mapsto(\emptyset,\{x^5\}),
                     \\ \; \loc^2\mapsto(\emptyset,\emptyset),\loc^8\mapsto(\emptyset,\{z^7\})] \end{array} \]
 	where $\loc$ is the location created from the reference construct.
-	The variable bindings are distinct, an the location $\loc$ is
+	The variable bindings are distinct, as the location $\loc$ is
         bound multiple times, for the program points $2$ and $8$. 
 
-	If we want to read a variable or location in $w_{ex}$, we must
-        also know for which program point since there can exists
-        multiple bindings for the same variable or location. 
+        When we read an occurrence bound in $w_{ex}$, we must also
+        know its program point, as there can exists multiple bindings
+        for the same variable or location.
 \end{example}
 
 By considering \cref{ex:dep}, we would like to read the information
@@ -316,9 +318,8 @@ $\{\loc^2,\loc^8\}$. From this, we find the greatest element:
 
 \subsection{Collection semantics}\label{sec:sem}
 
-We can now introduce the big-step semantics for our language that
-collects dependency information. In this semantics, the transitions
-are of the form
+The semantics for our language that collects dependency information is
+a big-step semantics with transitions of the form
 %
 \begin{align*}
 env\vdash\left\langle e^{p'},sto,(w,\sqleq_w),p\right\rangle\rightarrow\left\langle v,sto',(w',\sqleq_w'),(L,V),p''\right\rangle
@@ -740,7 +741,7 @@ A highlight of type rules can be found in \cref{fig:TypeSys}.
 
 	\item[\runa{T-Ref-read}] rule, for occurrence $[!e^{p}]^{p'}$, is used to retrieve the type of references, where $e^p$ must be a base type with alias information.
      Since the language contains pattern matching, there can be multiple internal variables in $\kappa$ and multiple occurrences to read from.
-     To do the lookup, we use $IP_{\Upsilon_{p'}}$ to look up all the $p'$-chains.
+     To do the lookup, we use $\IP_{\Upsilon_{p'}}$ to look up all the $p'$-chains.
      %As such, we need to lookup for all the possible internal variables and program points, where we use $ip_{\Upsilon_{p'}}$ to look them up.
 		%Since the type system is an over-approximation, there can be multiple internal variables in $\kappa$ and multiple occurrences we need to read from.
 		%As such we need to lookup for all internal variables and also possible for multiple program points.
