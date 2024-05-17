@@ -1115,17 +1115,19 @@ We can now present the soundness theorem for our type system.
 		\item $(env,(w',\sqleq_w'),v,(L,V))\models(\Gamma,T)$
 	\end{itemize}
 \end{theorem}
-% \begin{proof}(Outline)
-% 	The proof proceeds by induction on the height of the derivation tree for 
-% 	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
-% 	%We will only show the proof of four rules here, for \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref-write}.% , the full proof can be found in \cref{app:SoundnessProof}.
+\begin{proof}(Outline)
+	The proof proceeds by induction on the height of the derivation tree for 
+	$$env\vdash\left\langle e^{p'},sto,\psi,p\right\rangle\rightarrow\left\langle v,sto',\psi',(L,V),p''\right\rangle$$
+	% We will only show the proof of four rules here, for
+        % \runa{Var}, \runa{Case}, \runa{Ref}, and \runa{Ref-write}.
+        % , the full proof can be found in \cref{app:SoundnessProof}.
 
-% 	% \begin{description}
-% 	% 	\input{sections/Proof/SoundProof/var.tex}
-% 	% 	\input{sections/Proof/SoundProof/case.tex}
-% 	% 	\input{sections/Proof/SoundProof/refread.tex}
-% 	% \end{description}
-% \end{proof}
+	% \begin{description}
+	% 	\input{sections/Proof/SoundProof/var.tex}
+	% 	\input{sections/Proof/SoundProof/case.tex}
+	% 	\input{sections/Proof/SoundProof/refread.tex}
+	% \end{description}
+\end{proof}
 
 % \subfile{SoundProof/index.tex}
 
