@@ -55,4 +55,9 @@ Dennis Volpano and Geoffrey Smith.
   and Practice of Software Development}, pages 607--621, Berlin, Heidelberg,
   1997. Springer Berlin Heidelberg.
 
+\bibitem{df_implementation}
+Nicky Ask Lund.
+\newblock An implementation for the Dataflow semantics and type system.
+\newblock https://github.com/loevendallund/dataflow
+
 \end{thebibliography}

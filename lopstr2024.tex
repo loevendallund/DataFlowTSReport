@@ -65,7 +65,7 @@ languages that target JavaScript. ReScript is based on OCaml with a
 JavaScript-inspired syntax and a type system based on that of
 OCaml\cite{rescript_rebrand}. ReScript is imperative and allows for
 mutability through reference constructs for creation, reading, and
-writing,
+writing.
 
 The fragment that we study incorporates both functional and imperative
 features. We show that the type system is sound in the sense that
@@ -73,6 +73,12 @@ it correctly overapproximates the set of occurrences on which any
 given occurrence depends. Moreover, the dependency information that
 the type system provides can also be used to reason about information
 flow properties such as non-interference.
+An implementation for the semantics and type system presented in this paper.
+The implementation is made in the Rust programming language and includes a parser,
+an evaluator, the typing of the language, and approximating the order of program points.
+The approximation of program points is derived from the structure of the type system,
+as the order can be derived from the type rule and the premises.
+The implementation is hosted on Github and can be found at \cite{df_implementation}.
 
 \section{A fragment of ReScript}\label{sec:lang}
 
