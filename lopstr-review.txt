@@ -1,0 +1,309 @@
+Dear Hans,
+
+On behalf of the LOPSTR 2024 Program Committee, thank you again for submitting a paper.
+
+We have now completed the selection process and we regret to let you know that your paper
+
+   A type system for data flow and alias analysis in ReScript
+
+(paper 10) has not been accepted.
+
+Each submission has gone through a rigorous review process, receiving three reviews. This was followed by an online discussion among the program committee members, where the pros and cons of each submission were discussed, sometimes extensively. Below you can find your reviews. We hope that you will find the comments and suggestions in them useful.
+
+This notification is sent only to the corresponding authors, so we kindly ask you inform all of your co-authors.
+
+Regardless of the result, we warmly welcome you to join us in Milan in September. Registration for FM 2024 and affiliated conferences is open. The Early Bird rate applies until 30 July, see https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Feventi.fondazionepolitecnico.it%2FFM24-The26thInternationalSymposiumonFormalMethods%23%2F&data=05%7C02%7Chans.huttel%40di.ku.dk%7C06942491d3604a56f79308dc95b6d533%7Ca3927f91cda14696af898c9f1ceffa91%7C0%7C0%7C638549859696815622%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=J6n0%2F6s5mZXkRWXhciM8RMN2Wc2%2BwtPvC8FzGmHL5uM%3D&reserved=0.
+
+We wish you all the best in your future research endeavours.
+
+Best regards,
+Juliana Bowles and Harald Sondergaard
+LOPSTR 2024 Program Chairs
+
+SUBMISSION: 10
+TITLE: A type system for data flow and alias analysis in ReScript
+
+
+----------------------- REVIEW 1 ---------------------
+SUBMISSION: 10
+TITLE: A type system for data flow and alias analysis in ReScript
+AUTHORS: Hans Hüttel and Nicky Ask Lund
+
+----------- Overall evaluation -----------
+SCORE: -1 (weak reject)
+----- TEXT:
+This paper describes a type system which should support
+the analysis of aliasing effects in an imperative kernel language.
+Although it is mentioned in the title and in the introduction
+that this analysis is intended towards ReScript, another
+alternative to JavaScript, this motivation remains unclear.
+The paper does not contain a single example ReScript program
+in order to explain the challenges to be solved by this work.
+I expected that some problems related to client-side web
+programming will be addressed, but the paper considers
+a subset of OCaml without any specific relation to ReScript.
+Thus, the authors should either provide a better motivation
+for this work by showing concrete ReScript programs,
+or they should change the title of their paper.
+
+Apart from this, I had problems to get the overall picture
+of this research work. Data-flow and aliasing analysis
+is a topic with many works, but the authors do not provide
+a good explanation why they add a type system for this analysis.
+How does it compare to other approaches? Do you get better
+results? The paper mentions an implementation but do not
+provide a concrete link to it (btw, the references need
+substantial improvements, since just providing authors,
+title and year is not enough for a scientific citation).
+The authors do not report about the evaluation of their
+implementation.
+
+The contents of the paper is difficult to understand
+due to missing explanations and examples and quite
+complex (and incomplete) inference rules. For instance,
+the semantics is partially defined in Table 1 but there
+is no justification for it. It would be much better to define
+a standard semantics (without considering occurrences)
+and show that your semantics compute the same values
+as the standard semantics. The soundness of the type
+system might be interesting (where is the proof for it?),
+but it is not clear how this result can be used for a
+program analysis.
+
+Altogether, the work described in the paper could
+be interesting, but the paper needs to be improved
+to convince the reader why it is useful and what
+can be obtained with this work.
+
+
+Minor comments:
+---------------
+
+Submitting a paper without page and line numbers
+for reviewing is not a good idea. Look at the CfP!
+
+P. 1: Explain how ReScript targets JavaScript.
+Provide examples and improve ref. [1].
+
+P. 2: Provide precise link in ref. [5]
+
+Sect. 2.1: Explain the difference between occurrences and location.
+What is the meaning of s_1,...,s_n in the definition of patterns?
+Why do you consider functional application with exactly two
+arguments only?
+
+P. 3: "to, to the value"
+
+Example 2: "...we can infer the following bindings...":
+How can we infer exactly these bindings?
+For instance, why is z^9 not included in the set associated to y^9?
+
+"...x is an alias to.": To what?
+
+P. 6: Is there a "standard" semantics describing the
+evaluation of ReScript programs? Can you relate your
+semantics to it?
+
+"we user the notion"
+
+P. 7: Why are these rules selected? Where one can find
+the complete set of rules? Similarly in Table 2
+
+P. 15: What can be done with your type system?
+How does you analysis relate to other approaches?
+
+
+
+----------------------- REVIEW 2 ---------------------
+SUBMISSION: 10
+TITLE: A type system for data flow and alias analysis in ReScript
+AUTHORS: Hans Hüttel and Nicky Ask Lund
+
+----------- Overall evaluation -----------
+SCORE: -1 (weak reject)
+----- TEXT:
+In this paper, the authors present a type system that captures data flow-related information in a program written in a subset of ReScript. This analysis also captures information relative to aliasing.
+
+The paper presents a big-step semantics of the studied subset of the ReScript language and shows some of the rules of the type system. The presentation is technically complex, and I appreciate the rigorous approach to the analysis. However, my evaluation of the paper is not very positive, mainly due to two reasons:
+
+   - The paper lacks a discussion explaining the motivation for the analysis, its benefits for program optimization, and its use in the context of the ReScript toolchain, as well as its use outside of this language. In particular, could it be applied to any other imperative language?
+
+   - Data-flow and alias analyses are well-established research areas. A quick Google search on "data flow analysis" and "alias analysis" yields a large number of published articles on this area (e,g,. [1, 2]). However, the paper does not indicate what the contributions of the proposed analysis are compared to existing ones; is it the first time that a type system has been used for data-flow analysis? Even if the contributions are purely technical, the technical challenges involved in designing the analysis are not highlighted either.
+
+The paper is overly technical, and a good part of the auxiliary definitions related to correctness could be relegated to an appendix or technical report, where the rest of the type system rules should also be shown. Another thing that should be in an appendix is, indeed, the full proof of the correctness theorem.
+
+
+[1] Michael Burke and Jong-Deok Choi. 1992. Precise and efficient integration of interprocedural alias information into data-flow analysis. ACM Lett. Program. Lang. Syst. 1, 1 (March 1992), 14–21. https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fdoi.org%2F10.1145%2F130616.130618&data=05%7C02%7Chans.huttel%40di.ku.dk%7C06942491d3604a56f79308dc95b6d533%7Ca3927f91cda14696af898c9f1ceffa91%7C0%7C0%7C638549859696815622%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=RMe9zrkf50Ps3PlmB2kEk3ZumexlAdKkv9n%2FZZvKvCc%3D&reserved=0
+
+[2] Atanas Rountev, Barbara G. Ryder, and William Landi. 1999. Data-flow analysis of program fragments. SIGSOFT Softw. Eng. Notes 24, 6 (Nov. 1999), 235–252. https://eur02.safelinks.protection.outlook.com/?url=https%3A%2F%2Fdoi.org%2F10.1145%2F318774.318945&data=05%7C02%7Chans.huttel%40di.ku.dk%7C06942491d3604a56f79308dc95b6d533%7Ca3927f91cda14696af898c9f1ceffa91%7C0%7C0%7C638549859696815622%7CUnknown%7CTWFpbGZsb3d8eyJWIjoiMC4wLjAwMDAiLCJQIjoiV2luMzIiLCJBTiI6Ik1haWwiLCJXVCI6Mn0%3D%7C0%7C%7C%7C&sdata=LH%2Bsn7ig7LexlN1Y3V%2BcbE351XVOGJL2gEhniZlBOXY%3D&reserved=0
+
+Local comments
+==============
+
+Page 2, 1st paragraph:
+	- "an implementation for the type system were also made" ==> "was also made"
+	- "for an order of programs points" ==> "program points"
+	- "can be found at [5]": Reference [5] does not refer to any URL
+
+Page 3, example 1
+
+	The syntax of the example expression is inconsistent with the syntax rules given in page 2. In particular:
+
+	- In the occurrence (5^3)^4 I cannot see why the expression 5 is annotated with two program points.
+
+	- In the expression (!x)^10, since the rules say that ! is followed by an occurrence, the x should be labelled with a program point. So, it should be something like (!(x^p))^10 for some p
+
+Page 3, after example 1
+
+	- "to the reference, that x is bound to": remove the comma before "that"
+	- "Lastly the reference, that x is bound to": remove the comma before "that"
+
+Page 3, section 2.2
+
+	- "Moreover, we assume a funcition new: Loc -> Loc, which given a location, gives us the next location". In general, the use of `next` and `new` is a bit awkward. In the semantic rule (REF), would not it be easier to just say that `l` is a fresh location (i.e., it does not belong to dom(sto'))?
+
+Page 4, definition 1
+	- "is a partial functions w" ==> "is a partial function w"
+
+Page 4, example 2
+
+	The w_ex function is not totally consistent with what one would get by applying the semantic rules. Instead of "l^2 -> (\emptyset, \emptyset)", maybe it should be "l^1 -> (\emptyset, \emptyset)" since the (REF) rule inserts the binding [l^(p') -> (L, V)], where p' is the program point of the expression passed to `ref` (that is, 3^1 in the example)
+
+Page 4, 2nd paragraph after example 2
+
+	"there can exists multiple bindings" => "there can exist multiple bindings"
+		(or "there may be multiple bindings")
+
+Page 4, paragraph before definition 2
+	
+	- "from the location, that x is an alias to": remove the comma before "that"
+
+Page 4, definition 3:
+
+	There is something confusing in the definition of \sqsubseteq_w the meaning of w(p) in the expression p' \in points(w(p)), since w is a function whose domain consists of annotated locations and variables, but here you apply w to a program point p.
+
+Page 5, example 3:
+
+	This is quite confusing. I am not able to see how that \sqsubseteq_{w_{ex}} set is derived from the expression in Example 2.
+
+Page 5, definition 5:
+
+	Also unclear. I understand the `inf` operator is applied to the set of atomic occurrences in dom(w) such that there exists another atomic occurrence in dom(w) with a lower program point. So in example 4, the set to which `inf` would be applied is just {l^8}; l^2 is not included since there is no atomic reference in dom(w_{ex}) relative to l with a program point lower than 2.
+
+	As another example, assume that dom(w) = {l^1}, then what would IP(l, w) be? There is no other atomic occurrence of l in dom(w)...
+
+Page 5, example 4:
+
+	"IP(l, w_{e}x)" ==> "w_{ex}"
+
+Page 5, line before section 2.4.
+
+	"which were the occurrence" ==> "which was the ocurrence"
+
+Page 6, fourth paragraph (LET rule)
+
+	- "The (LET) rule evaluate e_1^{p_1}, to get the value v, that x will be bound to" ==> "evaluates" (and remove the comma before 'that')
+	- the binding of x in w is to the program points p_1" ==> "point"
+
+Page 6, section 3.1
+
+	- "given a type environment (presented in Section 3.4)": type environments are presented in Section 3.3.
+
+	- "and a so-called basis (presented in Section 3.3)": nothing is mentioned about the so-called basis in that section.
+
+Page 6, last paragraph
+
+	- "we user the notion of internal variables" ==> we use
+
+Page 7, table 1
+
+	- (VAR) rule appears twice
+
+	- (LET) rule: "where w_2 = w_1[x^{p_1} -> (L, V)]": should it be (L_1, V_1)?
+
+	- (REF-WRITE) rule: "l^{p''} = inf(...)" ==> "l^{p''} = IP(...)"
+
+
+Page 8, second paragraph
+
+	- "every abstraction is used at most used once" ==> "every abstraction is used at most once"
+
+Page 8, definition 7
+
+	- Throughout the paper you use sometimes "T_1 \cup T_2" and sometimes "T_1 \sqcup T_2". Is there any difference?
+
+	- I cannot see the difference between the branch "T_1 = (\delta, \kappa), T_2 = (\delta', \kappa')" and the branch "T_1 = (\delta', \kappa'), T_2 = (\delta, \kappa)". Both branches lead to the same result, or am I missing something?
+
+Page 9, definition 12
+
+	"if \Pi_p^* is a \Pi-chain" ==> "p-chain"
+
+
+Page 10, paragraph on (T-LET-1)
+
+	"creates a local binding for an internal variable". I cannot see that in the rule, unless you mean the bound variable "x".
+
+Page 10, section 4
+
+	"then describe relation between" ==> "then describe the relation between"
+
+Page 10, paragraph on (CONSTANT)
+
+	- "differs from the rule (T-CONST)": the rule (T-CONST) is not shown anywhere.
+
+	- "Constants can depend on other occurrences; we know that \delta can be non-empty". You should explain that. It is rather counterintuitive that a *constant* depends on anything else. A constant is, by definition, constant.
+
+Page 11, table 2
+
+	- rules (T-VAR) and (T-REF-READ). There are some occurrences of "uf" which are not explained anywhere.
+
+Page 11, paragraph on (LOCATION)
+
+	"can contains alias information" ==> "can contain alias information"
+
+Page 11, paragraph on (CLOSURE)
+
+	"when it were declared" ==> "when it was declared"
+	"to handle those part" ==> "parts"
+
+Page 12, definition 14
+
+	"For all x_i \in dom(env), then \exists x_i^{p} ... where ... then"
+
+	- The second 'then' does not make sense to me.
+
+Page 13, line 2
+
+	"where env^l \neq \emptyset". The notation env^l has not been explained before. Maybe you mean env^{-1}(l)?
+
+	"for some \kappa_i^0 \in \delta". This is also confusing, now \delta is a set of sets of variables?
+
+Page 14, definition 18
+
+	- In (1), I cannot get my head around the existential quantifiers on x^p throughout the whole formula.
+	- In (2), I do not understand whether the 'v' is existentially quantified or universally quantified.
+
+Page 15, Section 5:
+
+	- "as well as imperative feature" ==> "as well as imperative features"
+	- "the system contains slack". I cannot understand what does it mean.
+	- "there should be looked into base type polymorphism". I cannot understand this clause.
+	- "in an interative data flow analysis" ==> iterative? interactive?
+
+Page 16, reference [3]
+
+	"COMPILER CONSTRUCTION, PROCEEDINGS" appears in upper case.
+
+
+
+----------------------- REVIEW 3 ---------------------
+SUBMISSION: 10
+TITLE: A type system for data flow and alias analysis in ReScript
+AUTHORS: Hans Hüttel and Nicky Ask Lund
+
+----------- Overall evaluation -----------
+SCORE: -1 (weak reject)
+----- TEXT:
+The authors present a type system for a small language, based on the lambda calculus, but with pattern matching, let bindings and destructive updates, to track aliasing and the location of variable usage.
+
+The work is interesting, however, it is hard to assess the strength of the contribution, because the authors do not properly discuss related work on type based alias analysis. They do mention the work of Volpano and Smith, but leave a discussion and comparison to future work, but this should be part of the paper.
