@@ -34,7 +34,17 @@
 
 %\keywords{Data-flow analysis, Alias analysis, Program analysis, Programming languages, Type systems}
 
-\input{frontmatter/abstract.tex}
+\begin{abstract}
+	ReScript is a strongly typed language that targets
+        JavaScript, as an alternative to gradually typed languages,
+        such as TypeScript. In this paper, we present a sound type system
+        for data-flow analysis for a subset of the ReScript language,
+        more specifically for a $\lambda$-calculus with mutability and
+        pattern matching. The type system is a local analysis that
+        collects information about variables are used at each program
+        point as well as alias information. 
+\end{abstract}
+
 
 
 \section{Introduction}
@@ -126,15 +136,15 @@ An \emph{application} is written $o_1\;o_2$ , and $c\;o_1\;o_2$ denotes a
 \emph{functional application} where $c$ is a functional constant and
 $o_1$, $o_2$ are its arguments.
 
-\emph{Local declarations} $\mbox{let} \; x \; o_1 \; o_2$ and
-$\mbox{let rec} \; f \; o_1 \; o_2$ associate the variable $x$ with
-the value $o_1$ within $o_2$.  The latter form is recursive; $x$ may
-occur in $o_1$. Mutability in ReScript is introduced using the
-\emph{reference} construct $\mbox{ref\;o}$ which creates a
-reference in the form of a location and allows for binding locations
-to local declarations. We can read from a reference $o$ by writing
-$!o$ and write to a reference using the assignment construct
-$o_1\;:=\;o_2$.
+\emph{Local declarations} $\mbox{let} \; x \; o_1 \; o_2$ associate
+the variable $x$ with the value $o_1$ within $o_2$, and
+$\mbox{let rec} \; f \; o_1 \; o_2$ allows us to define a recursive
+function $f$ where $f$ may occur in $o_1$. ReScript is an imperative
+language due to the presence of the \emph{reference} construct
+$\mbox{ref\;o}$ which creates a reference in the form of a location
+and allows for binding locations to local declarations. We can read
+from a reference $o$ by writing $!o$ and write to a reference using
+the assignment construct $o_1\;:=\;o_2$.
 
 The pattern matching construct
 $\mbox{case} \; o_1 \; \vec{\pi} \; \vec{o}$ matches an occurrence
@@ -159,7 +169,7 @@ This creates a reference to the constant 3 and binds the reference to
 $x$ (so $x$ is an alias of this reference). Next a binding of $z$ is made
 to the constant 5 before writing to the reference, that $x$ is bound to, 
 to the value that $z$ is bound to. Then a binding for $y$ is made to the unit value,
-as the write construct evaluates to the unit value. Lastly the reference, that $x$ is bound to, is read.
+as the assignment evaluates to the unit value. Lastly the reference, that $x$ is bound to, is read.
 
 %Next a binding for $y$ is made
 %and after that a binding of $z$ to the constant 5 before writing
@@ -197,10 +207,12 @@ For any function $f$ we let $f[u
 
 \subsection{Keeping track of dependencies}\label{sec:DepFunc}
 
-The semantics that follows will  collect the semantic
-dependencies as they appear in a computation. To this end, we use a
-dependency function that will tell us for each variable and location
-occurrence what other, previous occurrences they depend upon.
+The semantics that follows will collect the semantic dependencies in a
+computation. An occurrence $u^p$ semantically depends upon a set of
+occurrences $S$ if the value of $u^p$ can be found using at most the
+values of the occurrences in $S$. To determine semantic dependencies
+we use a dependency function that will tell us for each variable and
+location occurrence what other, previous occurrences they depend upon.
 
 \begin{definition}[Dependency function]\label{def:DepFunc}
   A dependency function $w$ is a partial functions from atomic
@@ -258,7 +270,7 @@ program points.% :
 
 \begin{definition}[Occurring program points]\label{def:OccPP}
 	Let $O$ be a set of occurrences, then $\points(O)$ is given by:
-	\[ \points(O)=\{p\in\cat{P}\mid\exists e^p\in O\} \]
+	\[ \points(O)=\{p\in\cat{P}\mid\exists e^p. e^p\in O\} \]
         For a pair $(L,V)$ we let $\points(L,V) = \points(L) \cup \points(V)$.
 \end{definition}
 
@@ -292,7 +304,7 @@ occurrences $S$ is the most recent $u$-element in $S$ seen before $u$.
 \begin{definition}[Immediate predecessor]\label{def:GBind}
   Let $u$ be an element, let \sqleq\ be an ordering on program points
   and $S$ be a set of occurrences, then $\IP(u,S)$ is given by
-\[ \IP(u^p,S)=\inf\{u^q\in S\mid q\sqleq p\} \]
+\[ \IP(u^p,S)=\sup\{u^q\in S\mid q\sqleq p\} \]
 \end{definition}
 
 Based on \cref{def:GBind}, we can present an instantiation of the
@@ -302,7 +314,7 @@ $\sqleq_w$:
 \begin{definition}
   Let $w$ be a dependency function, $\sqleq_w$ be the induced order,
   and $u$ be an element, then $\IP_{\sqleq_w}$ is given by:
-	$$\IP_{\sqleq_w}(u,w)=\inf\{u^p\in \dom(w)\mid u^q\in \dom(w).q\sqleq_w p\}$$
+	$$\IP_{\sqleq_w}(u,w)=\sup\{u^p\in \dom(w)\mid u^q\in \dom(w).q\sqleq_w p\}$$
 \end{definition}
 
 
@@ -311,11 +323,11 @@ $\sqleq_w$:
   element for an element, e.g., a variable or location.  As we were
   interested in finding the greatest bindings a location is bound to
   in $w_ex$, we use the function $\IP_{\sqleq_w}$:
-	\[ \IP_{\sqleq_{w_ex}}(\loc,w_ex)=\inf\{\loc^p\in \dom(w)\mid
+	\[ \IP_{\sqleq_{w_ex}}(\loc,w_ex)=\sup\{\loc^p\in \dom(w)\mid
           \loc^q\in \dom(w). q\sqleq_{w_ex} p\} \]
 where the set we get for $\loc$ is 
 $\{\loc^2,\loc^8\}$. From this, we find the greatest element: 
-	\[ \loc^8=\inf\{\loc^2,\loc^8\} \]
+	\[ \loc^8=\sup\{\loc^2,\loc^8\} \]
 	As we can see, from the $\IP_{w_ex}$ function, we got $\loc^8$ which were the occurrence we wanted.
 \end{example}
 
@@ -625,7 +637,7 @@ The notion of the immediate predecessor of a $u\in\cat{IVar} \cup \cat{Var}$ at 
         %internal variable, $\Gamma$ be a type environment, and $\Pi$
         %be the approximated order of program points that is a partial
         %order, then $\IP_{\sqleq_\Pi}$ is given by: 
-	\[ \IP_{\sqleq_\Pi}(u,\Gamma)=\inf\{u^p\in
+	\[ \IP_{\sqleq_\Pi}(u,\Gamma)=\sup\{u^p\in
           \dom(\Gamma)\mid u^q\in \dom(\Gamma).q\sqleq_\Pi p\} \]
 \end{definition}
 
