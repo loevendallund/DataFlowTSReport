@@ -1,0 +1,124 @@
+[Du får ikke ofte mails fra synasc2024@easychair.org. Få mere at vide om, hvorfor dette er vigtigt, på https://aka.ms/LearnAboutSenderIdentification ]
+
+Dear Hans Hüttel,
+
+We are pleased to inform you that your paper
+
+55: A type system for data flow and alias analysis in ReScript
+
+has been accepted for presentation at FROM 2024, and for publication in the FROM 2024 proceedings in Electronic Proceedings in Theoretical Computer Science (EPTCS).
+
+The final version of the paper should be revised based on the comments made in the reviews.
+We will inform you soon how to proceed to format and upload your paper on the platform of EPTCS.
+
+At least one author per paper is required to register and participate to FROM.
+
+The registration form will be active in the next few days. We will keep you informed as soon as this service becomes available.
+
+Best regards,
+FROM 2024 programme chairs
+
+SUBMISSION: 55
+TITLE: A type system for data flow and alias analysis in ReScript
+
+
+----------------------- REVIEW 1 ---------------------
+SUBMISSION: 55
+TITLE: A type system for data flow and alias analysis in ReScript
+AUTHORS: Hans Hüttel and Nicky Ask Lund
+
+----------- Overall evaluation -----------
+SCORE: 1 (weak accept)
+----- TEXT:
+Description
+==========
+
+ReScript is a lightweight typed language that efficiently compiles into human-readable JavaScript. It is an alternative to Typescript, which adds a nice layer of types on top of Javascript. The types in Rescript can be explicitly mentioned or inferred. Rescript includes both functional and imperative features.
+
+The paper under review proposes a type system for a subset of Rescript including functional features, a system intended to be suitable for dataflow analysis. The soundness of the proposed system is proven.
+
+Evaluation
+==========
+
+Pros: Dataflow analysis of functional programs is a challenging problem. A relatively large community uses Rescript and any static analysis instrument is welcome. The paper presents the theoretical mechanism on top of which such an instrument can be thoroughly built.
+The subject fits very well with the FROM topics.
+
+Cons: The presentation is too technical and not easy to follow, it must be improved. Motivation examples and an evaluation of the proposed approach are missing. In section 5, an implementation is reported, but the mentioned reference [5] does not include any link and I did not find any related repository in the GitHub account of the first author. This must be clarified in the revised version.
+
+Detailed comments
+=================
+
+I suggest to use a different font for the keywords, this will significantly improve the readability. Here is just an example where a different font is needed: "where next
+is a pointer to the next unused location".
+
+Wherever you have something like "\subseteq =" it "\subseteq = \subset" write it as "{\subseteq} =" resp. "{\subseteq} = {\subset}". In this way, "=" is treated as a binary operator, and it will be surrounded by the corresponding space.
+
+
+Only subsets of rules for semantics and for the type system are included. It will be helpful to have a reference (e.g., a technical report) where they are completely defined.
+
+p. 1: "The fragment that we study incorporates both functional and imperative features." - I didn't see any real imperative features in the fragment presented in Section 2.
+
+p. 2: "let rec f o1 o2" -  I think it should be "let rec x o1 o2" to fit with the subsequent text.
+
+What exactly does "write construct" mean? Is it "o1 := o2"?
+
+In the rule defining values (the last row): what is "f"?
+
+p. 3, Def. 1: "...to a pair of dependencies" = what exactly is a "dependency" here?
+Also, mention explicitly that "\mathbb{P}" denotes the powerset operator.
+
+p.4., Def. 4: It seems that the "immediate predecessor" of u^p is itself u^p if there is no q with q \sqsubseteq p. Is it correct/intended?
+
+Example 4. "...finding the greatest bindings..." but in the below formula "inf" is used. Is it OK?
+
+2.4 "Collection semantics" --> "Collecting semantics"
+
+"The semantics for our language that collects dependency information is a big-step semantics" -- from my point of view, the big-step semantics is not suitable for dataflow analysis. Usually, a mix between small-step and big-step is used, in order to have defined the program points/locations.
+
+p. 5, 3.2: "we user" --> "we use"
+
+p. 7: Def 7, in the formula for T_1 \cup T_2: I guess that the third case is subsumed to the first one (or even the same with)
+
+p. 9, 4.1: "In our soundness theorem and its proof, values are mentioned." - to be reformulated.
+
+p. 12, Theorem 1 (Soundness): It will be helpful for the reader to have an explanation of what the theorem says.
+
+p. 16, Sec. 5: "The implementation is hosted on Github and can be found at [5]." - I did not find it.
+
+
+
+----------------------- REVIEW 2 ---------------------
+SUBMISSION: 55
+TITLE: A type system for data flow and alias analysis in ReScript
+AUTHORS: Hans Hüttel and Nicky Ask Lund
+
+----------- Overall evaluation -----------
+SCORE: 1 (weak accept)
+----- TEXT:
+This paper introduces a monomorphic type system for a specific subset of the ReScript language. The proposed type system is an overapproximation of the proposed big-step semantics for this language fragment.
+
+The authors' substantial effort in developing this work is evident, and the chosen research direction is interesting.
+
+Nonetheless, the paper presently reads more like a technical report than a traditional research paper. While the technical development appears free of obvious errors, the introduction is too brief. It lacks an in-depth discussion of the design trade-offs and challenges encountered during the development of the type system. To enhance the paper's quality, I recommend a more detailed exposition of these issues, along with a comparative analysis of related works in the literature.
+
+Minor comments
+
+Abstract: variables are -> variables that are
+
+the url is missing in reference [5].
+
+
+
+----------------------- REVIEW 3 ---------------------
+SUBMISSION: 55
+TITLE: A type system for data flow and alias analysis in ReScript
+AUTHORS: Hans Hüttel and Nicky Ask Lund
+
+----------- Overall evaluation -----------
+SCORE: 0 (borderline paper)
+----- TEXT:
+This paper presents a type system for a fragment of the ReScript language. The proposed type system tracks the dependencies of each value.
+The paper is written in a non-intuitive way. Therefore it was very hard to read and follow the authors' reasoning.  I would suggest the authors to use more examples to exemplify why their type system is useful.  A discussion of the use of the proposed type system is done very briefly in the conclusion. The link to the implementation of this type system is not provided.
+The demonstration of soundness seems to be correct as far as I could follow it.
+Another negative aspect is that the authors do not compare their type system with others existing in the literature.
+Despite the negative points listed above, I am not against presenting the paper at the symposium.
