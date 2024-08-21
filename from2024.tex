@@ -4,19 +4,6 @@
 \input{setup/macros-from2024.tex}
 \usepackage{xspace}
 
-\newcommand{\uf}{\ensuremath{\mathsf{IP}}}
-
-\newcommand{\condinf}[3]{\begin{tabular}{l} \inference[]{#1}{#2} \\[5mm]
-                          #3 \end{tabular}}
-
-\newcommand{\sqleq}{\ensuremath{\sqsubseteq\xspace}}
-\newcommand{\set}[1]{\ensuremath{\{ #1 \}}}
-\newcommand{\setof}[2]{\set{ #1 \mid #2}}
-\newcommand{\refc}{\ensuremath{\textrm{ref}\xspace}}
-\newcommand{\points}{\ensuremath{\textsf{points}}}
-\newcommand{\nexte}{\ensuremath{\textrm{next}}\xspace}
-
-\newcommand{\IP}{\ensuremath{\textsf{IP}}\xspace}
 
 %\input{frontmatter/acm.tex}
 
@@ -144,7 +131,7 @@ language due to the presence of the \emph{reference} construct
 $\mbox{ref\;o}$ which creates a reference in the form of a location
 and allows for binding locations to local declarations. We can read
 from a reference $o$ by writing $!o$ and write to a reference using
-the assignment construct $o_1\;:=\;o_2$.
+the \emph{assignment} construct $o_1\;:=\;o_2$.
 
 The pattern matching construct
 $\mbox{case} \; o_1 \; \vec{\pi} \; \vec{o}$ matches an occurrence
@@ -385,10 +372,10 @@ must be a location $\loc$, and reads the value of $\loc$ in the store.
 	{env\vdash \left\langle x^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqleq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[6mm]
 	where $env(x)=v$, $x^{p''}=\IP_{\sqleq_w}(x,w)$, and
           $w(x^{p''})=(L,V)$ \\[4mm]
-	\inference[]{}
-	{env\vdash \left\langle x^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqleq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[6mm]
-	where $env(x)=v$, $x^{p''}=\IP_{\sqleq_w}(x,w)$, and $w(x^{p''})=(L,V)$
-          \\[4mm]
+	% \inference[]{}
+	% {env\vdash \left\langle x^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqleq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[6mm]
+	% where $env(x)=v$, $x^{p''}=\IP_{\sqleq_w}(x,w)$, and $w(x^{p''})=(L,V)$
+        %   \\[4mm]
                     \runa{Let}\\[0.2cm]
 	\inference[]
 	{
@@ -418,7 +405,8 @@ must be a location $\loc$, and reads the value of $\loc$ in the store.
 		env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqleq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto_2,(w_2,\sqleq_w^2),(L_2,V_2),p_2 \right\rangle
 	}
 	{env\vdash \left\langle \left[e_1^{p_1}:=e_2^{p_2}\right]^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle (),sto',(w',\sqleq_w'),(L_1,V_1),p' \right\rangle}\\[6mm]
-	where $sto'=sto_2[\loc\mapsto v]$, $\loc^{p''}=inf_{\sqleq_w^2}(\loc,w_2)$,\\
+	where $sto'=sto_2[\loc\mapsto v]$,
+          $\loc^{p'}=inf_{\sqleq_w^2} \loc,w$,\\
 	$w'=w_2[\loc^{p'}\mapsto(L_2,V_2)]$, and
           $\sqleq_w'=\sqleq_w^2\cup(p'',p')$ \\[6mm]
 	\end{tabular}

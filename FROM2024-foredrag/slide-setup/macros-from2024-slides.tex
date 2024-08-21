@@ -1,4 +1,6 @@
-%\newcommand{\InfName}[1]{\ensuremath{\lbrack #1 \rbrack}}
+\setlength{\parskip}{\bigskipamount} 
+
+% \newcommand{\InfName}[1]{\ensuremath{\lbrack #1 \rbrack}}
 \newcommand{\InfName}[1]{\textsc{(#1)}}
 \newcommand{\InfVal}[1]{\ensuremath{\left\langle #1 \right\rangle}}
 
@@ -38,10 +40,10 @@
 
 \newcommand{\defeq}{\stackrel{\textsf{def}}{=}}
 
-\newtheorem{definition}{Definition}
-\newtheorem{example}{Example}
-\newtheorem{theorem}{Theorem}
-\newtheorem{lemma}{Lemma}
+% \newtheorem{definition}{Definition}
+% \newtheorem{example}{Example}
+% \newtheorem{theorem}{Theorem}
+% \newtheorem{lemma}{Lemma}
 
 \newcommand{\dom}{\textrm{dom}}
 
@@ -53,6 +55,8 @@
                           #3 \end{tabular}}
 
 \newcommand{\sqleq}{\ensuremath{\sqsubseteq\xspace}}
+\newcommand{\sqw}[1][w]{\sqleq_{#1}}
+
 \newcommand{\set}[1]{\ensuremath{\{ #1 \}}}
 \newcommand{\setof}[2]{\set{ #1 \mid #2}}
 \newcommand{\refc}{\ensuremath{\textrm{ref}\xspace}}
@@ -60,3 +64,41 @@
 \newcommand{\nexte}{\ensuremath{\textrm{next}}\xspace}
 
 \newcommand{\IP}{\ensuremath{\textsf{IP}}\xspace}
+
+% Listings med fremhævelse
+
+\lstnewenvironment{rescript}[1][]
+      {\lstset{language=Caml}\lstset{escapeinside={(*@}{@*)},
+%      numbers=left,numberstyle=\normalsize,stepnumber=1,numbersep=5pt,
+       breaklines=true,
+       mathescape=true,
+       %firstnumber=last,
+           %frame=tblr,
+           framesep=5pt,
+  %         basicstyle=\normalsize\ttfamily,
+           showstringspaces=false,
+           keywordstyle=\bfseries\color{black},
+          %identifierstyle=\ttfamily,
+           stringstyle=\color{maroon},
+           commentstyle=\color{black},
+           moredelim=**[is][\only<+>{\color{red}}]{@}{@},
+           gobble=4,
+        rulecolor=\color{black},
+        xleftmargin=0pt,
+        xrightmargin=0pt,
+        aboveskip=\bigskipamount,
+        belowskip=\bigskipamount,
+               backgroundcolor=\color{white}, #1
+    }}
+    {}
+
+    % Programpunkter
+
+        \newcommand{\p}[1]{\mathbf{\textcolor{red}{^{#1}}}}
+
+        \newcommand{\po}{\ensuremath{\sqleq_w}}
+    
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:

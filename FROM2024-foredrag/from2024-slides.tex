@@ -1,0 +1,576 @@
+\documentclass{beamer}
+\usefonttheme{serif}
+\input{slide-setup/slides-preamble}
+\input{slide-setup/macros-from2024-slides}
+
+% \mode<presentation>
+% {
+%   \usecolortheme[named=red]{structure}
+%   \setbeamertemplate{background canvas}{\includegraphics[width=\paperwidth,height=\paperheight]{timisoara.jpg}}
+%   \usetheme{Dresden}
+%   \maketitle
+% }
+
+\title{\textcolor{white}{\textbf{A type system for data flow and alias analysis in ReScript}}}
+
+\author{\textcolor{white}{Nicky Ask Lund  \and Hans Hüttel}}
+\date{\textcolor{white}{September 2024} \\[4mm]
+\textcolor{white}{\textsl{To appear at Applied Formal Methods Symposium 2024, Timi{\textcommabelow{s}}oara}}}
+
+\begin{document}
+
+{
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}[page number]
+\setbeamertemplate{background canvas}{\includegraphics
+[width=\paperwidth,height=\paperheight]{timisoara.jpg}}
+\maketitle
+}
+
+\begin{frame}
+  \frametitle{Data-flow analysis}
+
+  The goal of data-flow analysis is to provide a safe static analysis
+  of the flow information in a program. This information can then be
+  used in compiler optimizations and for register allocation.
+
+  A variable occurrence is live at a program point $p$ if its value
+  may be used at program points later than $p$.
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{How it all began}
+
+The initial work of (Kildall,1972) allowed one to compute a safe approximation
+of where each variable in a program was a live.
+
+The approach uses a collection of dataflow equations. A solution for
+them can be computed in time polynomial in the size of the program to
+be analyzed.
+
+There is no notion of dataflow analysis here.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Using a type system}
+
+  A good reason for using a type system to express this form of
+  analysis is that allows us to more easily combine the analysis with
+  other forms of static analysis.
+
+  $\Gamma_1 \vdash_1 e : \tau_1$ and $\Gamma_2 \vdash_2 e : \tau_2$
+  give us the conjunctive judgement $(\Gamma_1,\Gamma_2) \vdash e :
+  (\tau_1,\tau_2)$.
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Type-based approaches}
+
+  Later approaches use type systems and show how aliasing affects
+  dataflow. Some of the type systems are substructural in that they
+  introduce linearity.
+  
+  \begin{itemize}
+  \item (Smith et al., 2000) present a notion of alias types that allows
+    functions to specify the shape of a store and to track the flow of
+    pointers through a computation. The language is a simple
+    location-based language.
+  \item (Ahmed et al., 2005) use a language based on a linear
+    $\lambda$-calculus to give an alternative formulation of alias
+    types. Here, every well-typed program terminates.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{The goals of our work}
+
+  \begin{itemize}
+  \item To establish a type system for liveness analysis in the
+    presence of aliasing
+  \item To study this in the setting of an imperative functional
+    language
+  \item To see if this can be done without the need for introducing linearity
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{ReScript}
+
+  ReScript is based on OCaml with a JavaScript-inspired syntax and a
+  type system based on that of OCaml. 
+
+
+  Just like OCaml, ReScript is imperative and allows for mutability
+  through reference constructs for creation, reading, and writing.
+  
+\end{frame}
+
+% \begin{frame} \frametitle{Syntax}
+
+%   The formation rules of our abstract syntax are shown below.
+% %
+% \begin{align*}
+% e &::= x \mid c \mid e_1\;e_2 \mid \lambda x.e \mid c \; e_1 \; e_2\\
+% 			& \mid \mbox{let} \; x \; e_1 \; e_2 \mid
+%                    \mbox{let rec} \; x \; e_1 \; e_2 \\
+%   & \mid \mbox{case}
+%                    \; e_1 \; \vec{\pi} \; \vec{e} \mid  \refc \; e \mid e_1 := e_2 \mid \; !e\\
+% \pi &::= n \mid b \mid x \mid \_  \mid
+%                                 (s_1,\cdots,s_n)
+% \end{align*}
+
+% \end{frame}
+
+\begin{frame}
+  \frametitle{Functional constructs}
+
+ \begin{description}
+  \item[Abstractions] $\lambda\;x.o$ have a parameter $x$ and
+body $o$.  
+
+\item[Applications] arewritten $o_1\;o_2$. The expression occurrence
+  $o_1$ is applied to the argument $o_2$.
+
+\item[Local declarations] $\mbox{let} \; x \; o_1 \; o_2$ associate
+the variable $x$ with the value $o_1$ within $o_2$.
+
+\item[Recursive declarations]
+$\mbox{let rec} \; f \; o_1 \; o_2$ allows us to define a recursive
+function $f$ where $f$ may occur in $o_1$.
+
+\item[Pattern matching] $\mbox{case} \; o_1 \; \vec{\pi} \; \vec{o}$
+  matches an occurrence with an ordered set, $\vec{\pi}$, of
+  patterns. 
+\end{description}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Imperative constructs}
+  
+  ReScript is an imperative language due to the presence of
+  references.
+
+  \begin{description}
+    \item[The reference construct] $\mbox{ref\;o}$ which creates a reference in the form of a location and allows for binding locations to local declarations.
+
+    \item[Dereferencing] $!o$ lets us read from a reference $o$.
+
+    \item[Assignment] $o_1 := o_2$ lets us assign the value of $o_2$
+      to $o_1$ if $o_1$ is a reference.
+\end{description}
+
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{An imperative expression}
+  
+\begin{rescript}
+       (let x (ref 484000)
+        (let y (let z (5) (x:=z))))
+\end{rescript}
+
+\begin{itemize}
+\item<1->This creates a reference to the constant 484000 and binds the reference to
+  $x$ (so $x$ is an alias of this reference).
+\item<2-> Next a binding of $z$ is made
+to the constant 5 before writing to the reference, that $x$ is bound to, 
+to the value that $z$ is bound to.
+\item<3-> Then a binding for $y$ is made to the unit value,
+  as the assignment evaluates to the unit value.
+\item<4-> And finally we read the reference that $x$ is bound to.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{An annotated syntax}
+
+  We annotate expressions with program points. An occurrence $o$ is of the form $e^p$ where $p$ is a program point.
+  
+\begin{align*}
+o &::= e^p \\
+e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o \mid c \; o_1 \; o_2\\
+			& \mid \mbox{let} \; x \; o_1 \; o_2 \mid
+                   \mbox{let rec} \; x \; o_1 \; o_2 \\
+  & \mid \mbox{case}
+                   \; o_1 \; \vec{\pi} \; \vec{o} \mid  \refc \; o \mid o_1 := o_2 \mid \; !o\\
+\pi &::= n \mid b \mid x \mid \_  \mid
+                                (s_1,\cdots,s_n)
+\end{align*}
+
+\end{frame}
+\begin{frame}[fragile]
+  \frametitle{Here is the annotated version}
+
+    We only annotate \emph{bound} occurrences.
+
+  \begin{rescript}
+   (let x (ref 484000$\p{1}$)$\p{2}$
+     (let y (let z (5$\p{3}$)$\p{4}$
+        (x$\p{5}$:=z$\p{7}$)$\p{8}$)$\p{9}$ (!x)$\p{10}$)$\p{11}$)$\p{12}$
+\end{rescript}
+
+We see that e.g.
+
+\begin{itemize}
+\item $z\p{7}$ depends on $x\p{5}$.
+\item 
+\end{itemize}
+\end{frame}
+
+  \newcommand{\desc}[2]{\ensuremath{\underbrace{#1}_{\text{\tiny{#2}}}}}
+
+\begin{frame}
+  \frametitle{The binding model of the semantics}
+
+  Values are given by the formation rules
+%
+  \begin{align*}
+    v & ::= \desc{c}{constants} \mid \desc{\ell}{locations} \mid
+        \desc{()}{unit} \\
+    & \mid  \desc{\langle x,e^{p'},env\rangle}{closure} \mid
+      \desc{\langle x,f,e^{p''},env\rangle}{recursive closure}
+   \end{align*}
+
+   \begin{itemize}
+   \item An environment $env$ is a partial function from
+variables to \emph{locations}.
+\item A store $sto$ is a partial function from locations to values.
+   \end{itemize}
+
+\end{frame}
+\begin{frame} \frametitle{Keeping track of dependencies}
+
+  A dependency function $w$ is a map from occurrences to pairs of sets
+  of program points.
+  
+  If we have that
+  % 
+\[ w (u^p)=(L,V) \]
+%
+the value of the element $u^p$ depends on
+\begin{itemize}
+\item the set of location occurrences
+  $L=\{\loc_1^{p_1},\cdots,\loc_n^{p_n}\}$ and
+\item the set of variable occurrences $V =\{x_1^{p'_1},\cdots,x_m^{p'_m}\}$
+
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{An ordering on program points}
+
+   \begin{rescript}
+   (let x (ref 484000$\p{1}$)$\p{2}$
+     (let y (let z (5$\p{3}$)$\p{4}$
+        (x$\p{5}$:=z$\p{7}$)$\p{8}$)$\p{9}$ (!x)$\p{10}$)$\p{11}$)$\p{12}$
+\end{rescript}
+
+      If we have a dependency function $w$, we can derive a partial order $\po$ on
+      program points.
+
+      In our example, the ordering is the least po containing
+%
+      \begin{align*}
+        2 \po 4 && 2 \po 9 && 5 \po 9 \\
+        2 \po 8 && 7 \po 8
+      \end{align*}
+
+      Likewise, any $\po$ gives rise to a dependency function $w$.
+\end{frame}
+
+\begin{frame}
+\frametitle{A collecting semantics}
+
+The evaluation of an expression will always
+
+\begin{itemize}
+\item produce a new value
+\item modify the store, if references are involved
+\item reach a new program point
+\item create further dependencies
+\end{itemize}
+
+So we have big-step transitions of the form
+%
+\begin{align*}
+env\vdash\left\langle e^{p'},sto,(w,\sqleq_w),p\right\rangle\rightarrow\left\langle v,sto',(w',\sqleq_w'),(L,V),p''\right\rangle
+\end{align*}
+
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{The transition rule for variables}
+
+  \begin{center}
+  	\begin{tabular}{l}
+          \runa{Var}\\[6mm]
+	\inference[]{}
+	{\!\!\!\! env\vdash \left\langle x^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqleq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[8mm]
+          where $env(x)=v$ \\[3mm]
+          and $x^{p''}=\IP_{\sqleq_w}(x,w)$ \alert{(most recent $x$-occurrence)},\\[3mm]
+          and $w(x^{p''})=(L,V)$
+        \end{tabular}
+   \end{center}
+ \end{frame}
+
+ \begin{frame}
+   \frametitle{The transition rule for assignments}
+
+   \begin{center}
+     \begin{tabular}{l}
+       \runa{Ref-write}\\[6mm]
+	\inference[]
+	{
+		\!\!\!\! \!\!\!\!\!\!\!\!  env \vdash \left\langle e_1^{p_1},sto,(w,\sqleq_w),p
+       \right\rangle \rightarrow \left\langle
+       \loc,sto_1,(w_1,\sqleq_w^1),(L_1,V_1),p_1 \right\rangle \\
+       \\
+		\!\!\!\! \!\!\!\!\!\!\!\!  env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqleq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto_2,(w_2,\sqleq_w^2),(L_2,V_2),p_2 \right\rangle
+	}
+	{\!\!\!\! \!\!\!\!\!\!\!\!  env\vdash \left\langle \left[e_1^{p_1}:=e_2^{p_2}\right]^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle (),sto',(w',\sqleq_w'),(L_1,V_1),p' \right\rangle}\\[9mm]
+       where $sto'=sto_2[\loc\mapsto v]$ \\[3mm]
+       and $\loc^{p'}=\IP_{\sqleq_w}(\ell,w_2) $ \alert{(most recent $\ell$-occurrence)},\\[3mm]
+       and $w'=w_2[\loc^{p'}\mapsto(L_2,V_2)]$ \\[3mm]
+       and $\sqleq_w'=\sqleq_w^2\cup(p'',p')$
+       \end{tabular}
+   \end{center}
+ \end{frame}
+
+ \begin{frame}
+   \frametitle{The language of types}
+
+   The set of types \cat{Types} is given by the formation rules
+%
+\[ T ::=(\delta,\kappa)\mid T_1 \rightarrow T_2 \]
+%
+\begin{itemize}
+\item The base type $(\delta,\kappa)$ is the type of an occurrence $o$
+  that is not a function.
+  \begin{itemize}
+  \item $\delta$ is the set of occurrences that the value of $o$ may depend
+    upon
+  \item $\kappa$ represents the set of variables and internal
+    variables that the value of $o$ may depend upon.
+  \end{itemize}
+  
+\item The arrow type $T_1 \rightarrow T_2$ is used for typing
+  abstractions.
+  \end{itemize}
+\end{frame}
+
+ \begin{frame}
+   \frametitle{Locations and aliases at the type level}
+
+In a program, references are separate entities that introduce
+dependencies.
+
+This means that we need a notion of \alert{internal variable} to
+represent locations at the level of the type system.
+
+Internal variables are denoted by
+$\nu x,\nu y, \nu z \ldots \in\cat{IVar}$.
+
+We use a partition of $\cat{IVar} \cup \cat{Var}$ to represent
+aliasing.
+
+Two (possibly internal) variables belong to the same partition if they are
+aliases for the same location.
+
+
+ \end{frame}
+ 
+ \begin{frame}
+   \frametitle{The binding model of the type system}
+
+   In our type system, we assign a type to each occurrence and to each
+   internal variable.
+
+   A type environment $\Gamma$ is a partial function
+   %
+   \[
+     \Gamma:\cat{Var}_{\mathbf{P}}\cup\cat{IVar}_{\mathbf{P}}\rightharpoonup\cat{Types} \]
+   
+ \end{frame}
+
+ \begin{frame}
+   \frametitle{Dependencies at the type level}
+
+	An approximated order of program points $\Pi$ is a pair
+	\[ \Pi=(\cat{P},\sqleq_\Pi) \]
+	where
+	\begin{itemize}
+		\item \cat{P} is the set of program points in an occurrence,
+		\item $\sqleq_\Pi\subseteq\cat{P}\times\cat{P}$
+	\end{itemize}
+	We say that $\Pi$ is a partial order if $\sqleq_\Pi$ is a partial order.
+
+        The notion of immediate predecessor appears at the type level also,
+        but now wrt. $\sqleq_\Pi$ .
+        
+      \end{frame}
+
+      \begin{frame}
+        \frametitle{Type judgements}
+
+        Type judgements have the format
+%
+\[ \Gamma,\Pi\vdash e^p: T \]
+%
+and tell us that the occurrence $e^p$ has type $T$, given the
+dependency bindings $\Gamma$ and the approximated order of program
+points $\Pi$.
+
+
+
+      \end{frame}
+\begin{frame}
+  \frametitle{The type rule for variables}
+
+  \begin{tabular}{ll}
+    \runa{T-Var} &
+	\condinf{}
+	{\Gamma,\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}{where 
+                   $x^{p'}=\IP_{ \sqleq_\Pi}(x,\Gamma)$ \alert{(most recent occurrence of $x$)}\\
+    and
+                   $\Gamma(x^{p'})=T$}
+    \end{tabular}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{The let type rule}
+
+  \begin{tabular}{ll}
+    \runa{T-Let-1} &
+	\condinf{
+		\Gamma,\Pi\vdash e_1^{p_1}:(\delta,\kappa) \\
+		\Gamma',\Pi\vdash e_2^{p_2}:T_2
+	}
+	{\Gamma,\Pi\vdash [\mbox{let}\; x \; e_1^{p_1} \; e_2^{p_2}]^{p}:T_2}{where $\Gamma'=\Gamma[x^{p}:(\delta,\kappa\cup \{x\})]$ and
+          $\kappa\neq\emptyset$}
+  \end{tabular}
+  
+\end{frame}
+
+\begin{frame}
+  \frametitle{Two notions of dependency}
+
+  We now have
+
+  \begin{itemize}
+  \item Notions of dependency and bindings at the level of the semantics, as
+    described by $w$, $env$ and $sto$
+  \item Notions of dependency and bindings at the level of the semantics, as
+    described by $\Pi$ and $\Gamma$
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Soundness, informally}
+
+Suppose $e^p$ is a well-typed occurrence.
+  
+If the type-level dependency information $(\Gamma,\Pi)$ agrees with
+the information $(e,v,sto,w)$ at the level of the semantics, then this
+will also be the case after the evaluation of $e^p$..
+ 
+\end{frame}
+
+\begin{frame}
+  \frametitle{The type system is sound}
+
+  \begin{theorem}[Soundness]
+	Suppose $e^{p'}$ is an occurrence where
+	\begin{itemize}
+		\item $env\vdash\left\langle e^{p'},sto,(w,\sqleq_w),p\right\rangle\rightarrow\left\langle v,sto',(w',\sqleq_w'),(L,V),p''\right\rangle$,
+		\item $\Gamma,\Pi\vdash e^{p'} : T$
+		\item $\Gamma,\Pi\vdash env$
+		\item $(env,sto,(w,\sqleq_w))\models(\Gamma,\Pi)$
+	\end{itemize}
+	Then we have that
+	\begin{itemize}
+		\item $\Gamma,\Pi\vdash v:T$   \alert{(type preservation)}
+		\item $(env,sto',(w',\sqleq_w'))\models(\Gamma,\Pi)$
+                  \alert{(agreement wrt. the ordering)}
+                  
+		\item $(env,(w',\sqleq_w'),v,(L,V))\models(\Gamma,T)$  \alert{(agreement wrt. the type)}
+	\end{itemize}
+      \end{theorem}
+      
+\end{frame}
+
+\begin{frame}
+  \frametitle{Type checking}
+
+  Type checking involves
+  
+  \begin{itemize}
+  \item annotating the code to be analyzed with program points
+  \item specifying a dependency function $w$
+  \item specifying the types of variable occurrences as a $\Gamma$
+ \item specifying dependencies as a $\Pi$
+  \item specifying the type $T$ of an occurrence $e^p$
+  \item checking that $(\Gamma,\Pi) \vdash e^p : T$
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Type inference}
+
+  We would probably rather
+
+  \begin{itemize}
+  \item try to compute a $\Gamma$, $\Pi$ and $T$
+    given $e^p$   
+  \item assume that initially $w = \emptyset$.
+  \end{itemize}
+
+  This is liveness analysis as we know it.
+
+  The design of an algorithm for this is future work.
+\end{frame}
+
+\begin{frame}
+  \frametitle{Conclusions}
+
+  \begin{itemize}
+ 
+  \item We have established a type system for establishing the sets of
+    live variables and location at every program point of a ReScript
+    expression.
+  \item The type system is a safe overapproximation of the dependency
+    information found in the semantics.
+  \item This is a backward analysis, as type rules speak of immediate
+    predecessors.
+  \item The type system is not linear -- but references cannot be bound to
+abstractions and that every abstraction is used at most used once, so
+there is a "poor man's notion of linearity'' present.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Future work}
+
+  \begin{itemize}
+  \item Establish an algorithm for type inference. The constraints can
+    probably be solved using usual algorithms used for dataflow analysis.
+  \item Introduce notions of polymorphism to get rid of the "poor man's notion of linearity''.
+  \end{itemize}
+\end{frame}
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
