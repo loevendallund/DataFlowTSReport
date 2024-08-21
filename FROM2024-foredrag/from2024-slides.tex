@@ -1,6 +1,7 @@
 \documentclass{beamer}
 \usefonttheme{serif}
 \input{slide-setup/slides-preamble}
+\usepackage{transparent}
 \input{slide-setup/macros-from2024-slides}
 
 % \mode<presentation>
@@ -11,12 +12,19 @@
 %   \maketitle
 % }
 
-\title{\textcolor{red}{\textbf{A type system for data flow and alias analysis in ReScript}}}
+\mode<presentation>
+{
+  \usecolortheme[named=red]{structure}
+  \usetheme{Dresden}
+}
 
-\author{\textcolor{white}{Nicky Ask Lund  \and Hans Hüttel}}
-\date{\textcolor{white}{September 2024} \\[4mm]
-  \textcolor{yellow}{\textbf{COPLAWS 2024}} \\[4mm]
-\textcolor{white}{\textsl{To appear at Applied Formal Methods
+\title{\textcolor{yellow}{\textbf{A type system for data flow and alias analysis in ReScript}}}
+
+\author{\textcolor{yellow}{Nicky Ask Lund \and Hans Hüttel} \\[4mm]
+\textcolor{yellow}{Aalborg University \and University of Copenhagen}}
+\date{\ textcolor{yellow}{September 2024} \\[4mm]
+  \textcolor{yellow}{\large\textbf{COPLAWS 2024}} \\[4mm]
+\textcolor{yellow}{\textsl{To appear at Applied Formal Methods
     Symposium 2024, Timi{\textcommabelow{s}}oara, Romania}}}
 
 \begin{document}
@@ -25,9 +33,11 @@
 \setbeamertemplate{navigation symbols}{}
 \setbeamertemplate{footline}[page number]
 \setbeamertemplate{background canvas}{\includegraphics
-[width=\paperwidth,height=\paperheight]{timisoara.jpg}}
+[width=\paperwidth,height=\paperheight]{coplaws-2-kopi.jpg}}
 \maketitle
 }
+
+\section{Introduction}
 
 \begin{frame}
   \frametitle{Dataflow analysis}
@@ -96,6 +106,8 @@ There is no notion of dataflow analysis here.
   \item To see if this can be done without the need for introducing linearity
   \end{itemize}
 \end{frame}
+
+\section{ReScript}
 
 \begin{frame}
   \frametitle{ReScript}
@@ -192,6 +204,8 @@ to the value that $z$ is bound to.
 \end{itemize}
 
 \end{frame}
+
+\section{Dependencies}
 
 \begin{frame}
   \frametitle{An annotated syntax}
@@ -346,6 +360,8 @@ env\vdash\left\langle e^{p'},sto,(w,\sqleq_w),p\right\rangle\rightarrow\left\lan
    \end{center}
  \end{frame}
 
+ \section{The type system}
+ 
  \begin{frame}
    \frametitle{The language of types}
 
@@ -461,6 +477,8 @@ points $\Pi$.
   \end{tabular}
   
 \end{frame}
+
+\section{Results}
 
 \begin{frame}
   \frametitle{Two notions of dependency}
