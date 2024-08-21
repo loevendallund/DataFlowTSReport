@@ -11,11 +11,13 @@
 %   \maketitle
 % }
 
-\title{\textcolor{white}{\textbf{A type system for data flow and alias analysis in ReScript}}}
+\title{\textcolor{red}{\textbf{A type system for data flow and alias analysis in ReScript}}}
 
 \author{\textcolor{white}{Nicky Ask Lund  \and Hans Hüttel}}
 \date{\textcolor{white}{September 2024} \\[4mm]
-\textcolor{white}{\textsl{To appear at Applied Formal Methods Symposium 2024, Timi{\textcommabelow{s}}oara}}}
+  \textcolor{yellow}{\textbf{COPLAWS 2024}} \\[4mm]
+\textcolor{white}{\textsl{To appear at Applied Formal Methods
+    Symposium 2024, Timi{\textcommabelow{s}}oara, Romania}}}
 
 \begin{document}
 
@@ -28,9 +30,9 @@
 }
 
 \begin{frame}
-  \frametitle{Data-flow analysis}
+  \frametitle{Dataflow analysis}
 
-  The goal of data-flow analysis is to provide a safe static analysis
+  The goal of dataflow analysis is to provide a safe static analysis
   of the flow information in a program. This information can then be
   used in compiler optimizations and for register allocation.
 
@@ -68,9 +70,9 @@ There is no notion of dataflow analysis here.
 \begin{frame}
   \frametitle{Type-based approaches}
 
-  Later approaches use type systems and show how aliasing affects
-  dataflow. Some of the type systems are substructural in that they
-  introduce linearity.
+  Many more recent approaches to dataflow analysis use type systems
+  and show how aliasing affects dataflow. Some of the type systems are
+  \emph{substructural} in that they introduce linearity.
   
   \begin{itemize}
   \item (Smith et al., 2000) present a notion of alias types that allows
@@ -90,7 +92,7 @@ There is no notion of dataflow analysis here.
   \item To establish a type system for liveness analysis in the
     presence of aliasing
   \item To study this in the setting of an imperative functional
-    language
+    scripting language, ReScript
   \item To see if this can be done without the need for introducing linearity
   \end{itemize}
 \end{frame}
@@ -102,8 +104,9 @@ There is no notion of dataflow analysis here.
   type system based on that of OCaml. 
 
 
-  Just like OCaml, ReScript is imperative and allows for mutability
-  through reference constructs for creation, reading, and writing.
+  Just like OCaml, ReScript is imperative as well as functional. It
+  allows for mutability through reference constructs for creation,
+  reading, and writing.
   
 \end{frame}
 
@@ -124,23 +127,26 @@ There is no notion of dataflow analysis here.
 % \end{frame}
 
 \begin{frame}
-  \frametitle{Functional constructs}
+  \frametitle{Functional constructs of ReScript}
 
+  ReScript contains an applied $\lambda$-calculus with recursion,
+  let-bindings and pattern matching.
+  
  \begin{description}
   \item[Abstractions] $\lambda\;x.o$ have a parameter $x$ and
 body $o$.  
 
-\item[Applications] arewritten $o_1\;o_2$. The expression occurrence
+\item[Applications] are written $o_1\;o_2$. The expression occurrence
   $o_1$ is applied to the argument $o_2$.
 
-\item[Local declarations] $\mbox{let} \; x \; o_1 \; o_2$ associate
+\item[Local declarations] $\textsf{let} \; x \; o_1 \; o_2$ associate
 the variable $x$ with the value $o_1$ within $o_2$.
 
 \item[Recursive declarations]
-$\mbox{let rec} \; f \; o_1 \; o_2$ allows us to define a recursive
+$\textsf{let rec} \; f \; o_1 \; o_2$ allows us to define a recursive
 function $f$ where $f$ may occur in $o_1$.
 
-\item[Pattern matching] $\mbox{case} \; o_1 \; \vec{\pi} \; \vec{o}$
+\item[Pattern matching] $\textsf{case} \; o_1 \; \vec{\pi} \; \vec{o}$
   matches an occurrence with an ordered set, $\vec{\pi}$, of
   patterns. 
 \end{description}
@@ -148,13 +154,12 @@ function $f$ where $f$ may occur in $o_1$.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Imperative constructs}
+  \frametitle{Imperative constructs of ReScript}
   
-  ReScript is an imperative language due to the presence of
-  references.
+  The presence of references makes ReScript an imperative language.
 
   \begin{description}
-    \item[The reference construct] $\mbox{ref\;o}$ which creates a reference in the form of a location and allows for binding locations to local declarations.
+    \item[The reference construct] $\textsf{ref\;o}$ which creates a reference in the form of a location and allows for binding locations to local declarations.
 
     \item[Dereferencing] $!o$ lets us read from a reference $o$.
 
@@ -196,10 +201,10 @@ to the value that $z$ is bound to.
 \begin{align*}
 o &::= e^p \\
 e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o \mid c \; o_1 \; o_2\\
-			& \mid \mbox{let} \; x \; o_1 \; o_2 \mid
-                   \mbox{let rec} \; x \; o_1 \; o_2 \\
-  & \mid \mbox{case}
-                   \; o_1 \; \vec{\pi} \; \vec{o} \mid  \refc \; o \mid o_1 := o_2 \mid \; !o\\
+			& \mid \textsf{let} \; x \; o_1 \; o_2 \mid
+                   \textsf{let rec} \; x \; o_1 \; o_2 \\
+  & \mid \textsf{case}
+                   \; o_1 \; \vec{\pi} \; \vec{o} \mid  \textsf{ref} \; o \mid o_1 := o_2 \mid \; !o\\
 \pi &::= n \mid b \mid x \mid \_  \mid
                                 (s_1,\cdots,s_n)
 \end{align*}
@@ -216,12 +221,8 @@ e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o \mid c \; o_1 \; o_2\\
         (x$\p{5}$:=z$\p{7}$)$\p{8}$)$\p{9}$ (!x)$\p{10}$)$\p{11}$)$\p{12}$
 \end{rescript}
 
-We see that e.g.
+We see that e.g. $z\p{7}$ depends on $x\p{5}$.
 
-\begin{itemize}
-\item $z\p{7}$ depends on $x\p{5}$.
-\item 
-\end{itemize}
 \end{frame}
 
   \newcommand{\desc}[2]{\ensuremath{\underbrace{#1}_{\text{\tiny{#2}}}}}
