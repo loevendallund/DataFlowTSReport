@@ -189,9 +189,10 @@ function $f$ where $f$ may occur in $o_1$.
   
 \begin{rescript}
        (let x (ref 484000)
-        (let y (let z (5) (x:=z))))
+           (let y (let z (5)
+               (x:=z)) (!x)
 \end{rescript}
-
+%
 \begin{itemize}
 \item<1->This creates a reference to the constant 484000 and binds the reference to
   $x$ (so $x$ is an alias of this reference).
@@ -254,8 +255,7 @@ We see that e.g. $z\p{7}$ depends on $x\p{5}$.
    \end{align*}
 
    \begin{itemize}
-   \item An environment $env$ is a partial function from
-variables to \emph{locations}.
+   \item An environment $env$ is a partial function from variables to values.
 \item A store $sto$ is a partial function from locations to values.
    \end{itemize}
 
@@ -488,7 +488,7 @@ points $\Pi$.
   \begin{itemize}
   \item Notions of dependency and bindings at the level of the semantics, as
     described by $w$, $env$ and $sto$
-  \item Notions of dependency and bindings at the level of the semantics, as
+  \item Notions of dependency and bindings at the level of the type system, as
     described by $\Pi$ and $\Gamma$
   \end{itemize}
 
@@ -555,7 +555,9 @@ will also be the case after the evaluation of $e^p$..
   \item assume that initially $w = \emptyset$.
   \end{itemize}
 
-  This is liveness analysis as we know it.
+  This is liveness analysis as we know it: Computing an ordering of
+  program points ($\Pi$) and an overapproximation of which variables
+  are alive at which program points ($\Gamma$).
 
   The design of an algorithm for this is future work.
 \end{frame}
