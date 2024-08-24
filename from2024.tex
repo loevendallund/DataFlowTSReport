@@ -108,8 +108,8 @@ The formation rules of our abstract syntax are shown below.
 \begin{align*}
 o &::= e^p \\
 e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o \mid c \; o_1 \; o_2\\
-			& \mid \mbox{let} \; x \; o_1 \; o_2 \mid
-                   \mbox{let rec} \; x \; o_1 \; o_2 \mid \mbox{case}
+			& \mid \mbox{let} \; f \; o_1 \; o_2 \mid
+                   \mbox{let rec} \; f \; o_1 \; o_2 \mid \mbox{case}
                    \; o_1 \; \vec{\pi} \; \vec{o} \mid  \refc \; o \mid o_1 := o_2 \mid \; !o\\
 \pi &::= n \mid b \mid x \mid \_  \mid
                                 (s_1,\cdots,s_n)
@@ -124,8 +124,8 @@ An \emph{application} is written $o_1\;o_2$ , and $c\;o_1\;o_2$ denotes a
 \emph{functional application} where $c$ is a functional constant and
 $o_1$, $o_2$ are its arguments.
 
-\emph{Local declarations} $\mbox{let} \; x \; o_1 \; o_2$ associate
-the variable $x$ with the value $o_1$ within $o_2$, and
+\emph{Local declarations} $\mbox{let} \; f \; o_1 \; o_2$ associate
+the variable $f$ with the value $o_1$ within $o_2$, and
 $\mbox{let rec} \; f \; o_1 \; o_2$ allows us to define a recursive
 function $f$ where $f$ may occur in $o_1$. ReScript is an imperative
 language due to the presence of the \emph{reference} construct
@@ -319,7 +319,7 @@ $\{\loc^2,\loc^8\}$. From this, we find the greatest element:
 	As we can see, from the $\IP_{w_ex}$ function, we got $\loc^8$ which were the occurrence we wanted.
 \end{example}
 
-\subsection{Collection semantics}\label{sec:sem}
+\subsection{Collecting semantics}\label{sec:sem}
 
 The semantics for our language that collects dependency information is
 a big-step semantics with transitions of the form
@@ -456,7 +456,7 @@ occurrences given a type environment (presented in
 
 As presented, the language contains local information as bindings and
 global information as locations.  Since locations are a semantic
-notion, and references do not need to be bound to variables, we user
+notion, and references do not need to be bound to variables, we use
 the notion of \emph{internal} variables to represent locations.
 Internal variables are denoted by
 $\nu x,\nu y, \nu z \ldots \in\cat{IVar}$.  We use a partition of
