@@ -42,7 +42,7 @@
   of the flow information in a program. This information can then be
   used in compiler optimizations and for register allocation.
 
-  A variable occurrence is live at a program point $p$ if its value
+  A variable occurrence is \alert{live} at a program point $p$ if its value
   may be used at program points later than $p$.
 
 \end{frame}
@@ -50,14 +50,14 @@
 \begin{frame}
   \frametitle{How it all began}
 
-The initial work of (Kildall,1972) allowed one to compute a safe approximation
-of where each variable in a program was a live.
+The initial work of (Kildall,1972) allows one to compute a safe approximation
+of the program points where each variable in a program is live.
 
 The approach uses a collection of dataflow equations. A solution for
 them can be computed in time polynomial in the size of the program to
 be analyzed.
 
-There is no notion of dataflow analysis here.
+There is no notion of aliasing analysis here.
 \end{frame}
 
 \begin{frame}

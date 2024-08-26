@@ -39,7 +39,7 @@
   of the flow information in a program. This information can then be
   used in compiler optimizations and for register allocation.
 
-  A variable occurrence is live at a program point $p$ if its value
+  A variable occurrence is \alert{live} at a program point $p$ if its value
   may be used at program points later than $p$.
 
 \end{frame}
@@ -47,14 +47,14 @@
 \begin{frame}
   \frametitle{How it all began}
 
-The initial work of (Kildall,1972) allowed one to compute a safe approximation
-of where each variable in a program was a live.
+The initial work of (Kildall,1972) allows one to compute a safe approximation
+of the program points where each variable in a program is live.
 
 The approach uses a collection of dataflow equations. A solution for
 them can be computed in time polynomial in the size of the program to
 be analyzed.
 
-There is no notion of dataflow analysis here.
+There is no notion of aliasing analysis here.
 \end{frame}
 
 \begin{frame}
@@ -201,25 +201,8 @@ to the value that $z$ is bound to.
 
 \section{Dependencies}
 
-\begin{frame}
-  \frametitle{An annotated syntax}
-
-  We annotate expressions with program points. An occurrence $o$ is of the form $e^p$ where $p$ is a program point.
-  
-\begin{align*}
-o &::= e^p \\
-e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o \mid c \; o_1 \; o_2\\
-			& \mid \textsf{let} \; x \; o_1 \; o_2 \mid
-                   \textsf{let rec} \; x \; o_1 \; o_2 \\
-  & \mid \textsf{case}
-                   \; o_1 \; \vec{\pi} \; \vec{o} \mid  \textsf{ref} \; o \mid o_1 := o_2 \mid \; !o\\
-\pi &::= n \mid b \mid x \mid \_  \mid
-                                (s_1,\cdots,s_n)
-\end{align*}
-
-\end{frame}
 \begin{frame}[fragile]
-  \frametitle{Here is the annotated version}
+  \frametitle{The annotated version}
 
     We only annotate \emph{bound} occurrences.
 
@@ -229,7 +212,7 @@ e &::= x \mid c \mid o_1\;o_2 \mid \lambda x.o \mid c \; o_1 \; o_2\\
         (x$\p{5}$:=z$\p{7}$)$\p{8}$)$\p{9}$ (!x)$\p{10}$)$\p{11}$)$\p{12}$
 \end{rescript}
 
-We see that e.g. $z\p{7}$ depends on $x\p{5}$.
+We see that e.g. $x\p{5}$ depends on $z\p{7}$.
 
 \end{frame}
 
@@ -315,46 +298,29 @@ env\vdash\left\langle e^{p'},sto,(w,\sqleq_w),p\right\rangle\rightarrow\left\lan
 \end{frame}
 
 
-\begin{frame}
-  \frametitle{The transition rule for variables}
-
-  \begin{center}
-  	\begin{tabular}{l}
-          \runa{Var}\\[6mm]
-	\inference[]{}
-	{\!\!\!\! env\vdash \left\langle x^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle v,sto,(w,\sqleq_w),(L,V\cup\{x^{p'}\}),p' \right\rangle}\\[8mm]
-          where $env(x)=v$ \\[3mm]
-          and $x^{p'}=\IP_{\sqleq_w}(x,w)$ \alert{(most recent $x$-occurrence)},\\[3mm]
-          and $w(x^{p'})=(L,V)$
-        \end{tabular}
-   \end{center}
- \end{frame}
-
- \begin{frame}
-   \frametitle{The transition rule for assignments}
-
-   \begin{center}
-     \begin{tabular}{l}
-       \runa{Ref-write}\\[6mm]
-	\inference[]
-	{
-		\!\!\!\! \!\!\!\!\!\!\!\!  env \vdash \left\langle e_1^{p_1},sto,(w,\sqleq_w),p
-       \right\rangle \rightarrow \left\langle
-       \loc,sto_1,(w_1,\sqleq_w^1),(L_1,V_1),p_1 \right\rangle \\
-       \\
-		\!\!\!\! \!\!\!\!\!\!\!\!  env \vdash \left\langle e_2^{p_2},sto_1,(w_1,\sqleq_w^1),p_1 \right\rangle \rightarrow \left\langle v,sto_2,(w_2,\sqleq_w^2),(L_2,V_2),p_2 \right\rangle
-	}
-	{\!\!\!\! \!\!\!\!\!\!\!\!  env\vdash \left\langle \left[e_1^{p_1}:=e_2^{p_2}\right]^{p'},sto,(w,\sqleq_w),p \right\rangle \rightarrow \left\langle (),sto',(w',\sqleq_w'),(L_1,V_1),p' \right\rangle}\\[9mm]
-       where $sto'=sto_2[\loc\mapsto v]$ \\[3mm]
-       and $\loc^{p'}=\IP_{\sqleq_w}(\ell,w_2) $ \alert{(most recent $\ell$-occurrence)},\\[3mm]
-       and $w'=w_2[\loc^{p'}\mapsto(L_2,V_2)]$ \\[3mm]
-       and $\sqleq_w'=\sqleq_w^2\cup(p'',p')$
-       \end{tabular}
-   \end{center}
- \end{frame}
 
  \section{The type system}
- 
+
+ \begin{frame}
+   \frametitle{Locations and aliases at the type level}
+
+In a program, references are separate entities that introduce
+dependencies.
+
+This means that we need a notion of \alert{internal variable} to
+represent locations at the level of the type system.
+
+Internal variables are denoted by
+$\nu x,\nu y, \nu z \ldots \in\cat{IVar}$.
+
+We use a partition of $\cat{IVar} \cup \cat{Var}$ to represent
+aliasing.
+
+Two (possibly internal) variables belong to the same partition if they are
+aliases for the same location.
+
+\end{frame}
+
  \begin{frame}
    \frametitle{The language of types}
 
@@ -377,26 +343,7 @@ env\vdash\left\langle e^{p'},sto,(w,\sqleq_w),p\right\rangle\rightarrow\left\lan
   \end{itemize}
 \end{frame}
 
- \begin{frame}
-   \frametitle{Locations and aliases at the type level}
-
-In a program, references are separate entities that introduce
-dependencies.
-
-This means that we need a notion of \alert{internal variable} to
-represent locations at the level of the type system.
-
-Internal variables are denoted by
-$\nu x,\nu y, \nu z \ldots \in\cat{IVar}$.
-
-We use a partition of $\cat{IVar} \cup \cat{Var}$ to represent
-aliasing.
-
-Two (possibly internal) variables belong to the same partition if they are
-aliases for the same location.
-
-
- \end{frame}
+ 
  
  \begin{frame}
    \frametitle{The binding model of the type system}
@@ -442,19 +389,19 @@ points $\Pi$.
 
 
       \end{frame}
-\begin{frame}
-  \frametitle{The type rule for variables}
+% \begin{frame}
+%   \frametitle{The type rule for variables}
 
-  \begin{tabular}{ll}
-    \runa{T-Var} &
-	\condinf{}
-	{\Gamma,\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}{where 
-                   $x^{p'}=\IP_{ \sqleq_\Pi}(x,\Gamma)$ \alert{(most recent occurrence of $x$)}\\
-    and
-                   $\Gamma(x^{p'})=T$}
-    \end{tabular}
+%   \begin{tabular}{ll}
+%     \runa{T-Var} &
+% 	\condinf{}
+% 	{\Gamma,\Pi \vdash x^p:T \sqcup (\{x^p\},\emptyset)}{where 
+%                    $x^{p'}=\IP_{ \sqleq_\Pi}(x,\Gamma)$ \alert{(most recent occurrence of $x$)}\\
+%     and
+%                    $\Gamma(x^{p'})=T$}
+%     \end{tabular}
 
-\end{frame}
+% \end{frame}
 
 \begin{frame}
   \frametitle{The let type rule}
