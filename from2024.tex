@@ -78,8 +78,8 @@ full version of our paper is available at \cite{arxiv}.
 
 \section{A fragment of ReScript}\label{sec:lang}
 
-We consider a fragment of ReScript that contains a $\lambda$-calculus
-with bindings, pattern matching, and mutability.
+In this paper we consider a fragment of ReScript that contains a $\lambda$-calculus
+with pattern matching, local declarations that can be recursive and a notion of mutable references.
  
 \subsection{Syntax}
 
@@ -148,10 +148,10 @@ be ensured by means of $\alpha$-conversion.
 
 \begin{example}\label{ex:write}
 Consider
-\begin{lstlisting}[language=Caml, mathescape=true]
-  (let x (ref 3$^1$)$^2$
-  (let y (let z (5$^3$)$^4$
-     (x$^5$:=z$^7$)$^8$)$^{9}$ (!x)$^{10}$)$^{11}$)$^{12}$
+ \begin{lstlisting}[language=Caml, mathescape=true]
+   (let x (ref 484000$\p{1}$)$\p{2}$
+     (let y (let z (5$\p{3}$)$\p{4}$
+        (x$\p{5}$:=z$\p{7}$)$\p{8}$)$\p{9}$ (!x)$\p{10}$)$\p{11}$)$\p{12}$
 \end{lstlisting}
 This creates a reference to the constant 3 and binds the reference to
 $x$ (so $x$ is an alias of this reference). Next a binding of $z$ is made
@@ -269,7 +269,8 @@ Any dependency function induces an ordering on program points as follows.
 	Then the induced order $\sqleq_w$ is given by
 	 \[ \sqleq_w= \{(p,p')\mid p \in \points(\dom(w)), p' \in
            \points(w(p)) \} \]
-         	We say that $w$ is a partial order if $\sqleq_w$ is a partial order.
+         	We say that $w$ is a partial order if its equality
+                closure $\sqleq_w$ is a partial order.
 \end{definition}
 
 \begin{example}\label{ex:depRel}

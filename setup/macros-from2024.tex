@@ -38,10 +38,13 @@
 
 \newcommand{\defeq}{\stackrel{\textsf{def}}{=}}
 
-\newtheorem{definition}{Definition}
-\newtheorem{example}{Example}
 \newtheorem{theorem}{Theorem}
 \newtheorem{lemma}{Lemma}
+
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+\newtheorem{example}{Example}
 
 \newcommand{\dom}{\textrm{dom}}
 
@@ -60,3 +63,41 @@
 \newcommand{\nexte}{\ensuremath{next}\xspace}
 
 \newcommand{\IP}{\ensuremath{\textsf{IP}}\xspace}
+
+% Listings med fremhævelse
+
+\lstnewenvironment{rescript}[1][]
+      {\lstset{language=Caml}\lstset{escapeinside={(*@}{@*)},
+%      numbers=left,numberstyle=\normalsize,stepnumber=1,numbersep=5pt,
+       breaklines=true,
+       mathescape=true,
+       %firstnumber=last,
+           %frame=tblr,
+           framesep=5pt,
+  %         basicstyle=\normalsize\ttfamily,
+           showstringspaces=false,
+           keywordstyle=\bfseries\color{black},
+          %identifierstyle=\ttfamily,
+           stringstyle=\color{maroon},
+           commentstyle=\color{black},
+           moredelim=**[is][\only<+>{\color{red}}]{@}{@},
+           gobble=4,
+        rulecolor=\color{black},
+        xleftmargin=0pt,
+        xrightmargin=0pt,
+        aboveskip=\bigskipamount,
+        belowskip=\bigskipamount,
+               backgroundcolor=\color{white}, #1
+    }}
+    {}
+
+    % Programpunkter
+
+        \newcommand{\p}[1]{\mathbf{\textcolor{red}{^{#1}}}}
+
+        \newcommand{\po}{\ensuremath{\sqleq_w}}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
