@@ -36,12 +36,14 @@
   \frametitle{Dataflow analysis}
 
   The goal of dataflow analysis is to provide a safe static analysis
-  of the flow information in a program. This information can then be
-  used in compiler optimizations and for register allocation.
+  of the flow information in a program. 
 
   A variable occurrence is \alert{live} at a program point $p$ if its value
   may be used at program points later than $p$.
 
+  This information can then be used in compiler optimizations such as
+  the elimination of dead code and for register allocation.
+  
 \end{frame}
 
 \begin{frame}
@@ -138,20 +140,20 @@ There is no notion of aliasing analysis here.
   let-bindings and pattern matching.
   
  \begin{description}
-  \item[Abstractions] $\lambda\;x.o$ have a parameter $x$ and
+  \item[Abstractions] $\lambda\;x.e$ have a parameter $x$ and
 body $o$.  
 
-\item[Applications] are written $o_1\;o_2$. The expression occurrence
-  $o_1$ is applied to the argument $o_2$.
+\item[Applications] are written $e_1\;e_2$. The expression occurrence
+  $e_1$ is applied to the argument $e_2$.
 
-\item[Local declarations] $\textsf{let} \; x \; o_1 \; o_2$ associate
-the variable $x$ with the value $o_1$ within $o_2$.
+\item[Local declarations] $\textsf{let} \; x \; e_1 \; e_2$ associate
+the variable $x$ with the value $e_1$ within $e_2$.
 
 \item[Recursive declarations]
-$\textsf{let rec} \; f \; o_1 \; o_2$ allows us to define a recursive
-function $f$ where $f$ may occur in $o_1$.
+$\textsf{let rec} \; f \; e_1 \; e_2$ allows us to define a recursive
+function $f$ where $f$ may occur in $e_1$.
 
-\item[Pattern matching] $\textsf{case} \; o_1 \; \vec{\pi} \; \vec{o}$
+\item[Pattern matching] $\textsf{case} \; e_1 \; \vec{\pi} \; \vec{e}$
   matches an occurrence with an ordered set, $\vec{\pi}$, of
   patterns. 
 \end{description}
@@ -164,45 +166,22 @@ function $f$ where $f$ may occur in $o_1$.
   The presence of references makes ReScript an imperative language.
 
   \begin{description}
-    \item[The reference construct] $\textsf{ref\;o}$ which creates a reference in the form of a location and allows for binding locations to local declarations.
+    \item[The reference construct] $\textsf{ref\;e}$ which creates a
+      reference. A reference is a location containing the value of $e$.
 
-    \item[Dereferencing] $!o$ lets us read from a reference $o$.
+    \item[Dereferencing] $!e$ lets us read from a reference $e$.
 
-    \item[Assignment] $o_1 := o_2$ lets us assign the value of $o_2$
-      to $o_1$ if $o_1$ is a reference.
+    \item[Assignment] $e_1 := e_2$ lets us assign the value of $e_2$
+      to $e_1$ if $e_1$ is a reference.
 \end{description}
 
-
-\end{frame}
-
-
-
-\begin{frame}[fragile]
-  \frametitle{An imperative expression}
-  
-\begin{rescript}
-       (let x (ref 484000)
-           (let y (let z (5)
-               (x:=z)) (!x)
-\end{rescript}
-%
-\begin{itemize}
-\item<1->This creates a reference to the constant 484000 and binds the reference to
-  $x$ (so $x$ is an alias of this reference).
-\item<2-> Next a binding of $z$ is made
-to the constant 5 before writing to the reference, that $x$ is bound to, 
-to the value that $z$ is bound to.
-\item<3-> Then a binding for $y$ is made to the unit value,
-  as the assignment evaluates to the unit value.
-\item<4-> And finally we read the reference that $x$ is bound to.
-\end{itemize}
 
 \end{frame}
 
 \section{Dependencies}
 
 \begin{frame}[fragile]
-  \frametitle{The annotated version}
+  \frametitle{An annotated expression}
 
     We only annotate \emph{bound} occurrences.
 
@@ -212,7 +191,17 @@ to the value that $z$ is bound to.
         (x$\p{5}$:=z$\p{7}$)$\p{8}$)$\p{9}$ (!x)$\p{10}$)$\p{11}$)$\p{12}$
 \end{rescript}
 
-We see that e.g. $x\p{5}$ depends on $z\p{7}$.
+\begin{itemize}
+\item<1->This creates a reference to the constant 484000 and binds the reference to
+  $x$ (so $x$ is an alias of this reference).
+\item<2-> Next a binding of $z$ is made
+to the constant 5 before writing to the reference, that $x$ is bound to, 
+to the value that $z$ is bound to.
+\item<3-> Then a binding for $y$ is made to the unit value,
+  as the assignment evaluates to the unit value.
+\item<4-> And finally we read the reference that $x$ is bound to.
+\item<5-> We see that e.g. $x\p{5}$ depends on $z\p{7}$.
+\end{itemize}
 
 \end{frame}
 
@@ -236,7 +225,7 @@ We see that e.g. $x\p{5}$ depends on $z\p{7}$.
    \end{itemize}
 
 \end{frame}
-\begin{frame} \frametitle{Keeping track of dependencies}
+\begin{frame} \frametitle{Dependencies as described in the semantics}
 
   A dependency function $w$ is a map from occurrences to pairs of sets
   of program points.
@@ -432,6 +421,7 @@ points $\Pi$.
     described by $\Pi$ and $\Gamma$
   \end{itemize}
 
+  These two notions are closely related.
 \end{frame}
 
 \begin{frame}
@@ -512,7 +502,7 @@ will also be the case after the evaluation of $e^p$.
     expression.
   \item The type system is a safe overapproximation of the dependency
     information found in the semantics.
-  \item This is a backward analysis, as type rules speak of immediate
+  \item This is a \alert{backward analysis}, as type rules speak of immediate
     predecessors.
   \item The type system is not linear -- but references cannot be bound to
 abstractions and that every abstraction is used at most used once, so
@@ -524,9 +514,14 @@ there is a "poor man's notion of linearity'' present.
   \frametitle{Future work}
 
   \begin{itemize}
+  \item If we also classify variables according to high vs. low
+    security levels, our dataflow analysis can be used for checking
+    for non-interference. How does our type system compare to type
+    systems for non-interference such as those by Volpano and Smith?
   \item Establish an algorithm for type inference. The constraints can
     probably be solved using usual algorithms used for dataflow analysis.
-  \item Introduce notions of polymorphism to get rid of the "poor man's notion of linearity''.
+  \item Introduce notions of polymorphism to get rid of the "poor
+    man's notion of linearity''. 
   \end{itemize}
 \end{frame}
 \end{document}
