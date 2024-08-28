@@ -1,7 +1,8 @@
 \documentclass{eptcs}
 \usepackage{amsthm}
-\input{setup/preamble-lopstr2024.tex}
+\input{setup/preamble-from2024.tex}
 \input{setup/macros-from2024.tex}
+\usepackage{underscore}
 \usepackage{xspace}
 
 
@@ -43,12 +44,12 @@ build a system of flow equations based on a graph representation of
 the program and to compute a solution using an iterative algorithm
 \cite{KildallGaryA1973Auat,RyderBarbara1988Idaa}. Other graph-free
 approaches have also been considered
-\cite{HorspoolR.Niegel2002AGAt}. A challenge in this setting is how to
+\cite{mohnen}.  A challenge in this setting is how to
 deal with the aliasing that imperative language constructs introduce.
 
 Type systems have often been used to provide static analyses of
 programs in order to characterize specific run-time errors, including
-ones caused by aliasing. In \cite{10.1007/3-540-46425-5_24} Smith et
+ones caused by aliasing. In \cite{smith} Smith et
 al. present a notion of alias types that allows functions to specify
 the shape of a store and to track the flow of pointers through a
 computation. The language is a simple location-based language. Other
@@ -63,7 +64,7 @@ presence of aliasing for a non-trivial fragment of the programming
 language ReScript which is meant as an alternative to other typed
 languages that target JavaScript. ReScript is based on OCaml with a
 JavaScript-inspired syntax and a type system based on that of
-OCaml\cite{rescript_rebrand}. ReScript is imperative and allows for
+OCaml\cite{rescript}. ReScript is imperative and allows for
 mutability through reference constructs for creation, reading, and
 writing.
 
@@ -1142,7 +1143,7 @@ includes a parser, and evaluator, a type checker, and an approximator
 for an order of programs points. The approximator is based on the
 given type system, where it is derived from the structure of the type
 system.  The implementation is hosted on Github and can be found at
-\cite{df_implementation}.
+\cite{implementation}.
 
 \section{Conclusion}\label{sec:Conc}
 
@@ -1209,8 +1210,136 @@ should be bound.  We conjecture that such a type inference algorithm
 for our system will be able to compute the information found in an
 interative data flow analysis.
 
-\bibliography{bib}
-\bibliographystyle{plain}
+\begin{thebibliography}{10}
+\providecommand{\bibitemdeclare}[2]{}
+\providecommand{\surnamestart}{}
+\providecommand{\surnameend}{}
+\providecommand{\urlprefix}{Available at }
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\href}[2]{\texttt{#2}}
+\providecommand{\urlalt}[2]{\href{#1}{#2}}
+\providecommand{\doi}[1]{doi:\urlalt{https://doi.org/#1}{#1}}
+\providecommand{\eprint}[1]{arXiv:\urlalt{https://arxiv.org/abs/#1}{#1}}
+\providecommand{\bibinfo}[2]{#2}
+
+\bibitemdeclare{}{rescript}
+\bibitem{rescript}
+\bibinfo{author}{ReScript \surnamestart Association\surnameend}
+  (\bibinfo{year}{2020}): \emph{\bibinfo{title}{{BuckleScript and Reason
+  Rebranding}}}.
+\newblock
+  \urlprefix\url{https://rescript-lang.org/blog/bucklescript-is-rebranding}.
+
+\bibitemdeclare{inproceedings}{goguen-meseguer}
+\bibitem{goguen-meseguer}
+\bibinfo{author}{J.~A. \surnamestart Goguen\surnameend} \&
+  \bibinfo{author}{J.~\surnamestart Meseguer\surnameend}
+  (\bibinfo{year}{1982}): \emph{\bibinfo{title}{Security Policies and Security
+  Models}}.
+\newblock In: {\slshape \bibinfo{booktitle}{1982 IEEE Symposium on Security and
+  Privacy}}, pp. \bibinfo{pages}{11--11}, \doi{10.1109/SP.1982.10014}.
+
+\bibitemdeclare{inproceedings}{KildallGaryA1973Auat}
+\bibitem{KildallGaryA1973Auat}
+\bibinfo{author}{Gary~A. \surnamestart Kildall\surnameend}
+  (\bibinfo{year}{1973}): \emph{\bibinfo{title}{A unified approach to global
+  program optimization}}.
+\newblock In: {\slshape \bibinfo{booktitle}{Proceedings of the 1st Annual ACM
+  SIGACT-SIGPLAN Symposium on Principles of Programming Languages}},
+  \bibinfo{series}{POPL '73}, \bibinfo{publisher}{Association for Computing
+  Machinery}, \bibinfo{address}{New York, NY, USA}, p.
+  \bibinfo{pages}{194–206}, \doi{10.1145/512927.512945}.
+\newblock \urlprefix\url{https://doi.org/10.1145/512927.512945}.
+
+\bibitemdeclare{misc}{implementation}
+\bibitem{implementation}
+\bibinfo{author}{Nicky~Ask \surnamestart Lund\surnameend}
+  (\bibinfo{year}{2023}): \emph{\bibinfo{title}{Implementation of dataflow
+  analysis}}.
+\newblock \urlprefix\url{https://github.com/loevendallund/dataflow}.
+
+\bibitemdeclare{techreport}{arxiv}
+\bibitem{arxiv}
+\bibinfo{author}{Nicky~Ask \surnamestart Lund\surnameend} \&
+  \bibinfo{author}{Hans \surnamestart Hüttel\surnameend}
+  (\bibinfo{year}{2024}): \emph{\bibinfo{title}{A type system for data flow and
+  alias analysis in ReScript}}.
+\newblock \bibinfo{type}{Technical Report}, \bibinfo{institution}{Aalborg
+  University}.
+\newblock \urlprefix\url{http://arxiv.org/abs/2408.11954}.
+
+\bibitemdeclare{inproceedings}{mohnen}
+\bibitem{mohnen}
+\bibinfo{author}{Markus \surnamestart Mohnen\surnameend}
+  (\bibinfo{year}{2002}): \emph{\bibinfo{title}{A Graph-Free Approach to
+  Data-Flow Analysis}}.
+\newblock In: {\slshape \bibinfo{booktitle}{Proceedings of the 11th
+  International Conference on Compiler Construction}}, \bibinfo{series}{CC
+  '02}, \bibinfo{publisher}{Springer-Verlag}, \bibinfo{address}{Berlin,
+  Heidelberg}, p. \bibinfo{pages}{46–61}.
+\newblock \urlprefix\url{https://doi.org/10.1007/3-540-45937-5\_6}.
+
+\bibitemdeclare{inproceedings}{DBLP:conf/tlca/MorrisettAF05}
+\bibitem{DBLP:conf/tlca/MorrisettAF05}
+\bibinfo{author}{Greg \surnamestart Morrisett\surnameend},
+  \bibinfo{author}{Amal~J. \surnamestart Ahmed\surnameend} \&
+  \bibinfo{author}{Matthew \surnamestart Fluet\surnameend}
+  (\bibinfo{year}{2005}): \emph{\bibinfo{title}{L\({}^{\mbox{3}}\): {A} Linear
+  Language with Locations}}.
+\newblock In \bibinfo{editor}{Pawel \surnamestart Urzyczyn\surnameend}, editor:
+  {\slshape \bibinfo{booktitle}{Typed Lambda Calculi and Applications, 7th
+  International Conference, {TLCA} 2005, Nara, Japan, April 21-23, 2005,
+  Proceedings}}, {\slshape \bibinfo{series}{Lecture Notes in Computer Science}}
+  \bibinfo{volume}{3461}, \bibinfo{publisher}{Springer}, pp.
+  \bibinfo{pages}{293--307}, \doi{10.1007/11417170\_22}.
+\newblock \urlprefix\url{https://doi.org/10.1007/11417170\_22}.
+
+\bibitemdeclare{article}{RyderBarbara1988Idaa}
+\bibitem{RyderBarbara1988Idaa}
+\bibinfo{author}{Barbara~G. \surnamestart Ryder\surnameend} \&
+  \bibinfo{author}{Marvin~C. \surnamestart Paull\surnameend}
+  (\bibinfo{year}{1988}): \emph{\bibinfo{title}{Incremental data-flow analysis
+  algorithms}}.
+\newblock {\slshape \bibinfo{journal}{ACM Trans. Program. Lang. Syst.}}
+  \bibinfo{volume}{10}(\bibinfo{number}{1}), p. \bibinfo{pages}{1–50},
+  \doi{10.1145/42192.42193}.
+\newblock \urlprefix\url{https://doi.org/10.1145/42192.42193}.
+
+\bibitemdeclare{inproceedings}{smith}
+\bibitem{smith}
+\bibinfo{author}{Frederick \surnamestart Smith\surnameend},
+  \bibinfo{author}{David \surnamestart Walker\surnameend} \&
+  \bibinfo{author}{Greg \surnamestart Morrisett\surnameend}
+  (\bibinfo{year}{2000}): \emph{\bibinfo{title}{Alias Types}}.
+\newblock In \bibinfo{editor}{Gert \surnamestart Smolka\surnameend}, editor:
+  {\slshape \bibinfo{booktitle}{Programming Languages and Systems}},
+  \bibinfo{publisher}{Springer Berlin Heidelberg}, \bibinfo{address}{Berlin,
+  Heidelberg}, pp. \bibinfo{pages}{366--381}, \doi{10.1007/3-540-46425-5\_24}.
+
+\bibitemdeclare{inproceedings}{volpano-smith-97}
+\bibitem{volpano-smith-97}
+\bibinfo{author}{D.~\surnamestart Volpano\surnameend} \&
+  \bibinfo{author}{G.~\surnamestart Smith\surnameend} (\bibinfo{year}{1997}):
+  \emph{\bibinfo{title}{Eliminating covert flows with minimum typings}}.
+\newblock In: {\slshape \bibinfo{booktitle}{Proceedings 10th Computer Security
+  Foundations Workshop}}, pp. \bibinfo{pages}{156--168},
+  \doi{10.1109/CSFW.1997.596807}.
+
+\bibitemdeclare{inproceedings}{volpano-smith-96}
+\bibitem{volpano-smith-96}
+\bibinfo{author}{Dennis~M. \surnamestart Volpano\surnameend} \&
+  \bibinfo{author}{Geoffrey \surnamestart Smith\surnameend}
+  (\bibinfo{year}{1997}): \emph{\bibinfo{title}{A Type-Based Approach to
+  Program Security}}.
+\newblock In: {\slshape \bibinfo{booktitle}{Proceedings of the 7th
+  International Joint Conference CAAP/FASE on Theory and Practice of Software
+  Development}}, \bibinfo{series}{TAPSOFT '97},
+  \bibinfo{publisher}{Springer-Verlag}, \bibinfo{address}{Berlin, Heidelberg},
+  p. \bibinfo{pages}{607–621}.
+\newblock \urlprefix\url{https://doi.org/10.1007/BFb0030629}.
+
+\end{thebibliography}
+
 \end{document}
 
 

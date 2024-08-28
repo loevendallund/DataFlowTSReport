@@ -1,0 +1,146 @@
+@online{rescript,
+  author = {ReScript Association},
+  title = {{BuckleScript and Reason Rebranding}},
+  year = 2020,
+  url = {https://rescript-lang.org/blog/bucklescript-is-rebranding},
+  urldate = {14-09-2022}
+}
+
+@INPROCEEDINGS{goguen-meseguer,
+  author={Goguen, J. A. and Meseguer, J.},
+  booktitle={1982 IEEE Symposium on Security and Privacy}, 
+  title={Security Policies and Security Models}, 
+  year={1982},
+  volume={},
+  number={},
+  pages={11-11},
+  keywords={Computational modeling;Automata;Finite element methods;Mathematical model;Data models;Computers;Message systems},
+  doi={10.1109/SP.1982.10014}}
+
+
+@inproceedings{mohnen,
+author = {Mohnen, Markus},
+title = {A Graph-Free Approach to Data-Flow Analysis},
+year = {2002},
+isbn = {3540433694},
+publisher = {Springer-Verlag},
+address = {Berlin, Heidelberg},
+abstract = {For decades, data-flow analysis (DFA) has been done using an iterative algorithm based on graph representations of programs. For a given data-flow problem, this algorithm computes the maximum fixed point (MFP) solution. The edge structure of the graph represents possible control flows in the program. In this paper, we present a new, graph-free algorithm for computing the MFP solution. The experimental implementation of the algorithm was applied to a large set of samples. The experiments clearly show that the memory usage of our algorithm is much better: Our algorithm always reduces the amount of memory and reached improvements upto less than a tenth. In the average case, the reduction is about a third of the memory usage of the classical algorithm. In addition, the experiments showed that the runtimes are almost the same: The average speedup of the classical algorithm is only marginally greater than one.},
+booktitle = {Proceedings of the 11th International Conference on Compiler Construction},
+pages = {46–61},
+numpages = {16},
+series = {CC '02}
+}
+
+@inproceedings{KildallGaryA1973Auat,
+author = {Kildall, Gary A.},
+title = {A unified approach to global program optimization},
+year = {1973},
+isbn = {9781450373494},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+url = {https://doi.org/10.1145/512927.512945},
+doi = {10.1145/512927.512945},
+abstract = {A technique is presented for global analysis of program structure in order to perform compile time optimization of object code generated for expressions. The global expression optimization presented includes constant propagation, common subexpression elimination, elimination of redundant register load operations, and live expression analysis. A general purpose program flow analysis algorithm is developed which depends upon the existence of an "optimizing function." The algorithm is defined formally using a directed graph model of program flow structure, and is shown to be correct. Several optimizing functions are defined which, when used in conjunction with the flow analysis algorithm, provide the various forms of code optimization. The flow analysis algorithm is sufficiently general that additional functions can easily be defined for other forms of global code optimization.},
+booktitle = {Proceedings of the 1st Annual ACM SIGACT-SIGPLAN Symposium on Principles of Programming Languages},
+pages = {194–206},
+numpages = {13},
+location = {Boston, Massachusetts},
+series = {POPL '73}
+}
+
+@MISC{df_implementation,
+  author = {Nicky Ask Lund},
+  title = {Implementation of dataflow analysis},
+  year = 2023,
+  note = {https://github.com/loevendallund/dataflow}
+}
+
+@TechReport{arxiv,
+  author = 	 {Nicky Ask Lund and Hans Hüttel},
+  title = 	 {A type system for data flow and alias analysis in ReScript},
+  institution =  {Aalborg University},
+  year = 	 2024,
+  type =	 {Technical Report},
+  month =	 {August},
+  note =	 {http://arxiv.org/abs/2408.11954}
+}
+
+@inproceedings{DBLP:conf/tlca/MorrisettAF05,
+  author       = {Greg Morrisett and
+                  Amal J. Ahmed and
+                  Matthew Fluet},
+  editor       = {Pawel Urzyczyn},
+  title        = {L\({}^{\mbox{3}}\): {A} Linear Language with Locations},
+  booktitle    = {Typed Lambda Calculi and Applications, 7th International Conference,
+                  {TLCA} 2005, Nara, Japan, April 21-23, 2005, Proceedings},
+  series       = {Lecture Notes in Computer Science},
+  volume       = {3461},
+  pages        = {293--307},
+  publisher    = {Springer},
+  year         = {2005},
+  url          = {https://doi.org/10.1007/11417170\_22},
+  doi          = {10.1007/11417170\_22},
+  timestamp    = {Tue, 05 Jul 2022 08:30:25 +0200},
+  biburl       = {https://dblp.org/rec/conf/tlca/MorrisettAF05.bib},
+  bibsource    = {dblp computer science bibliography, https://dblp.org} 
+}
+
+@article{RyderBarbara1988Idaa,
+author = {Ryder, Barbara G. and Paull, Marvin C.},
+title = {Incremental data-flow analysis algorithms},
+year = {1988},
+issue_date = {Jan. 1988},
+publisher = {Association for Computing Machinery},
+address = {New York, NY, USA},
+volume = {10},
+number = {1},
+issn = {0164-0925},
+url = {https://doi.org/10.1145/42192.42193},
+doi = {10.1145/42192.42193},
+journal = {ACM Trans. Program. Lang. Syst.},
+month = {jan},
+pages = {1–50},
+numpages = {50}
+}
+
+@InProceedings{10.1007/3-540-46425-5_24,
+author="Smith, Frederick
+and Walker, David
+and Morrisett, Greg",
+editor="Smolka, Gert",
+title="Alias Types",
+booktitle="Programming Languages and Systems",
+year="2000",
+publisher="Springer Berlin Heidelberg",
+address="Berlin, Heidelberg",
+pages="366--381",
+abstract="Linear type systems allow destructive operations such as object deallocation and imperative updates of functional data structures. These operations and others, such as the ability to reuse memory at different types, are essential in low-level typed languages. However, traditional linear type systems are too restrictive for use in low-level code where it is necessary to exploit pointer aliasing. We present a new typed language that allows functions to specify the shape of the store that they expect and to track the flow of pointers through a computation. Our type system is expressive enough to represent pointer aliasing and yet safely permit destructive operations.",
+isbn="978-3-540-46425-9",
+doi="10.1007/3-540-46425-5_24"
+}
+
+
+@INPROCEEDINGS{volpano-smith-97,
+  author={Volpano, D. and Smith, G.},
+  booktitle={Proceedings 10th Computer Security Foundations Workshop}, 
+  title={Eliminating covert flows with minimum typings}, 
+  year={1997},
+  volume={},
+  number={},
+  pages={156-168},
+  keywords={Yarn;Computer science;Computer languages;Java;Information security;Sockets;Arithmetic},
+  doi={10.1109/CSFW.1997.596807}}
+
+@inproceedings{volpano-smith-96,
+author = {Volpano, Dennis M. and Smith, Geoffrey},
+title = {A Type-Based Approach to Program Security},
+year = {1997},
+isbn = {3540627812},
+publisher = {Springer-Verlag},
+address = {Berlin, Heidelberg},
+booktitle = {Proceedings of the 7th International Joint Conference CAAP/FASE on Theory and Practice of Software Development},
+pages = {607–621},
+numpages = {15},
+series = {TAPSOFT '97}
+}
