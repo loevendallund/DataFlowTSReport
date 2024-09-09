@@ -59,18 +59,18 @@ be analyzed.
 There is no notion of aliasing analysis here.
 \end{frame}
 
-\begin{frame}
-  \frametitle{Using a type system}
+% \begin{frame}
+%   \frametitle{Using a type system}
 
-  A good reason for using a type system to express this form of
-  analysis is that allows us to more easily combine the analysis with
-  other forms of static analysis.
+%   A good reason for using a type system to express this form of
+%   analysis is that allows us to more easily combine the analysis with
+%   other forms of static analysis.
 
-  $\Gamma_1 \vdash_1 e : \tau_1$ and $\Gamma_2 \vdash_2 e : \tau_2$
-  give us the conjunctive judgement $(\Gamma_1,\Gamma_2) \vdash e :
-  (\tau_1,\tau_2)$.
+%   $\Gamma_1 \vdash_1 e : \tau_1$ and $\Gamma_2 \vdash_2 e : \tau_2$
+%   give us the conjunctive judgement $(\Gamma_1,\Gamma_2) \vdash e :
+%   (\tau_1,\tau_2)$.
   
-\end{frame}
+% \end{frame}
 
 \begin{frame}
   \frametitle{Type-based approaches}
@@ -242,29 +242,30 @@ the value of the element $u^p$ depends on
 
 \end{itemize}
 
+If the value of $u^p$ depends on the value of $v^q$, we write $p \leq q$.
 \end{frame}
 
-\begin{frame}[fragile]
-  \frametitle{An ordering on program points}
+% \begin{frame}[fragile]
+%   \frametitle{An ordering on program points}
 
-   \begin{rescript}
-   (let x (ref 484000$\p{1}$)$\p{2}$
-     (let y (let z (5$\p{3}$)$\p{4}$
-        (x$\p{5}$:=z$\p{7}$)$\p{8}$)$\p{9}$ (!x)$\p{10}$)$\p{11}$)$\p{12}$
-\end{rescript}
+%    \begin{rescript}
+%    (let x (ref 484000$\p{1}$)$\p{2}$
+%      (let y (let z (5$\p{3}$)$\p{4}$
+%         (x$\p{5}$:=z$\p{7}$)$\p{8}$)$\p{9}$ (!x)$\p{10}$)$\p{11}$)$\p{12}$
+% \end{rescript}
 
-      If we have a dependency function $w$, we can derive a partial order $\po$ on
-      program points.
+%       If we have a dependency function $w$, we can derive a partial order $\po$ on
+%       program points.
 
-      In our example, the ordering is the least po containing
-%
-      \begin{align*}
-        2 \po 4 && 2 \po 9 && 5 \po 9 \\
-        2 \po 8 && 7 \po 8
-      \end{align*}
+%       In our example, the ordering is the least po containing
+% %
+%       \begin{align*}
+%         2 \po 4 && 2 \po 9 && 5 \po 9 \\
+%         2 \po 8 && 7 \po 8
+%       \end{align*}
 
-      Likewise, any $\po$ gives rise to a dependency function $w$.
-\end{frame}
+%       Likewise, any $\po$ gives rise to a dependency function $w$.
+% \end{frame}
 
 \begin{frame}
 \frametitle{A collecting semantics}
@@ -410,7 +411,7 @@ points $\Pi$.
 \section{Results}
 
 \begin{frame}
-  \frametitle{Two notions of dependency}
+  \frametitle{Soundness, informally}
 
   We now have
 
@@ -421,16 +422,10 @@ points $\Pi$.
     described by $\Pi$ and $\Gamma$
   \end{itemize}
 
-  These two notions are closely related.
-\end{frame}
-
-\begin{frame}
-  \frametitle{Soundness, informally}
-
-Suppose $e^p$ is a well-typed occurrence.
+  These two notions are closely related. Suppose $e^p$ is a well-typed occurrence.
   
 If the type-level dependency information $(\Gamma,\Pi)$ agrees with
-the information $(e,v,sto,w)$ at the level of the semantics, then this
+the information $(e^p,v,sto,w)$ at the level of the semantics, then this
 will also be the case after the evaluation of $e^p$.
  
 \end{frame}
