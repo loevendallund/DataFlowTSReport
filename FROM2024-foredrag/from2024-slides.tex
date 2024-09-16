@@ -422,7 +422,7 @@ points $\Pi$.
     described by $\Pi$ and $\Gamma$
   \end{itemize}
 
-  These two notions are closely related. Suppose $e^p$ is a well-typed occurrence.
+  These two notions are in agreement. Suppose $e^p$ is a well-typed occurrence.
   
 If the type-level dependency information $(\Gamma,\Pi)$ agrees with
 the information $(e^p,v,sto,w)$ at the level of the semantics, then this
@@ -495,6 +495,7 @@ will also be the case after the evaluation of $e^p$.
   \item We have established a type system for establishing the sets of
     live variables and location at every program point of a ReScript
     expression.
+  \item A type checker has been implemented (not mentioned in this talk).
   \item The type system is a safe overapproximation of the dependency
     information found in the semantics.
   \item This is a \alert{backward analysis}, as type rules speak of immediate
@@ -514,7 +515,8 @@ there is a "poor man's notion of linearity'' present.
     for non-interference. How does our type system compare to type
     systems for non-interference such as those by Volpano and Smith?
   \item Establish an algorithm for type inference. The constraints can
-    probably be solved using usual algorithms used for dataflow analysis.
+    probably be solved using usual algorithms used for dataflow
+    analysis. \emph{A protoype implementation exists.}
   \item Introduce notions of polymorphism to get rid of the "poor
     man's notion of linearity''. 
   \end{itemize}
