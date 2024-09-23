@@ -31,7 +31,8 @@ We need to show that \cat{1)} $\Gamma,\Pi\vdash c:T$, \cat{2)} $(env,sto',(w',\s
           $(w,\sqsubseteq_w)$, we then know from our assumptions that
           it is the case that $(env,sto,(w,\sqsubseteq_w))\models(\Gamma,\Pi)$ holds after an evaluation.
 
-	\item[3)] Since there are no updates to $sto'$ and $(w',\sqsubseteq_w')$, that $(L,V)$ is a result from looking up $x^{p''}$ in $(w,\sqsubseteq_w)$, and the type $T$ is from to looking up $x^{p''}$ in $\Gamma$, 
+	\item[3)] Since there are no updates to $sto'$ and
+          $(w',\sqsubseteq_w')$, since $(L,V) = w(x^{p''})$ and since $T = \Gamma(x^{p''})$,
 		we then know that $(env,v,(w',\sqsubseteq_w'),(L,V))\models(\Gamma,T)$.
 		Due to \cref{def:TAgree} we can conclude that: 
 		$$(env,v,(w',\sqsubseteq_w'),(L,V\cup\{x^{p''}\}))\models(\Gamma,T\sqcup \{x^{p''}\})$$
